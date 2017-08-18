@@ -1,0 +1,580 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>mysql日志备忘 | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="1. 介绍mysql常用日志有 错误日志，binlog日志(二进制日志)，慢查询日志，查询日志等，日志的作用参见另一篇博客mysql主从复制原理。当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。
+2. 相关命令mysql 配置文件一般是：/etc/my.cnf （目录位置可能不同但都是my.cnf）
+2.1 系统变量查看和设置
+显示系统日志开启">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql日志备忘">
+<meta property="og:url" content="huzongzhe.cn/2016/11/22/mysql日志知备忘/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="1. 介绍mysql常用日志有 错误日志，binlog日志(二进制日志)，慢查询日志，查询日志等，日志的作用参见另一篇博客mysql主从复制原理。当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。
+2. 相关命令mysql 配置文件一般是：/etc/my.cnf （目录位置可能不同但都是my.cnf）
+2.1 系统变量查看和设置
+显示系统日志开启">
+<meta property="og:updated_time" content="2017-07-26T11:25:20.595Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="mysql日志备忘">
+<meta name="twitter:description" content="1. 介绍mysql常用日志有 错误日志，binlog日志(二进制日志)，慢查询日志，查询日志等，日志的作用参见另一篇博客mysql主从复制原理。当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。
+2. 相关命令mysql 配置文件一般是：/etc/my.cnf （目录位置可能不同但都是my.cnf）
+2.1 系统变量查看和设置
+显示系统日志开启">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/author.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/author.png">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/11/22/mysql日志知备忘/" title="mysql日志备忘" itemprop="url">mysql日志备忘</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2016-11-22T13:32:12.000Z" itemprop="datePublished"> 发表于 2016-11-22</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-介绍"><span class="toc-number">1.</span> <span class="toc-text">1. 介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-相关命令"><span class="toc-number">2.</span> <span class="toc-text">2. 相关命令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-系统变量查看和设置"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 系统变量查看和设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-binlog日志相关命令"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 binlog日志相关命令</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-binlog二进制日志"><span class="toc-number">3.</span> <span class="toc-text">3. binlog二进制日志</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-binlog的三种模式"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 binlog的三种模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#查看binlog的方法"><span class="toc-number">3.2.</span> <span class="toc-text">查看binlog的方法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-错误日志，慢查询日志，查询日志"><span class="toc-number">4.</span> <span class="toc-text">4. 错误日志，慢查询日志，查询日志</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-其他日志文件说明"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 其他日志文件说明</span></a></li></ol></li></ol>
+		
+		</div>
+		
+		<h2 id="1-介绍"><a href="#1-介绍" class="headerlink" title="1. 介绍"></a>1. 介绍</h2><p>mysql常用日志有<strong> 错误日志</strong>，<strong>binlog日志(二进制日志)</strong>，<strong>慢查询日志</strong>，查询日志等，日志的作用参见另一篇博客<a href="http://huzongzhe.cn/2017/06/30/mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%8E%9F%E7%90%86/">mysql主从复制原理</a>。<br>当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。</p>
+<h2 id="2-相关命令"><a href="#2-相关命令" class="headerlink" title="2. 相关命令"></a>2. 相关命令</h2><p>mysql 配置文件一般是：<code>/etc/my.cnf</code> （目录位置可能不同但都是<code>my.cnf</code>）</p>
+<h3 id="2-1-系统变量查看和设置"><a href="#2-1-系统变量查看和设置" class="headerlink" title="2.1 系统变量查看和设置"></a>2.1 系统变量查看和设置</h3><ul>
+<li>显示系统日志开启情况和位置：<code>show variables like &#39;log_%&#39;;</code> \<br><code>show global variables like &#39;%log%&#39;;</code>（显示全局所有类型日志情况）</li>
+</ul>
+<h3 id="2-2-binlog日志相关命令"><a href="#2-2-binlog日志相关命令" class="headerlink" title="2.2 binlog日志相关命令"></a>2.2 binlog日志相关命令</h3><ol>
+<li>查看所有binlog日志列表： <code>show master logs;</code></li>
+<li>查看master状态，即最后(最新)一个binlog日志的编号名称，及其最后一个操作事件pos结束点(Position)值:<code>show master status;</code></li>
+<li>刷新log日志，自此刻开始产生一个新编号的binlog日志文件：<code>flush logs;</code><br>注：每当mysqld服务重启时，会自动执行此命令，刷新binlog日志；在mysqldump备份数据时加 -F 选项也会刷新binlog日志；</li>
+<li>重置(清空)所有binlog日志：<code>reset master;</code></li>
+<li>显示binlog的模式：<code>show global variables like &#39;binlog_format&#39;;</code></li>
+<li>将binlog转成能看懂的文件形式： <code>sudo ./mysqlbinlog /home/q/data/mysql/mysql-bin.000028 &gt; ~/a.sql</code></li>
+</ol>
+<h2 id="3-binlog二进制日志"><a href="#3-binlog二进制日志" class="headerlink" title="3. binlog二进制日志"></a>3. binlog二进制日志</h2><h3 id="3-1-binlog的三种模式"><a href="#3-1-binlog的三种模式" class="headerlink" title="3.1 binlog的三种模式"></a>3.1 binlog的三种模式</h3><ol>
+<li><code>row</code>：日志中记录的是每一行的数据修改，所以日志会非常大，mysql后面版本做了优化，将改表的语句记录成statement形式（eg：alter），但是update，delete仍是拆分成多条记录形式。<br>eg：<code>update user set age=22 where sex=‘man’</code>，这样一条sql，影响的是多条记录，row模式会记录每行的影响，并作为一条记录和事件。</li>
+<li><code>statement</code>：只记录修改表的sql语句，每条sql语句作为一条事件记录，减少日志大小，减少主从复制的I/O。</li>
+<li><code>mixed</code>：是前两种模式的结合。在 Mixed 模式下，MySQL 会根据执行的每一条具体的 SQL 语句来区分对待记录的日志形式，也就是在 statement 和 row 之间选择一种。</li>
+</ol>
+<h3 id="查看binlog的方法"><a href="#查看binlog的方法" class="headerlink" title="查看binlog的方法"></a>查看binlog的方法</h3><ol>
+<li><p><code>mysqlbinlog</code> mysql自带工具查看<br>语法：<code>mysqlbinlog [OPTION] [-d db_name] binlog_file</code>，其中OPTION：<code>--start-datetime</code>，<code>--stop-datetime</code>，<code>--start-position</code>，<code>--stop-position</code><br>eg：<code>sudo ./mysqlbinlog --start-datetime=&#39;2017-06-27 15:20:00&#39; -d test /home/q/data/mysql/mysql-bin.000028</code><br>mysqlbinlog 也可以查看远程mysql binlog，更多用法可以<code>./mysqlbinlog --help</code></p>
+</li>
+<li><p>在CLI中使用<code>show binlog</code>命令查看<br>语法：show binlog events [in ‘log_name’] [from pos] [limit [offset,] row_count];<br><code>log_name</code>: binlog日志文件名，<code>pos</code>：事件位置，<code>limit</code>和sql中的limit语义相同。<br>eg： <code>show binlog events in &#39;mysql-bin.000028&#39; limit 2,10 \G;</code> 查询<code>mysql-bin.000028</code>日中第2到10条记录;<br>eg：<code>show binlog events in &#39;mysql-bin.000028&#39; from 975 limit 10 \G;</code> 查询从pos为975开始的10条记录</p>
+</li>
+<li><p>数据恢复<br>语法：<code>mysqlbinlog -d db_name mysql-bin.0000xx | mysql -u用户名 -p密码 数据库名</code><br>其实就是用mysqlbinlog翻译成sql语句，然后管道传给mysql 客户端执行！<br>所以，可以先<code>./mysqlbinlog /home/q/data/mysql/mysql-bin.000028 &gt; ~/a.sql</code>到出sql，再给mysql执行,注意指定数据库名！。<br>恢复期间，先要<code>flush logs;</code>另启一个日志文件，且需要找到恢复的起始点（找到备份开始点，回滚结束点（记录时间和pos都可以））。</p>
+</li>
+</ol>
+<p>binlog在主从复制中的作用和原理过程参见另一篇博客<a href="http://huzongzhe.cn/2017/06/30/mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%8E%9F%E7%90%86/">mysql主从复制原理</a>。</p>
+<h2 id="4-错误日志，慢查询日志，查询日志"><a href="#4-错误日志，慢查询日志，查询日志" class="headerlink" title="4. 错误日志，慢查询日志，查询日志"></a>4. 错误日志，慢查询日志，查询日志</h2><p>默认错误日志开启，慢查询日志不开启，查询日志不开启，这几个日志都是以普通文本形式呈现，一般建议不开启，因为有性能丢失，<code>show global variables like &#39;%log%&#39;;</code>命令可以找到日志位置；<br>mysql为慢查询提供了一个命令行工具<code>mysqldumpslow</code>方便我们分析和查找。</p>
+<h3 id="4-1-其他日志文件说明"><a href="#4-1-其他日志文件说明" class="headerlink" title="4.1 其他日志文件说明"></a>4.1 其他日志文件说明</h3><p><code>ibdata1</code> ：InnoDB中保存数据的文件，用于存储InnoDB引擎下的数据库实际数据，索引等，库名的文件夹里面的那些表文件只是结构而已！可以配置将实际数据放到库名文件夹下，从而减小ibdata1文件的大小。</p>
+<p><code>ib_logfile0，ib_logfile1</code>：INNODB的REDO、UNDO日志（也称事务日志），事务执行中暂时保留一些事务信息(记录对数据文件数据修改的物理位置或叫做偏移量)，主要是在事务中起一个前滚或后滚的作用。</p>
+<p>binlog中的事务日志是已经commit执行成功的事务，只有在事务执行成功才会刷入binlog的事务日志。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/mysql/">mysql</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/mysql/">mysql</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="huzongzhe.cn/2016/11/22/mysql日志知备忘/" data-title="mysql日志备忘 | running river" data-tsina="null" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/11/23/mysql主从复制原理整理/" title="mysql主从复制原理整理">
+  <strong>上一篇：</strong><br/>
+  <span>
+  mysql主从复制原理整理</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/11/12/shell，bash操作快捷键/"  title="shell,bash操作快捷键">
+ <strong>下一篇：</strong><br/> 
+ <span>shell,bash操作快捷键
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-介绍"><span class="toc-number">1.</span> <span class="toc-text">1. 介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-相关命令"><span class="toc-number">2.</span> <span class="toc-text">2. 相关命令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-系统变量查看和设置"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 系统变量查看和设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-binlog日志相关命令"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 binlog日志相关命令</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-binlog二进制日志"><span class="toc-number">3.</span> <span class="toc-text">3. binlog二进制日志</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-binlog的三种模式"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 binlog的三种模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#查看binlog的方法"><span class="toc-number">3.2.</span> <span class="toc-text">查看binlog的方法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-错误日志，慢查询日志，查询日志"><span class="toc-number">4.</span> <span class="toc-text">4. 错误日志，慢查询日志，查询日志</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-其他日志文件说明"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 其他日志文件说明</span></a></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/脚本/" title="脚本">脚本<sup>2</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zk集群/" title="zk集群">zk集群<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/定时任务/" title="定时任务">定时任务<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2EX">V2EX</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com/" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/" target="_blank" title="github">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.cnblogs.com/huzongzhe/" target="_blank" title="博客园 Blog">博客园 Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="CSDN Blog">CSDN Blog</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code. <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2017 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

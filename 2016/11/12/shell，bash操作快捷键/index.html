@@ -1,0 +1,550 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>shell,bash操作快捷键 | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="前言： 在命令行(CLI)或者bash中编辑命令的时候，了解一些基本的快捷键，和编辑技巧，会让你效率更高，节约更多的时间，看到的都是缘分 - -。下面是我的总结：
+1. 编辑命令Ctrl + xx：在命令行首和光标之间移动,比较特殊！Ctrl + a ：移到命令行首Ctrl + e ：移到命令行尾Alt + f ：按单词前移（右向）Alt + b ：按单词后移（左向）Ctrl + u ：从光标处删">
+<meta property="og:type" content="article">
+<meta property="og:title" content="shell,bash操作快捷键">
+<meta property="og:url" content="huzongzhe.cn/2016/11/12/shell，bash操作快捷键/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="前言： 在命令行(CLI)或者bash中编辑命令的时候，了解一些基本的快捷键，和编辑技巧，会让你效率更高，节约更多的时间，看到的都是缘分 - -。下面是我的总结：
+1. 编辑命令Ctrl + xx：在命令行首和光标之间移动,比较特殊！Ctrl + a ：移到命令行首Ctrl + e ：移到命令行尾Alt + f ：按单词前移（右向）Alt + b ：按单词后移（左向）Ctrl + u ：从光标处删">
+<meta property="og:updated_time" content="2017-07-26T11:23:48.019Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="shell,bash操作快捷键">
+<meta name="twitter:description" content="前言： 在命令行(CLI)或者bash中编辑命令的时候，了解一些基本的快捷键，和编辑技巧，会让你效率更高，节约更多的时间，看到的都是缘分 - -。下面是我的总结：
+1. 编辑命令Ctrl + xx：在命令行首和光标之间移动,比较特殊！Ctrl + a ：移到命令行首Ctrl + e ：移到命令行尾Alt + f ：按单词前移（右向）Alt + b ：按单词后移（左向）Ctrl + u ：从光标处删">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/author.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/author.png">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/11/12/shell，bash操作快捷键/" title="shell,bash操作快捷键" itemprop="url">shell,bash操作快捷键</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2016-11-12T14:11:11.000Z" itemprop="datePublished"> 发表于 2016-11-12</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-编辑命令"><span class="toc-number">1.</span> <span class="toc-text">1. 编辑命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-重新执行命令"><span class="toc-number">2.</span> <span class="toc-text">2. 重新执行命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-控制命令"><span class="toc-number">3.</span> <span class="toc-text">3. 控制命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-Bang-命令"><span class="toc-number">4.</span> <span class="toc-text">4. Bang (!) 命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-特殊字符的含义"><span class="toc-number">5.</span> <span class="toc-text">5. 特殊字符的含义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#提示"><span class="toc-number">6.</span> <span class="toc-text">提示</span></a></li></ol>
+		
+		</div>
+		
+		<p>前言： 在命令行(CLI)或者bash中编辑命令的时候，了解一些基本的快捷键，和编辑技巧，会让你效率更高，节约更多的时间，看到的都是缘分 - -。下面是我的总结：</p>
+<h3 id="1-编辑命令"><a href="#1-编辑命令" class="headerlink" title="1. 编辑命令"></a>1. 编辑命令</h3><p><code>Ctrl + xx</code>：在命令行首和光标之间移动,比较特殊！<br><code>Ctrl + a</code> ：移到命令行首<br><code>Ctrl + e</code> ：移到命令行尾<br><strong><code>Alt + f</code> </strong>：按单词前移（右向）<br><strong><code>Alt + b</code> </strong>：按单词后移（左向）<br><strong><code>Ctrl + u</code> </strong>：从光标处删除至命令行首<br><strong><code>Ctrl + k</code> </strong>：从光标处删除至命令行尾<br><strong><code>Ctrl + w</code></strong>：从光标处删除至字首，》<strong>以空格为分隔符</strong><br><strong><code>Alt + Backspace</code></strong>：与 Ctrl + w 类似，以各种标点为分隔符<br><strong><code>Alt + d</code> </strong>：从光标处删除至字尾<br><code>Ctrl + d</code> ：删除光标处的字符<br><code>Ctrl + h</code> ：删除光标前的字符<br><strong><code>Ctrl + y</code> </strong>：粘贴至光标后（粘贴刚才所删除的字符）<br><code>Alt + c</code> ：从光标处更改为首字母大写的单词<br><code>Alt + u</code> ：从光标处更改为全部大写的单词<br><code>Alt + l</code>：从光标处更改为全部小写的单词<br><code>Ctrl + t</code>：交换光标处和之前的字符<br><code>Alt + t</code> ：交换光标处和之前的单词</p>
+<h3 id="2-重新执行命令"><a href="#2-重新执行命令" class="headerlink" title="2. 重新执行命令"></a>2. 重新执行命令</h3><p><strong><code>Ctrl + r</code></strong>：逆向搜索命令历史（多次按表示下一个）<br><strong><code>Ctrl + g</code></strong>：从历史搜索模式退出<br><code>Ctrl + p</code>：历史中的上一条命令<br><code>Ctrl + n</code>：历史中的下一条命令<br><strong><code>Alt + .</code></strong>：使用上一条命令的最后一个参数,多次按<code>.</code>会向上选择.</p>
+<h3 id="3-控制命令"><a href="#3-控制命令" class="headerlink" title="3. 控制命令"></a>3. 控制命令</h3><p><strong><code>Alt+Esc</code>或<code>tab+tab</code></strong>: 查找可输入的命令,第一次按两下esc<br><code>Ctrl + l</code>：清屏<br><code>Ctrl + o</code>：执行当前命令，并选择上一条命令<br><strong><code>Ctrl + s</code></strong>：阻止屏幕输出<br><strong><code>Ctrl + q</code></strong>：允许屏幕输出<br><code>Ctrl + c</code>：终止命令<br><code>Ctrl + z</code>：挂起命令</p>
+<h3 id="4-Bang-命令"><a href="#4-Bang-命令" class="headerlink" title="4. Bang (!) 命令"></a>4. Bang (!) 命令</h3><p><code>!!</code>：执行上一条命令<br><code>!cmd</code>：执行最近的以 blah 开头的命令，如 !ls<br><code>!$</code>：上一条命令的最后一个参数，与 Alt + . 相同<br><code>!*</code>：上一条命令的所有参数<br>!blah:p：仅打印输出，而不执行<br>!$:p：打印输出 !$ 的内容<br>!<em>:p：打印输出 !</em> 的内容<br>^content：删除上一条命令中的 content<br>^content^foo：将上一条命令中的 content 替换为 foo<br>^content^foo^：将上一条命令中所有的 content 都替换为 foo</p>
+<h3 id="5-特殊字符的含义"><a href="#5-特殊字符的含义" class="headerlink" title="5. 特殊字符的含义"></a>5. 特殊字符的含义</h3><p><code>&amp;</code>  在运行的指令末尾添加”&amp;“符号可以让命令在后台运行<br><code>&amp;&amp;</code>  表示前面命令执行成功后,执行后面的命令. eg: <code>ls &amp;&amp; ll</code><br><code>cd -</code> 表示返回刚刚的目录<br><code>cd ~</code> 表示回用户目录; ~代表用户目录,eg:<code>~/Downloads</code><br><code>sudo！！</code> 执行上一个需要sudo权限的命令.<br><code>!$</code> 一个特殊的环境变量，代表了上一个命令的最后一个字符串</p>
+<h3 id="提示"><a href="#提示" class="headerlink" title="提示"></a>提示</h3><p>Bash 默认为 emacs 编辑模式，但有的bash使用vi的快捷键，如果你的 Bash 不在 emacs 编辑模式，可通过在<code>.bashrc</code>里面 <code>set -o emacs</code> 设置。<code>set -o vi</code>设置成vi编辑模式。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/shell/">shell</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/shell/">shell</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="huzongzhe.cn/2016/11/12/shell，bash操作快捷键/" data-title="shell,bash操作快捷键 | running river" data-tsina="null" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/11/22/mysql日志知备忘/" title="mysql日志备忘">
+  <strong>上一篇：</strong><br/>
+  <span>
+  mysql日志备忘</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/10/12/Ubuntu分区删除后恢复/"  title="Ubuntu分区删除后恢复">
+ <strong>下一篇：</strong><br/> 
+ <span>Ubuntu分区删除后恢复
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-编辑命令"><span class="toc-number">1.</span> <span class="toc-text">1. 编辑命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-重新执行命令"><span class="toc-number">2.</span> <span class="toc-text">2. 重新执行命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-控制命令"><span class="toc-number">3.</span> <span class="toc-text">3. 控制命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-Bang-命令"><span class="toc-number">4.</span> <span class="toc-text">4. Bang (!) 命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-特殊字符的含义"><span class="toc-number">5.</span> <span class="toc-text">5. 特殊字符的含义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#提示"><span class="toc-number">6.</span> <span class="toc-text">提示</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/脚本/" title="脚本">脚本<sup>2</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zk集群/" title="zk集群">zk集群<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/定时任务/" title="定时任务">定时任务<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2EX">V2EX</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com/" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/" target="_blank" title="github">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.cnblogs.com/huzongzhe/" target="_blank" title="博客园 Blog">博客园 Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="CSDN Blog">CSDN Blog</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code. <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2017 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
