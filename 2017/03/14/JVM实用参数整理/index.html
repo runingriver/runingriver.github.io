@@ -1,0 +1,830 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>JVM实用参数整理 | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&amp;lt;&amp;lt;深入理解Java虚拟机&amp;gt;&amp;gt;这本书，正好配合日常所需好地整理下。
+一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不一样。标准参数格式如下：-XX:+&amp;lt;option&amp;gt; 开启option参数-XX:-">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM实用参数整理">
+<meta property="og:url" content="huzongzhe.cn/2017/03/14/JVM实用参数整理/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&amp;lt;&amp;lt;深入理解Java虚拟机&amp;gt;&amp;gt;这本书，正好配合日常所需好地整理下。
+一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不一样。标准参数格式如下：-XX:+&amp;lt;option&amp;gt; 开启option参数-XX:-">
+<meta property="og:image" content="huzongzhe.cn/images/garbage.jpg">
+<meta property="og:updated_time" content="2017-08-22T12:39:49.613Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JVM实用参数整理">
+<meta name="twitter:description" content="前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&amp;lt;&amp;lt;深入理解Java虚拟机&amp;gt;&amp;gt;这本书，正好配合日常所需好地整理下。
+一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不一样。标准参数格式如下：-XX:+&amp;lt;option&amp;gt; 开启option参数-XX:-">
+<meta name="twitter:image" content="huzongzhe.cn/images/garbage.jpg">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/author.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/author.png">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/03/14/JVM实用参数整理/" title="JVM实用参数整理" itemprop="url">JVM实用参数整理</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2017-03-14T13:33:02.000Z" itemprop="datePublished"> 发表于 2017-03-14</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#一，说明"><span class="toc-number">1.</span> <span class="toc-text">一，说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#二，内存分配相关参数"><span class="toc-number">2.</span> <span class="toc-text">二，内存分配相关参数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#三，GC收集器参数"><span class="toc-number">3.</span> <span class="toc-text">三，GC收集器参数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#垃圾收集器介绍"><span class="toc-number">3.1.</span> <span class="toc-text">垃圾收集器介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#垃圾收集器组合"><span class="toc-number">3.2.</span> <span class="toc-text">垃圾收集器组合</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#垃圾收集器选择"><span class="toc-number">3.3.</span> <span class="toc-text">垃圾收集器选择</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#收集器相关参数"><span class="toc-number">3.4.</span> <span class="toc-text">收集器相关参数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#四，GC日志参数"><span class="toc-number">4.</span> <span class="toc-text">四，GC日志参数</span></a></li></ol>
+		
+		</div>
+		
+		<p><strong>前言</strong>：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&lt;&lt;深入理解Java虚拟机&gt;&gt;这本书，正好配合日常所需好地整理下。</p>
+<h2 id="一，说明"><a href="#一，说明" class="headerlink" title="一，说明"></a>一，说明</h2><p>JVM参数分为标准参数（以<code>-XX:</code>开头）和非标准参数（<code>java -X</code>命令查看），他们之间格式不一样。<br>标准参数格式如下：<br><code>-XX:+&lt;option&gt;</code> 开启option参数<br><code>-XX:-&lt;option&gt;</code> 关闭option参数<br><code>-XX:&lt;option&gt;=&lt;value&gt;</code> 设置option参数值<br>其他的为非标准参数。</p>
+<p>分代叫法对比：<br>年轻代：<code>Young Generation</code>，也称新生代<code>New Generation</code><br>年老代：<code>Old Generation</code>，也称终身代<code>Tenured Generation</code><br>永久代：<code>Perm Generation</code></p>
+<h2 id="二，内存分配相关参数"><a href="#二，内存分配相关参数" class="headerlink" title="二，内存分配相关参数"></a>二，内存分配相关参数</h2><table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>简述</th>
+<th>详解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-Xms</code></td>
+<td>JVM启动初始堆大小，如：<code>-Xms4096m</code>，<code>-Xms4g</code></td>
+<td>JVM启动，应用初始堆内存大小。启动后堆的大小调整受<code>MinHeapFreeRatio</code>和<code>MaxHeapFreeRatio</code>控制，最大不超过<code>-Xmx</code>，最小不小于<code>-Xms</code>。</td>
+</tr>
+<tr>
+<td><code>-Xmx</code></td>
+<td>JVM最大堆大小，如：<code>-Xmx4096m</code>，<code>-Xmx4g</code></td>
+<td>Java程序最大堆内存，默认物理内存的1/4，不设置时默认等于<code>-Xms</code></td>
+</tr>
+<tr>
+<td><code>-Xmn</code></td>
+<td>年轻代大小，一般不设置</td>
+<td>年轻代 = <code>eden+ 2 survivor space</code>，整个堆大小=<code>年轻代大小(Young Generation)</code> + <code>年老代大小(Old Generation)</code> + <code>持久代大小(permanent Generation)</code>。增大年轻代后,将会减小年老代大小.此值对系统性能影响较大,Sun官方推荐配置为整个堆的3/8</td>
+</tr>
+<tr>
+<td><code>-Xss</code></td>
+<td>每个线程栈大小</td>
+<td>JDK5.0后默认1M，以前是256K</td>
+</tr>
+<tr>
+<td><code>MinHeapFreeRatio</code></td>
+<td>当堆可用内存小于此值时扩展堆大小</td>
+<td>当堆空余内存小于整个堆大小的MinHeapFreeRatio（默认40%）时，JVM会增加堆大小，默认值40，当-Xmx 和-Xms 相等时参数无效。</td>
+</tr>
+<tr>
+<td><code>MaxHeapFreeRatio</code></td>
+<td>当堆空闲内存大于此值是缩小堆大小</td>
+<td>当堆空余内存大于整个堆大小的MaxHeapFreeRatio（默认70%）时，JVM会缩小堆大小，默认值70，当-Xmx 和-Xms 相等时参数无效。</td>
+</tr>
+<tr>
+<td><code>-XX:NewSize</code></td>
+<td>年轻代初始大小</td>
+<td>通常我们会设置一个初始大小，如<code>-XX:NewSize=256m</code></td>
+</tr>
+<tr>
+<td><code>-XX:MaxNewSize</code></td>
+<td>年轻代最大值</td>
+<td></td>
+</tr>
+<tr>
+<td><code>-XX:PermSize</code></td>
+<td>永久代初始大小</td>
+<td>通常根据程序会设置一个初始大小，如：<code>-XX:PermSize=256m</code></td>
+</tr>
+<tr>
+<td><code>-XX:MaxPermSize</code></td>
+<td>永久代最大值</td>
+<td>不设置时默认等于<code>-XX:PermSize</code>，大部分情况默认64M，经测试内存8G，perm是82M</td>
+</tr>
+<tr>
+<td><code>-XX:NewRatio</code></td>
+<td>Young与Old的大小比例</td>
+<td>默认值为2，即：<code>Young:Old=1:2</code>，Young占整个堆的1/3大小，Old占2/3，这只是一个理论值表示他们能达到的最大大小，计算中这里省略了Perm代，因为二者实际占用物理内存大小是随对象创建，销毁，晋升而改变，当可用内存为0时二者内存也不一定能达到这个阈值。</td>
+</tr>
+<tr>
+<td><code>-XX:SurvivorRatio</code></td>
+<td>Eden与Survivor的比例</td>
+<td>默认8，即：<code>2 Survivor：Eden=2:8</code>，From或To Survivor占整个Young的1/10，这是理论最大值，并非实际大小</td>
+</tr>
+<tr>
+<td><code>-XX:MaxTenuringThreshold</code></td>
+<td>经过多少次Young GC后晋升到年老代</td>
+<td>默认值15，所有新建对象默认在Eden区分配（容纳不下的对象先Minor GC然后再分配担保机制在Old分配，大对象也有可能直接进入Old，如果启动了本地线程私有分配缓冲区（TLAB Eden区中）可能会在TLAB上分配），经过第一次Minor GC，存活的对象会移到From Survivor，年龄+1，多次GC后存活对象会移到Old区。15是一个最大值，当Survivor区中相同年龄的所有对象大小的总和大于Survivor空间的一半时，年龄大于或等于该年龄的对象可以直接进入老年代</td>
+</tr>
+<tr>
+<td><code>-XX:PretenureSizeThreshold</code></td>
+<td>对象大小超过该值直接在Old分配</td>
+<td>Parallel Scavenge收集器无效，通常那种很长的字符串数组大小超过该值会直接在Old分配，设置可以避免大量的Eden Survivor内存复制。默认0，不开启。</td>
+</tr>
+<tr>
+<td><code>-XX:+UseAdaptiveSizePolicy</code></td>
+<td>动态调整各区大小</td>
+<td>默认开启，动态调整Java堆中各个区域的大小及进入老年代的年龄。</td>
+</tr>
+</tbody>
+</table>
+<p>Tip：空间分配担保<br>当新创建一个对象时Eden空间不够，触发一次Minor GC，如果Eden中仍有大量对象存活，以致Survivor无法容纳这些对象，此时会开启空间分配担保，将无法容纳的对象移到Old区，如果Old区的空间无法容纳这些对象，会进行一次Full GC，若仍无法容纳，会触发<code>HandlePromotionFailure</code>失败，失败后会再发起一次Full GC。Jdk6 update24后<code>HandlePromotionFailure</code>失败不再生效，如果空间不足，直接Full GC！</p>
+<h2 id="三，GC收集器参数"><a href="#三，GC收集器参数" class="headerlink" title="三，GC收集器参数"></a>三，GC收集器参数</h2><h3 id="垃圾收集器介绍"><a href="#垃圾收集器介绍" class="headerlink" title="垃圾收集器介绍"></a>垃圾收集器介绍</h3><table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>详解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Serial收集器</code></td>
+<td>单CPU环境简单高效，适用桌面程序。</td>
+</tr>
+<tr>
+<td><code>ParNew收集器</code></td>
+<td>是Serial的多线程版，多核下比Serial更能有效利用cpu资源，只能和CMS配合使用！</td>
+</tr>
+<tr>
+<td><code>Parallel Scavenge收集器</code></td>
+<td>可控制的吞吐量（吞吐量=运行用户代码时间/(运行用户代码时间+垃圾回收时间)），更高效地利用CPU，适合运算多交互少场景。</td>
+</tr>
+<tr>
+<td><code>Serial Old收集器</code></td>
+<td>单线程的老年代的标记-整理算法的实现。</td>
+</tr>
+<tr>
+<td><code>Parallel Old收集器</code></td>
+<td>是Parallel Scavenge 的老年代实现，多线程！</td>
+</tr>
+<tr>
+<td><code>CMS收集器</code></td>
+<td>最短回收停留，更快的服务响应速度，多用于B/S模式！缺点：由于采用与用户线程并发收集策略，可能出现卡顿，可能产生浮动垃圾，基于标记-清除的算法实现，导致Old区碎片，大对象分配找不到空间发生Full GC。 注：默认使用Old空间占68%就开始回收，可以设置内存整理策略UseCMSCompactAtFullCollection FullGC时进行内存整理和CMSFullGCsBeforeCompaction多少次FullGC后进行一次内存整理。默认情况，每次FullGC都进行一次内存整理。</td>
+</tr>
+<tr>
+<td><code>G1收集器</code></td>
+<td>JDK7开始支持，不再分代，而是分Region的思想，现商用不多。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="垃圾收集器组合"><a href="#垃圾收集器组合" class="headerlink" title="垃圾收集器组合"></a>垃圾收集器组合</h3><p><img src="/images/garbage.jpg" alt=""></p>
+<p>注：连线的才能一起使用！<strong>年轻代都是用<code>复制算法</code>，老年代都使用<code>标记-整理算法</code></strong></p>
+<h3 id="垃圾收集器选择"><a href="#垃圾收集器选择" class="headerlink" title="垃圾收集器选择"></a>垃圾收集器选择</h3><table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>收集器</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-XX:+UseSerialGC</code></td>
+<td><code>Serial +Serial Old</code>串行收集器</td>
+<td>client模式的默认收集器，打开后会默认使用<code>Serial +Serial Old</code>组合回收</td>
+</tr>
+<tr>
+<td><code>-XX:+UseParallelGC</code></td>
+<td><code>Parallel Scavenge+Serial Old</code></td>
+<td>server模式的默认收集器，打开后会默认使用<code>Parallel Scavenge+Serial Old</code>组合回收</td>
+</tr>
+<tr>
+<td><code>-XX:+UseParalledlOldGC</code></td>
+<td><code>Parallel Scavenge+Parallel Old</code></td>
+<td>默认关闭，打开后默认使用<code>Parallel Scavenge+Parallel Old</code>组合回收</td>
+</tr>
+<tr>
+<td><code>-XX:+UseConcMarkSweepGC</code></td>
+<td><code>ParNew+CMS+Serial Old</code></td>
+<td>默认关闭，打开后默认使用<code>ParNew+CMS+Serial Old</code>组合回收，Serial Old将作为CMS收集器出现Concurrent Mode Failure失败后的备用收集器</td>
+</tr>
+<tr>
+<td><code>-XX:+ParNewGC</code></td>
+<td><code>ParNew+Serial Old</code></td>
+<td>默认关闭，打开后默认使用<code>ParNew+Serial Old</code>组合回收</td>
+</tr>
+</tbody>
+</table>
+<p>Tip：client模式表示启动时加<code>-client</code>参数，对应server模式加<code>-server</code>参数！</p>
+<h3 id="收集器相关参数"><a href="#收集器相关参数" class="headerlink" title="收集器相关参数"></a>收集器相关参数</h3><table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>简述</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-XX:ParallelGCThreads</code></td>
+<td>并行GC时内存回收的线程数</td>
+<td>当<code>cpu数量&lt;=8</code>时，默认8个，<code>cpu数量&gt;8</code>时，设置小于cpu数量</td>
+</tr>
+<tr>
+<td><code>-XX:+ScavengeBeforeFullGC</code></td>
+<td>Full GC前是否先Minor GC</td>
+<td>默认true，Full GC前是否先Minor GC</td>
+</tr>
+<tr>
+<td><code>-XX:+UseGCOverheadLimit</code></td>
+<td>默认开启</td>
+<td>禁止GC无限制的执行，如果过于频繁，就直接抛OOM异常</td>
+</tr>
+<tr>
+<td><code>-XX:+UseTLAB</code></td>
+<td>server模式默认开启</td>
+<td>优先在本地线程缓冲区中分配对象，避免分配内存时的锁定过程，TLAB分配在eden区</td>
+</tr>
+<tr>
+<td><code>-XX:+HeapDumpOnOutOfMemoryError</code></td>
+<td></td>
+<td>参数表示当JVM发生OOM时，自动生成DUMP文件。</td>
+</tr>
+<tr>
+<td><code>-XX:HeapDumpPath</code></td>
+<td>-XX:HeapDumpPath=${目录}/java_heapdump.hprof</td>
+<td>表示生成DUMP文件的路径，也可以指定文件名称,默认文件名为：java__heapDump.hprof</td>
+</tr>
+</tbody>
+</table>
+<p><code>Parallel Scavenge</code>收集器参数：</p>
+<table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>简述</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-XX:GCTimeRatio</code></td>
+<td>GC时间占总时间比值</td>
+<td>默认99，即允许1%的GC时间，仅在使用<code>Parallel Scavenge</code>收集器时生效。</td>
+</tr>
+<tr>
+<td><code>-XX:MaxGCPauseMillis</code></td>
+<td>GC最大停顿时间</td>
+<td>仅在使用<code>Parallel Scavenge</code>收集器时生效</td>
+</tr>
+</tbody>
+</table>
+<p><code>CMS</code>收集器参数：</p>
+<table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>简述</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-XX:CMSInitiatingOccupancyFraction</code></td>
+<td>默认值68</td>
+<td>设置CMS收集器在Old区使用多少后触发GC，默认Old区使用占总Old的68%时触发。</td>
+</tr>
+<tr>
+<td><code>-XX:+UseCMSCompactAtFullCollection</code></td>
+<td>默认开启</td>
+<td>设置当CMS GC完后进行内存碎片整理</td>
+</tr>
+<tr>
+<td><code>-XX:CMSFullGCsBeforeCompaction</code></td>
+<td>无默认值</td>
+<td>设置CMS进行若干次GC后再启动一次内存碎片整理</td>
+</tr>
+</tbody>
+</table>
+<p> Full GC触发原因：</p>
+<ul>
+<li>Minor GC导致Survivor不能容纳下所有存活对象触发分配担保</li>
+<li><code>System.gc()</code> 被显式调用</li>
+<li>Perm 域被写满</li>
+<li>Old 被写满<br>Tip：Full GC通常耗时较长，可能会导致停止应用响应STW(Stop-The-World Even )。</li>
+</ul>
+<h2 id="四，GC日志参数"><a href="#四，GC日志参数" class="headerlink" title="四，GC日志参数"></a>四，GC日志参数</h2><p>常用设置GC打印格式参数:</p>
+<ul>
+<li><code>-XX:+PrintGCApplicationStoppedTime</code> 输出GC造成应用暂停的时间</li>
+<li><code>-XX:+PrintGCTimeStamps</code> GC发送时间，样式：<code>188.220: [GC [PSYoungGen: 1279472K-&gt;80396K(1245696K)]</code>，显示的是GC发生相对JVM启动的时间 </li>
+<li><code>-XX:+PrintGCDateStamps</code> GC发送时间，样式：<code>2017-07-22T18:33:16.432+0800: 122.713: [GC [PSYoungGen: 1256318K-&gt;100567K(1262080K)]</code> 更详细的显示时间</li>
+<li><code>-XX:+DisableExplicitGC</code>： 关闭<code>System.gc()</code>，调用<code>System.gc()</code>会变成一个空操作</li>
+<li><code>-Xloggc:$CATALINA_BASE/logs/gc.log</code> gc日志产生的路径</li>
+<li><code>-verbose:gc</code>： verbose详细的意思,显示详细的GC信息(即类似<code>[GC [PSYoungGen: 230112K-&gt;960K(219648K)] 265174K-&gt;36086K(303616K), 0.0045880 secs]</code>的输出)</li>
+<li><code>-xx:+printGCdetails</code> 打印GC详情到输出设备 </li>
+</ul>
+<p>注意：<br>一般系统都加上了这两个参数：<code>-verbose:gc</code>和<code>-xx:+printGCdetails</code> ，但是测试删掉<code>-verbose:gc</code>参数并没有什么改变！<br>当只有<code>-verbose:gc</code>参数，则GC样式为：<code>[GC 223188K-&gt;40186K(2260992K), 0.0315090 secs]</code><br>当只有 <code>-xx:+printGCdetails</code> 样式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[GC [PSYoungGen: 1221316K-&gt;88958K(1279488K)] 1382475K-&gt;259135K(3114496K), 0.0625040 secs] [Times: user=0.18 sys=0.03, real=0.06 secs]</div></pre></td></tr></table></figure></p>
+<p>Tip：通常配置GC日志的方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">-XX:+DisableExplicitGC -verbose:gc -XX:+PrintGCDateStamps -XX:+PrintGCDetails -Xloggc:$CATALINA_BASE/logs/gc.log</div></pre></td></tr></table></figure></p>
+<p>Tip：如果只有<code>-verbose:gc</code>参数，gc日志会输出到控制台上，如果<code>-verbose:gc</code>和<code>-Xloggc:filename</code>参数共存，以<code>-Xloggc</code>为准。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/java/">java</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/JVM参数/">JVM参数</a><a href="/tags/垃圾收集器/">垃圾收集器</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="huzongzhe.cn/2017/03/14/JVM实用参数整理/" data-title="JVM实用参数整理 | running river" data-tsina="null" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/03/26/记一次22亿大数据分析处理踩坑经历/" title="记一次22亿大数据分析处理踩坑经历">
+  <strong>上一篇：</strong><br/>
+  <span>
+  记一次22亿大数据分析处理踩坑经历</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/03/13/java排查常用工具(jvisualvm,jps,jmap,jstack)/"  title="java排查常用工具(jvisualvm,jps,jmap,jstack)">
+ <strong>下一篇：</strong><br/> 
+ <span>java排查常用工具(jvisualvm,jps,jmap,jstack)
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#一，说明"><span class="toc-number">1.</span> <span class="toc-text">一，说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#二，内存分配相关参数"><span class="toc-number">2.</span> <span class="toc-text">二，内存分配相关参数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#三，GC收集器参数"><span class="toc-number">3.</span> <span class="toc-text">三，GC收集器参数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#垃圾收集器介绍"><span class="toc-number">3.1.</span> <span class="toc-text">垃圾收集器介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#垃圾收集器组合"><span class="toc-number">3.2.</span> <span class="toc-text">垃圾收集器组合</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#垃圾收集器选择"><span class="toc-number">3.3.</span> <span class="toc-text">垃圾收集器选择</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#收集器相关参数"><span class="toc-number">3.4.</span> <span class="toc-text">收集器相关参数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#四，GC日志参数"><span class="toc-number">4.</span> <span class="toc-text">四，GC日志参数</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/脚本/" title="脚本">脚本<sup>2</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zk集群/" title="zk集群">zk集群<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/定时任务/" title="定时任务">定时任务<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM参数/" title="JVM参数">JVM参数<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2EX">V2EX</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com/" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/" target="_blank" title="github">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.cnblogs.com/huzongzhe/" target="_blank" title="博客园 Blog">博客园 Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="CSDN Blog">CSDN Blog</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code. <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2017 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
