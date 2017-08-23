@@ -11,20 +11,20 @@
     
 
     
-    <meta name="description" content="前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&amp;lt;&amp;lt;深入理解Java虚拟机&amp;gt;&amp;gt;这本书，正好配合日常所需好地整理下。
-一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不一样。标准参数格式如下：-XX:+&amp;lt;option&amp;gt; 开启option参数-XX:-">
+    <meta name="description" content="前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&amp;lt;&amp;lt;深入理解Java虚拟机&amp;gt;&amp;gt;这本书，正好配合日常所需好好地整理下。
+一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不一样。标准参数格式如下：-XX:+&amp;lt;option&amp;gt; 开启option参数-XX:">
 <meta property="og:type" content="article">
 <meta property="og:title" content="JVM实用参数整理">
 <meta property="og:url" content="huzongzhe.cn/2017/03/14/JVM实用参数整理/index.html">
 <meta property="og:site_name" content="running river">
-<meta property="og:description" content="前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&amp;lt;&amp;lt;深入理解Java虚拟机&amp;gt;&amp;gt;这本书，正好配合日常所需好地整理下。
-一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不一样。标准参数格式如下：-XX:+&amp;lt;option&amp;gt; 开启option参数-XX:-">
+<meta property="og:description" content="前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&amp;lt;&amp;lt;深入理解Java虚拟机&amp;gt;&amp;gt;这本书，正好配合日常所需好好地整理下。
+一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不一样。标准参数格式如下：-XX:+&amp;lt;option&amp;gt; 开启option参数-XX:">
 <meta property="og:image" content="huzongzhe.cn/images/garbage.jpg">
-<meta property="og:updated_time" content="2017-08-22T12:39:49.613Z">
+<meta property="og:updated_time" content="2017-08-23T04:23:37.075Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="JVM实用参数整理">
-<meta name="twitter:description" content="前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&amp;lt;&amp;lt;深入理解Java虚拟机&amp;gt;&amp;gt;这本书，正好配合日常所需好地整理下。
-一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不一样。标准参数格式如下：-XX:+&amp;lt;option&amp;gt; 开启option参数-XX:-">
+<meta name="twitter:description" content="前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&amp;lt;&amp;lt;深入理解Java虚拟机&amp;gt;&amp;gt;这本书，正好配合日常所需好好地整理下。
+一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不一样。标准参数格式如下：-XX:+&amp;lt;option&amp;gt; 开启option参数-XX:">
 <meta name="twitter:image" content="huzongzhe.cn/images/garbage.jpg">
 
     
@@ -105,7 +105,7 @@
 		
 		</div>
 		
-		<p><strong>前言</strong>：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&lt;&lt;深入理解Java虚拟机&gt;&gt;这本书，正好配合日常所需好地整理下。</p>
+		<p><strong>前言</strong>：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&lt;&lt;深入理解Java虚拟机&gt;&gt;这本书，正好配合日常所需好好地整理下。</p>
 <h2 id="一，说明"><a href="#一，说明" class="headerlink" title="一，说明"></a>一，说明</h2><p>JVM参数分为标准参数（以<code>-XX:</code>开头）和非标准参数（<code>java -X</code>命令查看），他们之间格式不一样。<br>标准参数格式如下：<br><code>-XX:+&lt;option&gt;</code> 开启option参数<br><code>-XX:-&lt;option&gt;</code> 关闭option参数<br><code>-XX:&lt;option&gt;=&lt;value&gt;</code> 设置option参数值<br>其他的为非标准参数。</p>
 <p>分代叫法对比：<br>年轻代：<code>Young Generation</code>，也称新生代<code>New Generation</code><br>年老代：<code>Old Generation</code>，也称终身代<code>Tenured Generation</code><br>永久代：<code>Perm Generation</code></p>
 <h2 id="二，内存分配相关参数"><a href="#二，内存分配相关参数" class="headerlink" title="二，内存分配相关参数"></a>二，内存分配相关参数</h2><table>
@@ -129,7 +129,7 @@
 </tr>
 <tr>
 <td><code>-Xmn</code></td>
-<td>年轻代大小，一般不设置</td>
+<td>年轻代大小，当需将对象留在Eden区设置</td>
 <td>年轻代 = <code>eden+ 2 survivor space</code>，整个堆大小=<code>年轻代大小(Young Generation)</code> + <code>年老代大小(Old Generation)</code> + <code>持久代大小(permanent Generation)</code>。增大年轻代后,将会减小年老代大小.此值对系统性能影响较大,Sun官方推荐配置为整个堆的3/8</td>
 </tr>
 <tr>
@@ -178,9 +178,14 @@
 <td>默认8，即：<code>2 Survivor：Eden=2:8</code>，From或To Survivor占整个Young的1/10，这是理论最大值，并非实际大小</td>
 </tr>
 <tr>
+<td><code>-XX:TargetSurvivorRatio</code></td>
+<td>设置Survivor空间使用率</td>
+<td>默认50%，<code>-XX:TargetSurvivorRatio=90</code>设定当Survivor空间使用到达90%时，将Survivor中部分对象送人Old，是否还是在当相同年龄对象(A)总大小大于等于Survivor空间一半时，将年龄大于等于A的所有对象送入Old，有待考证！</td>
+</tr>
+<tr>
 <td><code>-XX:MaxTenuringThreshold</code></td>
 <td>经过多少次Young GC后晋升到年老代</td>
-<td>默认值15，所有新建对象默认在Eden区分配（容纳不下的对象先Minor GC然后再分配担保机制在Old分配，大对象也有可能直接进入Old，如果启动了本地线程私有分配缓冲区（TLAB Eden区中）可能会在TLAB上分配），经过第一次Minor GC，存活的对象会移到From Survivor，年龄+1，多次GC后存活对象会移到Old区。15是一个最大值，当Survivor区中相同年龄的所有对象大小的总和大于Survivor空间的一半时，年龄大于或等于该年龄的对象可以直接进入老年代</td>
+<td>默认值15，所有新建对象默认在Eden区分配（容纳不下的对象先Minor GC，若仍不能容纳下,采用分配担保机制在Old分配，大对象也有可能直接进入Old(设置PretenureSizeThreshold)；如果启动了本地线程私有分配缓冲区（TLAB Eden区中）可能会在TLAB上分配），经过第一次Minor GC，存活的对象会移到From Survivor，年龄+1，多次GC后存活对象会移到Old区。15是一个最大值，当Survivor区中相同年龄的所有对象大小的总和大于Survivor空间的一半时，年龄大于或等于该年龄的对象可以直接进入老年代；Minor GC后Survivor无法容纳Eden的所有存活对象时，这些无法放入Survivor的对象会直接进入Old。</td>
 </tr>
 <tr>
 <td><code>-XX:PretenureSizeThreshold</code></td>
@@ -195,6 +200,7 @@
 </tbody>
 </table>
 <p>Tip：空间分配担保<br>当新创建一个对象时Eden空间不够，触发一次Minor GC，如果Eden中仍有大量对象存活，以致Survivor无法容纳这些对象，此时会开启空间分配担保，将无法容纳的对象移到Old区，如果Old区的空间无法容纳这些对象，会进行一次Full GC，若仍无法容纳，会触发<code>HandlePromotionFailure</code>失败，失败后会再发起一次Full GC。Jdk6 update24后<code>HandlePromotionFailure</code>失败不再生效，如果空间不足，直接Full GC！</p>
+<p>Tip：配置<code>-XX:NewSize=32m -XX:MaxNewSize=512m -XX:NewRatio=3</code>Young空间怎么分配？<br>Young中多个区域都存在绝对值和相对值的参数，当二者同时存在时绝对值起作用，如上，JVM会尝试为Young分配1/4的堆大小，但不会小于32MB和大于521MB。</p>
 <h2 id="三，GC收集器参数"><a href="#三，GC收集器参数" class="headerlink" title="三，GC收集器参数"></a>三，GC收集器参数</h2><h3 id="垃圾收集器介绍"><a href="#垃圾收集器介绍" class="headerlink" title="垃圾收集器介绍"></a>垃圾收集器介绍</h3><table>
 <thead>
 <tr>
@@ -372,12 +378,13 @@
 <h2 id="四，GC日志参数"><a href="#四，GC日志参数" class="headerlink" title="四，GC日志参数"></a>四，GC日志参数</h2><p>常用设置GC打印格式参数:</p>
 <ul>
 <li><code>-XX:+PrintGCApplicationStoppedTime</code> 输出GC造成应用暂停的时间</li>
-<li><code>-XX:+PrintGCTimeStamps</code> GC发送时间，样式：<code>188.220: [GC [PSYoungGen: 1279472K-&gt;80396K(1245696K)]</code>，显示的是GC发生相对JVM启动的时间 </li>
-<li><code>-XX:+PrintGCDateStamps</code> GC发送时间，样式：<code>2017-07-22T18:33:16.432+0800: 122.713: [GC [PSYoungGen: 1256318K-&gt;100567K(1262080K)]</code> 更详细的显示时间</li>
+<li><code>-XX:+PrintGCTimeStamps</code> GC发生相对JVM启动的时间，样式：<br>  <code>188.220: [GC [PSYoungGen: 1279472K-&gt;80396K(1245696K)]</code></li>
+<li><code>-XX:+PrintGCDateStamps</code> GC具体发送时间，也包括相对JVM启动时间，样式：<br>  <code>2017-07-22T18:33:16.432+0800: 122.713: [GC [PSYoungGen: 1256318K-&gt;100567K(1262080K)]</code></li>
 <li><code>-XX:+DisableExplicitGC</code>： 关闭<code>System.gc()</code>，调用<code>System.gc()</code>会变成一个空操作</li>
 <li><code>-Xloggc:$CATALINA_BASE/logs/gc.log</code> gc日志产生的路径</li>
 <li><code>-verbose:gc</code>： verbose详细的意思,显示详细的GC信息(即类似<code>[GC [PSYoungGen: 230112K-&gt;960K(219648K)] 265174K-&gt;36086K(303616K), 0.0045880 secs]</code>的输出)</li>
-<li><code>-xx:+printGCdetails</code> 打印GC详情到输出设备 </li>
+<li><code>-xx:+printGCdetails</code>：打印GC详情到输出设备 </li>
+<li><code>-XX:+PrintTenuringDistribution</code>：指定JVM 在每次新生代GC时，输出幸存区中对象的年龄分布。</li>
 </ul>
 <p>注意：<br>一般系统都加上了这两个参数：<code>-verbose:gc</code>和<code>-xx:+printGCdetails</code> ，但是测试删掉<code>-verbose:gc</code>参数并没有什么改变！<br>当只有<code>-verbose:gc</code>参数，则GC样式为：<code>[GC 223188K-&gt;40186K(2260992K), 0.0315090 secs]</code><br>当只有 <code>-xx:+printGCdetails</code> 样式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[GC [PSYoungGen: 1221316K-&gt;88958K(1279488K)] 1382475K-&gt;259135K(3114496K), 0.0625040 secs] [Times: user=0.18 sys=0.03, real=0.06 secs]</div></pre></td></tr></table></figure></p>
 <p>Tip：通常配置GC日志的方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">-XX:+DisableExplicitGC -verbose:gc -XX:+PrintGCDateStamps -XX:+PrintGCDetails -Xloggc:$CATALINA_BASE/logs/gc.log</div></pre></td></tr></table></figure></p>
@@ -516,15 +523,7 @@
 			
 		
 			
-				<li><a href="/tags/定时任务/" title="定时任务">定时任务<sup>1</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
 			
 		
 			
@@ -532,11 +531,19 @@
 			
 		
 			
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/定时任务/" title="定时任务">定时任务<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/JVM参数/" title="JVM参数">JVM参数<sup>1</sup></a></li>
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
@@ -544,7 +551,7 @@
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/JVM参数/" title="JVM参数">JVM参数<sup>1</sup></a></li>
 			
 		
 			
