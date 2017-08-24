@@ -162,51 +162,6 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/13/cron，at，batch(任务调度)/" title="cron，at，batch(任务调度)" itemprop="url">
-  
-    <h1 itemprop="name">cron，at，batch(任务调度)</h1>
-    
-     
-           <p itemprop="description" >一，基础知识
-corntab周期执行任务,anacron调度每日、每周或每月执行的作业,at调度只运行一次的作业.
-batch 命令被用来在系统平均负载达到 0.8% 以下时执行一次性的任务，通俗的所就是系统空闲时执行任务。
-crontab调度的任务是不会加载任何环境变量的,这就</p>
-        
-    
-    <time datetime="2017-06-13T09:21:12.000Z" itemprop="datePublished">2017-06-13</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2017/05/13/记一次蛋疼的mongo to hive导数过程/" title="记一次蛋疼的mongo to hive导数过程" itemprop="url">
-  
-    <h1 itemprop="name">记一次蛋疼的mongo to hive导数过程</h1>
-    
-     
-           <p itemprop="description" >1. 起因一次hive查数过程中，发现hive中缺省了10天的近3000w的数据，自问自答：怎么办，当然是要补数啊！从哪里补，mongo啊（还好mongo中有一份）！
-mongo中数据是bson保存，而且数据列与hive不一样！
-2. 解决方案方案1：mongoexport思路：</p>
-        
-    
-    <time datetime="2017-05-13T12:42:25.000Z" itemprop="datePublished">2017-05-13</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
     <a href="/2017/03/26/记一次22亿大数据分析处理踩坑经历/" title="记一次22亿大数据分析处理踩坑经历" itemprop="url">
   
     <h1 itemprop="name">记一次22亿大数据分析处理踩坑经历</h1>
@@ -228,16 +183,38 @@ mongo中数据是bson保存，而且数据列与hive不一样！
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/03/14/JVM实用参数整理/" title="JVM实用参数整理" itemprop="url">
+    <a href="/2017/03/19/记一次HBase rowkey设计演化之路/" title="记一次HBase rowkey设计演化之路" itemprop="url">
   
-    <h1 itemprop="name">JVM实用参数整理</h1>
+    <h1 itemprop="name">记一次HBase rowkey设计演化之路</h1>
     
      
-           <p itemprop="description" >前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&amp;lt;&amp;lt;深入理解Java虚拟机&amp;gt;&amp;gt;这本书，正好配合日常所需好好地整理下。
-一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -</p>
+           <p itemprop="description" >前言：一次HBase的rowkey设计，走了些弯路，踩了些坑，故这里记录下来，供参考引以为戒吧。在介绍rowkey设计之前，必须对HBase有个最基本的了解，本文先介绍关于HBase的基础知识，再根据简化场景介绍rowkey设计的演化过程。
+一. HBase基础知识整理Hbase</p>
         
     
-    <time datetime="2017-03-14T13:33:02.000Z" itemprop="datePublished">2017-03-14</time>
+    <time datetime="2017-03-19T14:42:12.000Z" itemprop="datePublished">2017-03-19</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2017/03/13/记一次蛋疼的mongo to hive导数过程/" title="记一次蛋疼的mongo to hive导数过程" itemprop="url">
+  
+    <h1 itemprop="name">记一次蛋疼的mongo to hive导数过程</h1>
+    
+     
+           <p itemprop="description" >1. 起因一次hive查数过程中，发现hive中缺省了10天的近3000w的数据，自问自答：怎么办，当然是要补数啊！从哪里补，mongo啊（还好mongo中有一份）！
+mongo中数据是bson保存，而且数据列与hive不一样！
+2. 解决方案方案1：mongoexport思路：</p>
+        
+    
+    <time datetime="2017-03-13T12:42:25.000Z" itemprop="datePublished">2017-03-13</time>
   </a>
 </section>
 
@@ -259,6 +236,27 @@ mongo中数据是bson保存，而且数据列与hive不一样！
         
     
     <time datetime="2017-03-13T07:32:12.000Z" itemprop="datePublished">2017-03-13</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2017/03/10/JVM实用参数整理/" title="JVM实用参数整理" itemprop="url">
+  
+    <h1 itemprop="name">JVM实用参数整理</h1>
+    
+     
+           <p itemprop="description" >前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&amp;lt;&amp;lt;深入理解Java虚拟机&amp;gt;&amp;gt;这本书，正好配合日常所需好好地整理下。
+一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -</p>
+        
+    
+    <time datetime="2017-03-10T13:33:02.000Z" itemprop="datePublished">2017-03-10</time>
   </a>
 </section>
 
@@ -308,6 +306,10 @@ BEGIN{ 这里面放的是执行前</p>
 		<ul>
 		
 		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>1</sup></a></li>
+		  
+		
+		  
 			<li><a href="/categories/Linux/" title="Linux">Linux<sup>3</sup></a></li>
 		  
 		
@@ -345,11 +347,11 @@ BEGIN{ 这里面放的是执行前</p>
 		<ul class="clearfix">
 		
 			
-				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
 			
 		
 			
@@ -373,6 +375,10 @@ BEGIN{ 这里面放的是执行前</p>
 			
 		
 			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
 			
 		
@@ -381,15 +387,7 @@ BEGIN{ 这里面放的是执行前</p>
 			
 		
 			
-				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
 			
 		
 			
@@ -398,6 +396,22 @@ BEGIN{ 这里面放的是执行前</p>
 		
 			
 				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rowkey设计/" title="rowkey设计">rowkey设计<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
 			
 		
 		</ul>

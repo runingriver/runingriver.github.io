@@ -1,0 +1,654 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>记一次HBase rowkey设计演化之路 | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="前言：一次HBase的rowkey设计，走了些弯路，踩了些坑，故这里记录下来，供参考引以为戒吧。在介绍rowkey设计之前，必须对HBase有个最基本的了解，本文先介绍关于HBase的基础知识，再根据简化场景介绍rowkey设计的演化过程。
+一. HBase基础知识整理Hbase是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，Zookeeper + Master+Region Server">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次HBase rowkey设计演化之路">
+<meta property="og:url" content="huzongzhe.cn/2017/03/19/记一次HBase rowkey设计演化之路/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="前言：一次HBase的rowkey设计，走了些弯路，踩了些坑，故这里记录下来，供参考引以为戒吧。在介绍rowkey设计之前，必须对HBase有个最基本的了解，本文先介绍关于HBase的基础知识，再根据简化场景介绍rowkey设计的演化过程。
+一. HBase基础知识整理Hbase是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，Zookeeper + Master+Region Server">
+<meta property="og:image" content="huzongzhe.cn/images/hbase-processe.png">
+<meta property="og:image" content="huzongzhe.cn/images/hfile.png">
+<meta property="og:image" content="huzongzhe.cn/images/rowkey-design-result.png">
+<meta property="og:updated_time" content="2017-08-24T06:57:27.491Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="记一次HBase rowkey设计演化之路">
+<meta name="twitter:description" content="前言：一次HBase的rowkey设计，走了些弯路，踩了些坑，故这里记录下来，供参考引以为戒吧。在介绍rowkey设计之前，必须对HBase有个最基本的了解，本文先介绍关于HBase的基础知识，再根据简化场景介绍rowkey设计的演化过程。
+一. HBase基础知识整理Hbase是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，Zookeeper + Master+Region Server">
+<meta name="twitter:image" content="huzongzhe.cn/images/hbase-processe.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/author.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/author.png">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/03/19/记一次HBase rowkey设计演化之路/" title="记一次HBase rowkey设计演化之路" itemprop="url">记一次HBase rowkey设计演化之路</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2017-03-19T14:42:12.000Z" itemprop="datePublished"> 发表于 2017-03-19</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<p><strong>前言</strong>：一次HBase的rowkey设计，走了些弯路，踩了些坑，故这里记录下来，供参考引以为戒吧。在介绍rowkey设计之前，必须对HBase有个最基本的了解，本文先介绍关于HBase的基础知识，再根据简化场景介绍rowkey设计的演化过程。</p>
+<h1 id="一-HBase基础知识整理"><a href="#一-HBase基础知识整理" class="headerlink" title="一. HBase基础知识整理"></a>一. HBase基础知识整理</h1><p>Hbase是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，Zookeeper + Master+Region Server + HLog保证高可靠，面向列的存储提供了高性能（通常写入性能要好，读要差点，虽然号称有百万吞吐量每秒）.<br>Region的自动分裂机制保证了系统的可伸缩性。当一台服务down掉，可以自动恢复（补充）。<br>Hbase无法使用sql，但是可以联合Phonenix或 Hive，但是会有一定的性能损失，联合hive就无法绕过MapReduce，Phonenix性能优于hive但是会部分改变Hbase原有数据组织。<br>缺点：不支持二级索引(如果要实现二级索引可以通过建立索引表的形式,二级索引无非就是将scan查询改为get查询!)，不支持事务。</p>
+<h2 id="1，Hbase组件介绍"><a href="#1，Hbase组件介绍" class="headerlink" title="1，Hbase组件介绍"></a>1，Hbase组件介绍</h2><ol>
+<li><code>Master</code>：HBase Master 用于协调多个 Region Server，侦测各个 Region Server 之间的状态，并平衡 Region Server 之间的负载。<br>HBase Master 还有一个职责就是负责分配 Region 给 Region Server。HBase 允许多个 Master 节点共存，但是这需要 Zookeeper 的帮助。<br>不过当多个 Master 节点共存时，只有一个 Master 是提供服务的，其他的 Master 节点处于待命的状态。当正在工作的 Master 节点宕机时，其他的 Master 则会接管 HBase 的集群。</li>
+<li><code>Region Server</code>：一个Region Server管理多个Region。Region Server的作用只是管理表格，以及实现读写操作。Client 直接连接 Region Server，并通信获取 HBase 中的数据。<br>Region是真实存放 HBase 数据的地方，也就说 Region 是 HBase 可用性和分布式的基本单位，也是HBase高并发的基础。<br>如果当一个表格很大，并由多个 CF 组成时，那么表的数据将存放在多个 Region 之间，并且在每个 Region 中会关联多个存储的单元（Store）。<br>一个Region对应一个CF，一个CF可以有多个Region（按Rowkey区间进行分裂，且当Region数据达到上限就会自动分裂成多个Region）</li>
+<li><code>Region</code>：每个Region用于保存一个CF中的某一段（rowkey范围划分）数据，Region的自动分裂实现了类似的水平分表。<br>开始一张表的Region可能保存在同一个Region Server中，随着Region分裂变多，同一张表的Region可能会被分配到不同的Region Server中。</li>
+<li><code>MemStore,Store,StoreFile</code>关系：Stroe可以理解成一个Region的数据仓库，一个Region下可能有多个Stroe（也有多个MemStroe），一个Stroe下有多个StoreFile。<br>MemStore满后会刷到磁盘对应生产一个新的StoreFile，当多次MemStore刷写到磁盘后StoreFile会变多，最后多个小的StoreFile会合并成一个大的StroeFile。<br>一个store对应一个MemStore，一个Store下有多个StoreFile，一个StoreFile对应一个HFile，HFile最后都保存在HDFS中。<br>StoreFile和HFile的关系可以看做相等，HFile只是在StroeFile上面做了一层封装。</li>
+<li><code>HLog</code>：HLog是一个实现Write Ahead Log（WAL）的类，用户的每次修改操作都会先写入到HLog保存到物理存储，<br>当Region Server意外终止后，Master会通过Zookeeper感知，Master会根据HLog文件，恢复Region Server中未持久化到HFile中的数据！从而保证<strong>数据写入的可靠性</strong><br><strong>Tip：</strong>每个Region Server中都会有一个HLog的实例，Region Server会将更新操作（如 Put，Delete）先记录到WAL（也就是 HLog）中，<br>然后再将操作写入到MemStore，MemStore到达配置的内存阀值后会将数据写入到持久化的HFile中。<br>这样就保证了HBase的写的可靠性。如果没有WAL，当Region Server宕掉的时候，MemStore还没有写入到HFile，或者StoreFile 还没有保存，数据就会丢失。</li>
+<li><code>Zookeeper</code>：首先Zookeeper是作为HBase Master的HA解决方案。也就是说，是Zookeeper保证了至少有一个HBase Master处于运行状态。<br>并且Zookeeper负责Region和Region Server的注册。</li>
+<li><code>HDFS</code>：虽然HBase也可以存储在本地文件系统，通常使用HDFS作为底层存储，HDFS保证了分布式文件系统的数据可靠性（一般每份数据有3个copy）。</li>
+</ol>
+<h2 id="2，Hbase工作原理流程"><a href="#2，Hbase工作原理流程" class="headerlink" title="2，Hbase工作原理流程"></a>2，Hbase工作原理流程</h2><p>综上所述，来张图，并讲述一下Hbase的工作流程：<br><img src="/images/hbase-processe.png" alt=""><br><strong>写工作流程：</strong><br>当一个Client访问HBase集群时，Client需要先和Zookeeper来通信，找到对应的Region Server，一个Region Server管理着很多个Region。<br>Client写入 -&gt; 存入内存MemStore，一直到MemStore满 -&gt; Flush成一个新StoreFile，<br>StoreFile增长到一定阈值 -&gt; 触发Compact合并操作 -&gt; 多个StoreFile合并成一个StoreFile，同时进行版本合并和数据删除。<br>当StoreFiles Compact后，逐步形成越来越大的StoreFile -&gt; 单个StoreFile大小超过一定阈值后，触发Split操作<br>把当前Region Split成2个Region（从中间切开，100G从中间切成2个50G），原Region会下线，新Split出的2个孩子Region会被HMaster分配到相应的HRegionServer上（自动rebalance），<br>使得原先1个Region的压力得以分流到2个Region上。<br>由此过程可知，HBase只是增加数据，有所得更新和删除操作，都是在Compact阶段做的，所以，用户写操作只需要进入到内存即可立即返回，从而保证I/O高性能。<br><strong>Tip：</strong>HBase的删除操作不是真正的物理删除，因为HFile文件是不可变的，只是在相应记录上做一个标记，使得scan/get不返回该记录，真正的物理删除实在合并压缩阶段！<br><strong>Tip：</strong>HBase是行锁，也即修改一行中的多个数据时要么都成功，要么都失败！<br><strong>读工作流程：</strong><br>连接过程和写相同，不同的是，读通过缓存来读取记录，使用LRU算法将HFile中热点数据缓存到内存，另外从HFile中读取一行，还要检查MemStore中未持久化到HFile的数据是否有该行的修改记录！</p>
+<h2 id="3，HFile文件格式"><a href="#3，HFile文件格式" class="headerlink" title="3，HFile文件格式"></a>3，HFile文件格式</h2><p>HFile数据组织形式：<br><img src="/images/hfile.png" alt=""><br>一个HFile中有多个Data数据块，数据块中有一个header和多个k-v组成，默认64KB，HFile文件尾部有一个Trailer，其中包含数据相关的索引信息，Hbase也是通过Trailer的索引来检索数据。有没有发现，这样的组织非常类似B树！</p>
+<h2 id="4，Hbase一些术语理解"><a href="#4，Hbase一些术语理解" class="headerlink" title="4，Hbase一些术语理解"></a>4，Hbase一些术语理解</h2><ol>
+<li><code>Row Key</code>:按照字典顺序排序，最多只能存储64k的字节数据。通俗理解，用作数据分块的依据。比如：<code>row设置为20170505</code>，表示将数据按天切分开！</li>
+<li><code>Column Family列族（CF1、CF2、CF3） &amp; qualifier列</code>：<br>数据存储，权限控制，条优都是通过CF来进行的，通常单表不要超过3个CF（一般建一个CF，且名字尽可能短），一个CF下可以有多个<code>column</code>（k-v，最小数据单元），且可以动态扩展。<br>通常CF下面还可以有多个Qualifier，可以理解为Family是第一级列，Qualifier是第二级列。</li>
+<li><code>Cell单元格</code>：由时间戳来作为版本，无数据类型，以字节码形式存储。由{row key，column(=<family> +<qualifier>)，version}唯一确定的单元。</qualifier></family></li>
+</ol>
+<h3 id="高表和宽表"><a href="#高表和宽表" class="headerlink" title="高表和宽表"></a>高表和宽表</h3><p>通常倾向于设计成高表，形象的理解如下:<br><strong>宽表:</strong></p>
+<table>
+<thead>
+<tr>
+<th>x</th>
+<th>c1</th>
+<th>c2</th>
+<th>c3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>r1</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+</tr>
+</tbody>
+</table>
+<p><strong>高表:</strong></p>
+<table>
+<thead>
+<tr>
+<th>x</th>
+<th>r1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>c1</td>
+<td>x</td>
+</tr>
+<tr>
+<td>c2</td>
+<td>x</td>
+</tr>
+<tr>
+<td>c3</td>
+<td>x</td>
+</tr>
+</tbody>
+</table>
+<p>高表优点：HBase只能按行进行分片，高表更灵活；根据HBase的拆分规则，高表更容易拆分。<br><strong>Tip：</strong>Region数据到达设置的大小时，会自动split（分裂），split成多个小的Region，此过程中还需要对StoreFile进行分割和压缩（compact）形成对应Region下的独立StroeFile。另外，大的Region StoreFile也会更大，所以大的StroeFile分裂压缩操作也是对内存的一个挑战！<br>宽表优点：HBase保证了行级的原子性，宽表的更新操作更方便，反观高表，可能需要跨行更新。</p>
+<hr>
+<h1 id="三-设计Rowkey演化"><a href="#三-设计Rowkey演化" class="headerlink" title="三. 设计Rowkey演化"></a>三. 设计Rowkey演化</h1><h2 id="1，rowkey设计原则"><a href="#1，rowkey设计原则" class="headerlink" title="1，rowkey设计原则"></a>1，rowkey设计原则</h2><ol>
+<li>全局唯一，hbase以此为索引检索数据，一个rowkey对应一行数据！</li>
+<li>以字典顺序排序，最大64k，存为byte[]字节数组，尽可能短（若rowkey=100byte，1000w行，就要占近1G空间）！<br><strong>字典顺序,也可以理解成ASCII表的顺序,比如:数字+字母组合,范围可以是<code>0-z</code></strong></li>
+<li>将经常读或最近可能被访问的数据放到一起！而且要保证数据均匀分布到不同的Region中。<br>且要防止热点问题，如果热点数据都放在一个Region中，多个client访问同一个Region，造成单台服务器压力太大，出现热点问题，性能不佳！</li>
+<li>rowkey的高位设计成离散的。<br>如果将时间戳放在rowkey的高位，会导致所有数据都集中在一个Region，造成热点问题。如：201707218613512345678abcd，这种rowkey就会出现热点问题！</li>
+<li>一个rowkey对应二维表中的一行(可以看做唯一键)</li>
+</ol>
+<h2 id="2，rowkey设计策略"><a href="#2，rowkey设计策略" class="headerlink" title="2，rowkey设计策略"></a>2，rowkey设计策略</h2><ol>
+<li>Salt，即在rowkey高位加几位随机数，随机数的种类和你预期使用的Region数量保持一致。</li>
+<li>Hash，为使高为离散，使用Hash值放在高位。</li>
+<li>reverse，即反转数字序列，通常高位是不变的（如2017），反转后经常改变的部分放在前面了，rowkey离散了，但是rowkey会变得无序！</li>
+</ol>
+<p>常见反转例子：<br>(1) 手机号反转：相比手机号的固定开头，发转后会使得数据更加离散。<br>(2) 时间戳反转：可以设计成key+ (Long.Max_Value - timestamp)的格式rowkey，这样最近的数据值最小，scan (key) 获取的是最新是数据，保证了升序。<br>且范围查询比较方便，如startRow:(Long.Max_Value - 起始时间)，stopRow:(Long.Max_Value - 结束时间)</p>
+<h2 id="3，多种rowkey设计分析"><a href="#3，多种rowkey设计分析" class="headerlink" title="3，多种rowkey设计分析"></a>3，多种rowkey设计分析</h2><p>场景：HBase保存所有发送的message记录，每条短信包括手机号，发送时间，内容，是否到达… …等等，供其他业务线查询，从用户角度出发最基础的查询message条件是：手机号+大概时间。<br>假设message数量在十的10次方级别，qps在1w左右，保存一条message内容需要3次左右的put操作，其中的两次需要get查询一次message并有check逻辑。<br>设计一个rowkey，既能满足基本的查询要求，还能抗住读写压力。<br>根据上面的背景介绍，rowkey的设计必须至少包含时间，手机号两个因素，下面谈谈我的一步步演化的设计思路：</p>
+<ol>
+<li><p><code>rowkey = [dateTime] + [mobile] + [reverse timestamp]</code>，如：2017071386136123498761503382954<br>这样设计，好处在于同一天的数据会放在同一块（往往都会查最近一天的某个手机号的N条记录），可以统计每天的数据量。坏处是热点问题，如果读写qps太可能会出现问题。<br>这种，设计是不合理的，缺点很多，而且可做到上述要求的方法很多，这后面再分析。</p>
+</li>
+<li><p><code>rowkey = [mobile reverse] + [reverse timestamp]</code><br>这样，既没有热点问题，也能进行范围查询，但是要统计某段时间内短信发送量就比较麻烦！</p>
+</li>
+<li><p><code>rowkey = [hash dataTime] + [mobile] + [reverse timestamp]</code><br>这样可以通过前面的Hash方法确定指定Region的个数，也能方便地统计和查询，但是还是会有热点问题。<br>说到这里，只描述了最简单的查询场景下的rowkey的探索，鱼和熊掌不能兼得，想要没有热点问题（或者说支持更高的读写并发），那就必须得将数据离散开，这样范围统计就变得困难！反之，亦然。</p>
+</li>
+<li><p><code>rowkey = [hash mobile] + [date time] + [mobile] +[reverse timestamp]</code><br>这是最终方案，也算一个折中，采用<code>预分区+Hash散列</code>，既能避免热点问题，也可以在可控范围内进行数据统计（范围统计），后面详细描述。</p>
+</li>
+</ol>
+<p>有个问题：如果我将每个Region设置为10G，这样开始可能数据在一个Region中，但是随着数据量变大，10GRegion填满，发生Split，那么一个Region就均分成两个小范围的StartRowkey和StopRowkey了，这样读写压力不就分到多个RegionServer中了吗？<br>答：看似很有道理，首先split是根据文件大小从中间切分为二，其次split操作是非常消耗资源的操作不能频繁执行，另外多数业务场景想Rowkey是递增的，也就是说写最终还是只会在一个Region上写，并不能解决热点问题！</p>
+<h3 id="预分区-Hash散列"><a href="#预分区-Hash散列" class="headerlink" title="预分区+Hash散列"></a>预分区+Hash散列</h3><p>最终方案叙述：<strong><code>rowkey = [hash mobile] + [date time] + [mobile] +[reverse timestamp]</code></strong></p>
+<ol>
+<li>预分区：表示在创建表的时候指定Region个数或范围。<br>指定Region个数的语法：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">create &apos;namespace:table_name&apos;, &#123;NUMREGIONS =&gt; 5, SPLITALGO =&gt; &apos;HexStringSplit&apos;&#125;, &#123;NAME =&gt; &apos;cf&apos;, COMPRESSION=&gt;&apos;SNAPPY&apos;, VERSIONS =&gt; 1&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>建表时会创建5个分区，但是分区的rowkey范围会根据rowkey动态决定。<br>指定Region个数和Region范围：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">create &apos;namespace:table_name&apos;,&#123;SPLITS =&gt; [&apos;10&apos;, &apos;20&apos;, &apos;30&apos;, &apos;40&apos;, &apos;50&apos;, &apos;60&apos;, &apos;70&apos;,&apos;80&apos;,&apos;90&apos;]&#125;,&#123;NAME =&gt; &apos;cf&apos;, COMPRESSION=&gt;&apos;SNAPPY&apos;, VERSIONS =&gt; 1&#125;</div></pre></td></tr></table></figure></p>
+<p>创建表时指定创建10个分区，范围从<code>0~10</code>，<code>10~20</code>，…，<code>90~</code>十个预分区，此时就需要Hash散列，在rowkey前两位随机产生0~100的随机数。</p>
+<ol>
+<li>Hash散列：表示根据rowkey中某个字段Hash出一个范围数字，作为rowkey的高位，这样这个散列可以重现，使得我们能通过rowkey进行get查询，也可以进行范围查询。<br>Hash出来的数字是可以根据rowkey中某个字段重新计算出来的，如果要随机产生0~100的随机数最简单与100取余即可，但实际应用中可能需要进行数据抽样分析，确保能均匀分散到每一块。如，Hash Mobile可以直接取mobile后两位作为rowkey的高位，也可以先获求一个mobile的Hash值，再与100取余。<br>另外，如果服务器RegionServer只有5个，那么预分区设置成5个或许会更好。<br>这里给出，测试约1500w数据的写入结果：<br><img src="/images/rowkey-design-result.png" alt=""><br>数据能够均匀分布在不同的RS上（测试数据：现在HBase能够接收3W+的qps，相比之前1w左右就报警要提升很多）。其中，前两位是取mobile的最后一位和一个随机数（这里选择的是区间中间值5）包括（05,15,25,35,45,55,65,75,85,95）等10种情况。当然，这里取一位也可以，但是这里考虑到其他情况所以选择两位，可能还有其他很好方法具体情况就具体分析了。</li>
+</ol>
+<p>有个问题：如果具体业务中历史数据随着时间的推移使用和查询几率越来越小，会不会因为历史数据和最新数据混合在一起导致查询效率的降低？<br>答：不会！首先rowkey的设计一般会根据时间递增或递减，所以在Region中数据会按照时间排列在一起，最新的数据始终会在最前或最后，rowkey的范围查询，并不会遍历到历史数据！</p>
+<p>最后，在实际的情景中，可能由于各种问题，得有些折中。这里不是为了做抛砖引玉的作用，仅作引以为界罢了。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/HBase/">HBase</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/HBase/">HBase</a><a href="/tags/rowkey设计/">rowkey设计</a><a href="/tags/HBase原理/">HBase原理</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="huzongzhe.cn/2017/03/19/记一次HBase rowkey设计演化之路/" data-title="记一次HBase rowkey设计演化之路 | running river" data-tsina="null" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/03/26/记一次22亿大数据分析处理踩坑经历/" title="记一次22亿大数据分析处理踩坑经历">
+  <strong>上一篇：</strong><br/>
+  <span>
+  记一次22亿大数据分析处理踩坑经历</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/03/13/记一次蛋疼的mongo to hive导数过程/"  title="记一次蛋疼的mongo to hive导数过程">
+ <strong>下一篇：</strong><br/> 
+ <span>记一次蛋疼的mongo to hive导数过程
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/脚本/" title="脚本">脚本<sup>2</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zk集群/" title="zk集群">zk集群<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/定时任务/" title="定时任务">定时任务<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM参数/" title="JVM参数">JVM参数<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rowkey设计/" title="rowkey设计">rowkey设计<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2EX">V2EX</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com/" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/" target="_blank" title="github">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.cnblogs.com/huzongzhe/" target="_blank" title="博客园 Blog">博客园 Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="CSDN Blog">CSDN Blog</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code. <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2017 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

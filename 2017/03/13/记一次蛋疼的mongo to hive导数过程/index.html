@@ -4,26 +4,29 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>shell,bash操作快捷键 | running river</title>
+    <title>记一次蛋疼的mongo to hive导数过程 | running river</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="奔跑的小河">
     
 
     
-    <meta name="description" content="前言： 在命令行(CLI)或者bash中编辑命令的时候，了解一些基本的快捷键，和编辑技巧，会让你效率更高，节约更多的时间，看到的都是缘分 - -。下面是我的总结：
-1. 编辑命令Ctrl + xx：在命令行首和光标之间移动,比较特殊！Ctrl + a ：移到命令行首Ctrl + e ：移到命令行尾Alt + f ：按单词前移（右向）Alt + b ：按单词后移（左向）Ctrl + u ：从光标处删">
+    <meta name="description" content="1. 起因一次hive查数过程中，发现hive中缺省了10天的近3000w的数据，自问自答：怎么办，当然是要补数啊！从哪里补，mongo啊（还好mongo中有一份）！
+mongo中数据是bson保存，而且数据列与hive不一样！
+2. 解决方案方案1：mongoexport思路：由于mongoexport只能以逗号分割字段，所以要导到hive里面最快的方式就是，利用mysql可以导逗号的cvs文件">
 <meta property="og:type" content="article">
-<meta property="og:title" content="shell,bash操作快捷键">
-<meta property="og:url" content="huzongzhe.cn/2016/11/12/shell，bash操作快捷键/index.html">
+<meta property="og:title" content="记一次蛋疼的mongo to hive导数过程">
+<meta property="og:url" content="huzongzhe.cn/2017/03/13/记一次蛋疼的mongo to hive导数过程/index.html">
 <meta property="og:site_name" content="running river">
-<meta property="og:description" content="前言： 在命令行(CLI)或者bash中编辑命令的时候，了解一些基本的快捷键，和编辑技巧，会让你效率更高，节约更多的时间，看到的都是缘分 - -。下面是我的总结：
-1. 编辑命令Ctrl + xx：在命令行首和光标之间移动,比较特殊！Ctrl + a ：移到命令行首Ctrl + e ：移到命令行尾Alt + f ：按单词前移（右向）Alt + b ：按单词后移（左向）Ctrl + u ：从光标处删">
-<meta property="og:updated_time" content="2017-07-26T11:23:48.019Z">
+<meta property="og:description" content="1. 起因一次hive查数过程中，发现hive中缺省了10天的近3000w的数据，自问自答：怎么办，当然是要补数啊！从哪里补，mongo啊（还好mongo中有一份）！
+mongo中数据是bson保存，而且数据列与hive不一样！
+2. 解决方案方案1：mongoexport思路：由于mongoexport只能以逗号分割字段，所以要导到hive里面最快的方式就是，利用mysql可以导逗号的cvs文件">
+<meta property="og:updated_time" content="2017-08-24T06:31:27.543Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="shell,bash操作快捷键">
-<meta name="twitter:description" content="前言： 在命令行(CLI)或者bash中编辑命令的时候，了解一些基本的快捷键，和编辑技巧，会让你效率更高，节约更多的时间，看到的都是缘分 - -。下面是我的总结：
-1. 编辑命令Ctrl + xx：在命令行首和光标之间移动,比较特殊！Ctrl + a ：移到命令行首Ctrl + e ：移到命令行尾Alt + f ：按单词前移（右向）Alt + b ：按单词后移（左向）Ctrl + u ：从光标处删">
+<meta name="twitter:title" content="记一次蛋疼的mongo to hive导数过程">
+<meta name="twitter:description" content="1. 起因一次hive查数过程中，发现hive中缺省了10天的近3000w的数据，自问自答：怎么办，当然是要补数啊！从哪里补，mongo啊（还好mongo中有一份）！
+mongo中数据是bson保存，而且数据列与hive不一样！
+2. 解决方案方案1：mongoexport思路：由于mongoexport只能以逗号分割字段，所以要导到hive里面最快的方式就是，利用mysql可以导逗号的cvs文件">
 
     
     <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
@@ -83,33 +86,60 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2016/11/12/shell，bash操作快捷键/" title="shell,bash操作快捷键" itemprop="url">shell,bash操作快捷键</a>
+      <a href="/2017/03/13/记一次蛋疼的mongo to hive导数过程/" title="记一次蛋疼的mongo to hive导数过程" itemprop="url">记一次蛋疼的mongo to hive导数过程</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
 		
   <p class="article-time">
-    <time datetime="2016-11-12T14:11:11.000Z" itemprop="datePublished"> 发表于 2016-11-12</time>
+    <time datetime="2017-03-13T12:42:25.000Z" itemprop="datePublished"> 发表于 2017-03-13</time>
     
   </p>
 </header>
 	<div class="article-content">
 		
-		<div id="toc" class="toc-article">
-			<strong class="toc-title">文章目录</strong>
-		
-			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-编辑命令"><span class="toc-number">1.</span> <span class="toc-text">1. 编辑命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-重新执行命令"><span class="toc-number">2.</span> <span class="toc-text">2. 重新执行命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-控制命令"><span class="toc-number">3.</span> <span class="toc-text">3. 控制命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-Bang-命令"><span class="toc-number">4.</span> <span class="toc-text">4. Bang (!) 命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-特殊字符的含义"><span class="toc-number">5.</span> <span class="toc-text">5. 特殊字符的含义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#提示"><span class="toc-number">6.</span> <span class="toc-text">提示</span></a></li></ol>
-		
-		</div>
-		
-		<p>前言： 在命令行(CLI)或者bash中编辑命令的时候，了解一些基本的快捷键，和编辑技巧，会让你效率更高，节约更多的时间，看到的都是缘分 - -。下面是我的总结：</p>
-<h3 id="1-编辑命令"><a href="#1-编辑命令" class="headerlink" title="1. 编辑命令"></a>1. 编辑命令</h3><p><code>Ctrl + xx</code>：在命令行首和光标之间移动,比较特殊！<br><code>Ctrl + a</code> ：移到命令行首<br><code>Ctrl + e</code> ：移到命令行尾<br><strong><code>Alt + f</code> </strong>：按单词前移（右向）<br><strong><code>Alt + b</code> </strong>：按单词后移（左向）<br><strong><code>Ctrl + u</code> </strong>：从光标处删除至命令行首<br><strong><code>Ctrl + k</code> </strong>：从光标处删除至命令行尾<br><strong><code>Ctrl + w</code></strong>：从光标处删除至字首，》<strong>以空格为分隔符</strong><br><strong><code>Alt + Backspace</code></strong>：与 Ctrl + w 类似，以各种标点为分隔符<br><strong><code>Alt + d</code> </strong>：从光标处删除至字尾<br><code>Ctrl + d</code> ：删除光标处的字符<br><code>Ctrl + h</code> ：删除光标前的字符<br><strong><code>Ctrl + y</code> </strong>：粘贴至光标后（粘贴刚才所删除的字符）<br><code>Alt + c</code> ：从光标处更改为首字母大写的单词<br><code>Alt + u</code> ：从光标处更改为全部大写的单词<br><code>Alt + l</code>：从光标处更改为全部小写的单词<br><code>Ctrl + t</code>：交换光标处和之前的字符<br><code>Alt + t</code> ：交换光标处和之前的单词</p>
-<h3 id="2-重新执行命令"><a href="#2-重新执行命令" class="headerlink" title="2. 重新执行命令"></a>2. 重新执行命令</h3><p><strong><code>Ctrl + r</code></strong>：逆向搜索命令历史（多次按表示下一个）<br><strong><code>Ctrl + g</code></strong>：从历史搜索模式退出<br><code>Ctrl + p</code>：历史中的上一条命令<br><code>Ctrl + n</code>：历史中的下一条命令<br><strong><code>Alt + .</code></strong>：使用上一条命令的最后一个参数,多次按<code>.</code>会向上选择.</p>
-<h3 id="3-控制命令"><a href="#3-控制命令" class="headerlink" title="3. 控制命令"></a>3. 控制命令</h3><p><strong><code>Alt+Esc</code>或<code>tab+tab</code></strong>: 查找可输入的命令,第一次按两下esc<br><code>Ctrl + l</code>：清屏<br><code>Ctrl + o</code>：执行当前命令，并选择上一条命令<br><strong><code>Ctrl + s</code></strong>：阻止屏幕输出<br><strong><code>Ctrl + q</code></strong>：允许屏幕输出<br><code>Ctrl + c</code>：终止命令<br><code>Ctrl + z</code>：挂起命令</p>
-<h3 id="4-Bang-命令"><a href="#4-Bang-命令" class="headerlink" title="4. Bang (!) 命令"></a>4. Bang (!) 命令</h3><p><code>!!</code>：执行上一条命令<br><code>!cmd</code>：执行最近的以 blah 开头的命令，如 !ls<br><code>!$</code>：上一条命令的最后一个参数，与 Alt + . 相同<br><code>!*</code>：上一条命令的所有参数<br>!blah:p：仅打印输出，而不执行<br>!$:p：打印输出 !$ 的内容<br>!<em>:p：打印输出 !</em> 的内容<br>^content：删除上一条命令中的 content<br>^content^foo：将上一条命令中的 content 替换为 foo<br>^content^foo^：将上一条命令中所有的 content 都替换为 foo</p>
-<h3 id="5-特殊字符的含义"><a href="#5-特殊字符的含义" class="headerlink" title="5. 特殊字符的含义"></a>5. 特殊字符的含义</h3><p><code>&amp;</code>  在运行的指令末尾添加”&amp;“符号可以让命令在后台运行<br><code>&amp;&amp;</code>  表示前面命令执行成功后,执行后面的命令. eg: <code>ls &amp;&amp; ll</code><br><code>cd -</code> 表示返回刚刚的目录<br><code>cd ~</code> 表示回用户目录; ~代表用户目录,eg:<code>~/Downloads</code><br><code>sudo！！</code> 执行上一个需要sudo权限的命令.<br><code>!$</code> 一个特殊的环境变量，代表了上一个命令的最后一个字符串</p>
-<h3 id="提示"><a href="#提示" class="headerlink" title="提示"></a>提示</h3><p>Bash 默认为 emacs 编辑模式，但有的bash使用vi的快捷键，如果你的 Bash 不在 emacs 编辑模式，可通过在<code>.bashrc</code>里面 <code>set -o emacs</code> 设置。<code>set -o vi</code>设置成vi编辑模式。</p>
+		<h2 id="1-起因"><a href="#1-起因" class="headerlink" title="1. 起因"></a>1. 起因</h2><p>一次hive查数过程中，发现hive中缺省了10天的近3000w的数据，自问自答：怎么办，当然是要补数啊！从哪里补，mongo啊（还好mongo中有一份）！</p>
+<p>mongo中数据是bson保存，而且数据列与hive不一样！</p>
+<h2 id="2-解决方案"><a href="#2-解决方案" class="headerlink" title="2. 解决方案"></a>2. 解决方案</h2><h4 id="方案1：mongoexport"><a href="#方案1：mongoexport" class="headerlink" title="方案1：mongoexport"></a>方案1：<code>mongoexport</code></h4><p>思路：由于<code>mongoexport</code>只能以逗号分割字段，所以要导到hive里面最快的方式就是，利用mysql可以导逗号的cvs文件，还可以指定列，并且约束严格可以方便的检查数据正确性。</p>
+<p>所以，第一反应是<code>mongo to cvs to mysql to hive</code>，但是很快就失败了，过程还是要记录下来的！</p>
+<p><strong>第一步</strong>：<code>mongo to cvs</code></p>
+<p>语句：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sudo ./mongoexport -hxxx --port xxx -u xxx -pxxx -d sms -c outbox1 --type=csv -f id,type,mobile, -q \</div><div class="line">&apos;&#123;optime:&#123;$gte: &quot;2017-02-19 05:40:00&quot;, $lte: &quot;2017-02-20 05:40:00&quot;&#125;&#125;&apos; -o /home/q/temp_mongo/mongo_data.cvs</div></pre></td></tr></table></figure></p>
+<p><strong>第二步</strong>：<code>cvs to mysql</code></p>
+<p>语句：<code>LOAD DATA LOCAL INFILE &#39;/home/xxx/xx00&#39; INTO TABLE xxxtable FIELDS TERMINATED BY &#39;,&#39; LINES TERMINATED BY &#39;\n&#39;;</code></p>
+<p>插曲：<code>mongo_data.cvs</code>数据太大60多G，采用<code>split</code>切分<code>split -50000 mongo_data.cvs</code>,每个文件5w行切分，第一次测试就先切1000行吧：<code>csplit /mongo_data.cvs 1000</code>先将文件切成了2份！</p>
+<h4 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h4><ol>
+<li><code>mongoexport</code>对字符串不加<code>&quot;</code>导致字段中包含逗号<code>,</code>，导致导入失败！（知道为啥不直接到hive了吧，导数过程肯定有问题啊，mysql解决问题多方便快捷）</li>
+</ol>
+<ol>
+<li><code>mongoexport</code>对于<code>\</code>不会转义，所以字符串中出现<code>\[汉字]</code>，<code>eg : \请...</code>形式的字符，mysql无法识别。</li>
+</ol>
+<p>报错： <code>[HY000][1300] Invalid utf8 character string: &#39;xxx&#39;</code> </p>
+<p><strong>最简单的方法要解决这些问题太玛法，迅速放弃，期待<code>mongoexport</code>更智能点吧，找其他快速解决的办法！</strong></p>
+<h4 id="方案2：mongo-shell"><a href="#方案2：mongo-shell" class="headerlink" title="方案2：mongo shell"></a>方案2：<code>mongo shell</code></h4><p> <code>mongoexport</code>不能解决问题，借助shell也许是最快的办法了。</p>
+<p>思路：<code>mongo shell to  cvs to hive</code></p>
+<p><strong>第一步</strong>： 新建脚本 <code>export.js</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">db.auth(&quot;xxx&quot;,&quot;xxx&quot;);</div><div class="line">conn = new Mongo();</div><div class="line">db = conn.getDB(&quot;xxxdb&quot;);</div><div class="line">var cur = db.xxxdb.find(&#123;optime:&#123;$gte: &quot;2017-02-19 05:40:00&quot;, $lte: &quot;2017-02-20 05:40:00&quot;&#125;&#125;);</div><div class="line">var obj;</div><div class="line">while(cur.hasNext())&#123;</div><div class="line">    obj = cur.next();</div><div class="line">    print(obj.id+&quot;\t&quot;+ ... +&quot;\t&quot;+obj.subaccount+&quot;\n&quot;);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>tip： 和在命令行语法差不多，可以随意指定输出格式！这样就可以直接一步到hive了</p>
+<p><strong>第二步</strong>： 使用<code>mongo</code>执行<code>cd .../mongodb/bin</code>目录下的mongo脚本，<code>./mongo --help</code>查看帮助</p>
+<p><code>sudo ./mongo xxxip:30000/xxdb -u xxx -p xxx export.js &gt; /home/q/temp_mongo/outbox</code></p>
+<p>注：<code>export.js</code>放在当前目录，所以没有路径！并且要删除outbox前两行输出: <code>sed -i &#39;1,2d&#39; outbox</code></p>
+<p><strong>第三步</strong>：导hive</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">#!/usr/bin/env bash</div><div class="line"></div><div class="line">source /etc/profile</div><div class="line">eval cd $(dirname $0)</div><div class="line">currentDir=$(pwd)</div><div class="line"></div><div class="line">line=&quot;xxx&quot;</div><div class="line">_HIVE_TABLE=xxxdb</div><div class="line">PATH_FILE=&quot;$&#123;currentDir&#125;/xxx&quot;</div><div class="line"></div><div class="line">gzip $&#123;PATH_FILE&#125;</div><div class="line">PATH_GZ=&quot;$&#123;PATH_FILE&#125;.gz&quot;</div><div class="line">echo &quot;PATH_GZ:$&#123;PATH_GZ&#125;&quot;</div><div class="line">hive -e &quot;set mapreduce.job.name = $&#123;0&#125;_xxx;USE hive_db; \</div><div class="line">alter table $&#123;_HIVE_TABLE&#125; add IF NOT EXISTS PARTITION(num=&apos;$&#123;line&#125;&apos;); \</div><div class="line">LOAD DATA LOCAL INPATH &apos;$&#123;PATH_GZ&#125;&apos; OVERWRITE INTO TABLE $&#123;_HIVE_TABLE&#125; partition(num=$&#123;line&#125;);&quot; || exit 1</div><div class="line">rm -f $&#123;PATH_FILE&#125;</div><div class="line">rm -f $&#123;PATH_GZ&#125;</div><div class="line">echo &quot;end success.&quot;</div></pre></td></tr></table></figure>
+<p>搞定，也算比较快的方式吧- -！</p>
+<h2 id="3-总结"><a href="#3-总结" class="headerlink" title="3. 总结"></a>3. 总结</h2><p>我想只有坑踩多了，才会成长吧！你将从本文获取如下知识点：</p>
+<ol>
+<li><p>使用<code>mongoexport</code>导出mongo数据。</p>
+</li>
+<li><p>使用shell脚本<strong>个性化</strong>导出mongo数据。</p>
+</li>
+<li><p>cvs导mysql，字符串中特殊字符的问题。</p>
+</li>
+<li><p>cvs导hive的脚本基本知识。</p>
+</li>
+<li><p><code>mysql，hive，mongo</code>之间数据导入导出方法。</p>
+</li>
+</ol>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -117,13 +147,13 @@
 
 <div class="article-categories">
   <span></span>
-  <a class="article-category-link" href="/categories/shell/">shell</a>
+  <a class="article-category-link" href="/categories/脚本/">脚本</a>
 </div>
 
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/shell/">shell</a>
+  <span></span> <a href="/tags/shell/">shell</a><a href="/tags/mysql/">mysql</a><a href="/tags/hive/">hive</a><a href="/tags/mongo/">mongo</a>
   </div>
 
 </div>
@@ -132,7 +162,7 @@
 
 	<div class="article-share" id="share">
 	
-	  <div data-url="huzongzhe.cn/2016/11/12/shell，bash操作快捷键/" data-title="shell,bash操作快捷键 | running river" data-tsina="null" class="share clearfix">
+	  <div data-url="huzongzhe.cn/2017/03/13/记一次蛋疼的mongo to hive导数过程/" data-title="记一次蛋疼的mongo to hive导数过程 | running river" data-tsina="null" class="share clearfix">
 	  </div>
 	
 	</div>
@@ -146,18 +176,18 @@
 <nav class="article-nav clearfix">
  
  <div class="prev" >
- <a href="/2016/11/22/mysql日志知备忘/" title="mysql日志备忘">
+ <a href="/2017/03/19/记一次HBase rowkey设计演化之路/" title="记一次HBase rowkey设计演化之路">
   <strong>上一篇：</strong><br/>
   <span>
-  mysql日志备忘</span>
+  记一次HBase rowkey设计演化之路</span>
 </a>
 </div>
 
 
 <div class="next">
-<a href="/2016/10/12/Ubuntu分区删除后恢复/"  title="Ubuntu分区删除后恢复">
+<a href="/2017/03/13/java排查常用工具(jvisualvm,jps,jmap,jstack)/"  title="java排查常用工具(jvisualvm,jps,jmap,jstack)">
  <strong>下一篇：</strong><br/> 
- <span>Ubuntu分区删除后恢复
+ <span>java排查常用工具(jvisualvm,jps,jmap,jstack)
 </span>
 </a>
 </div>
@@ -169,13 +199,6 @@
 
 </div>  
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
-
-  <div id="toc" class="toc-aside">
-  <strong class="toc-title">文章目录</strong>
- 
- <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-编辑命令"><span class="toc-number">1.</span> <span class="toc-text">1. 编辑命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-重新执行命令"><span class="toc-number">2.</span> <span class="toc-text">2. 重新执行命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-控制命令"><span class="toc-number">3.</span> <span class="toc-text">3. 控制命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-Bang-命令"><span class="toc-number">4.</span> <span class="toc-text">4. Bang (!) 命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-特殊字符的含义"><span class="toc-number">5.</span> <span class="toc-text">5. 特殊字符的含义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#提示"><span class="toc-number">6.</span> <span class="toc-text">提示</span></a></li></ol>
- 
-  </div>
 
 <div id="asidepart">
 <div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
@@ -428,8 +451,6 @@ $(document).ready(function(){
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
-      
-      $('#toc.toc-aside').css('display', 'none');
         
     }
   });
