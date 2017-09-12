@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="running river">
 <meta property="og:description" content="前言: 基于activemq-client的开发过程和实践中，肯定会遇到很多问题，很多疑问，这里记录我开发中遇到的个人觉得比较有价值的问题和疑问。这些是基于在开发封装activemq-client 5.14版本jar包过程中产生，详见github：activemq-simple-client
 1. 采用线程池消费消息，线程池频繁的创建线程先给结论，有兴趣看过程：用线程池线程消费消息没有catch住">
-<meta property="og:updated_time" content="2017-09-12T11:24:10.451Z">
+<meta property="og:updated_time" content="2017-09-12T13:03:27.295Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【ActiveMQ】开发中遇到的问题(八)">
 <meta name="twitter:description" content="前言: 基于activemq-client的开发过程和实践中，肯定会遇到很多问题，很多疑问，这里记录我开发中遇到的个人觉得比较有价值的问题和疑问。这些是基于在开发封装activemq-client 5.14版本jar包过程中产生，详见github：activemq-simple-client
@@ -127,7 +127,7 @@
 <h3 id="问题2：ActiveMQ-DLQ队列数据怎么产生"><a href="#问题2：ActiveMQ-DLQ队列数据怎么产生" class="headerlink" title="问题2：ActiveMQ.DLQ队列数据怎么产生"></a>问题2：ActiveMQ.DLQ队列数据怎么产生</h3><ol>
 <li>ActiveMQ.DLQ中保存所有不正常的消息，比如过期的消息，程序处理消息时发送异常的消息！<br>如果程序中消费消息发送异常，也即无法处理该消息，Mq会将该消息抛到ActiveMQ.DLQ队列中，该队列会记录每条消息的异常情况。<br>Tip：异常时将异常消息发送到<code>ActiveMQ.DLQ</code>是一个耗时的过程！</li>
 </ol>
-<p>全篇完～</p>
+<p>OK，全篇完，作者原创，欢迎转载 ^ _ ^</p>
 <p>.</p>
 <hr>
 <p>博客暂不支持评论，如有任何疑问，建议，观点，Email me：702143700@qq.com ,非常感谢！～</p>
@@ -262,6 +262,10 @@
 			
 		
 			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
 			
 		
@@ -270,15 +274,15 @@
 			
 		
 			
-				<li><a href="/tags/定时任务/" title="定时任务">定时任务<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/JVM参数/" title="JVM参数">JVM参数<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
@@ -286,7 +290,7 @@
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
 			
 		
 			
@@ -302,11 +306,7 @@
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+				<li><a href="/tags/定时任务/" title="定时任务">定时任务<sup>1</sup></a></li>
 			
 		
 		</ul>

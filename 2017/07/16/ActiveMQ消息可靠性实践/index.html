@@ -11,22 +11,16 @@
     
 
     
-    <meta name="description" content="前言: 占位…
-
-博客暂不支持评论，如有任何疑问，建议，观点，Email me：702143700@qq.com ,非常感谢！～">
+    <meta name="description" content="前言: 消息可靠性是任何一个MQ的最基本，最重要的功能，和必须要保证的方面。如果不能保证消息的可靠性，那么这个MQ可以说是不可用的！本文首先简单介绍ActiveMQ保证消息可靠性的机制，然后，从开发业务场景出发，即在大量消息模式下多线程消费消息的情况下，讲述MQ将消息递给我后，我如何保证消息的可靠性！本文所叙述的思路的代码可以在我的github中找到：activemq-simple-client">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【ActiveMQ】消息可靠性实践(六)">
 <meta property="og:url" content="huzongzhe.cn/2017/07/16/ActiveMQ消息可靠性实践/index.html">
 <meta property="og:site_name" content="running river">
-<meta property="og:description" content="前言: 占位…
-
-博客暂不支持评论，如有任何疑问，建议，观点，Email me：702143700@qq.com ,非常感谢！～">
-<meta property="og:updated_time" content="2017-09-12T11:24:10.451Z">
+<meta property="og:description" content="前言: 消息可靠性是任何一个MQ的最基本，最重要的功能，和必须要保证的方面。如果不能保证消息的可靠性，那么这个MQ可以说是不可用的！本文首先简单介绍ActiveMQ保证消息可靠性的机制，然后，从开发业务场景出发，即在大量消息模式下多线程消费消息的情况下，讲述MQ将消息递给我后，我如何保证消息的可靠性！本文所叙述的思路的代码可以在我的github中找到：activemq-simple-client">
+<meta property="og:updated_time" content="2017-09-12T13:03:32.395Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【ActiveMQ】消息可靠性实践(六)">
-<meta name="twitter:description" content="前言: 占位…
-
-博客暂不支持评论，如有任何疑问，建议，观点，Email me：702143700@qq.com ,非常感谢！～">
+<meta name="twitter:description" content="前言: 消息可靠性是任何一个MQ的最基本，最重要的功能，和必须要保证的方面。如果不能保证消息的可靠性，那么这个MQ可以说是不可用的！本文首先简单介绍ActiveMQ保证消息可靠性的机制，然后，从开发业务场景出发，即在大量消息模式下多线程消费消息的情况下，讲述MQ将消息递给我后，我如何保证消息的可靠性！本文所叙述的思路的代码可以在我的github中找到：activemq-simple-client">
 
     
     <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
@@ -99,14 +93,48 @@
 </header>
 	<div class="article-content">
 		
-		<div id="toc" class="toc-article">
-			<strong class="toc-title">文章目录</strong>
-		
-			
-		
-		</div>
-		
-		<p><strong>前言:</strong> 占位…</p>
+		<p><strong>前言:</strong> 消息可靠性是任何一个MQ的最基本，最重要的功能，和必须要保证的方面。如果不能保证消息的可靠性，那么这个MQ可以说是不可用的！<br>本文首先简单介绍ActiveMQ保证消息可靠性的机制，然后，从开发业务场景出发，即在大量消息模式下多线程消费消息的情况下，讲述MQ将消息递给我后，我如何保证消息的可靠性！<br>本文所叙述的思路的代码可以在我的github中找到：<a href="https://github.com/runingriver/activemq-simple-client" target="_blank" rel="external">activemq-simple-client</a></p>
+<h2 id="一，-Broker"><a href="#一，-Broker" class="headerlink" title="一， Broker"></a>一， Broker</h2><ol>
+<li><p>HA架构<br>ActiveMQ提供Master-Slaver模式的主从架构高可用模式，简单Master-Slaver只能保证消息的可恢复，Master-Slaver-Slaver模式能保证系统的高可用，其中一台宕掉，仍能正常提供服务。</p>
+</li>
+<li><p>持久化<br>Broker支持基于Kahadb和LevelDB的消息持久化，另一方面支持消息统一的数据库和共享存储模式，消息的持久化是消息可靠性的最重要环节，如果系统重启 ，宕机都能保证消息可恢复。</p>
+</li>
+<li><p>ACK<br>网络环节上，ActiveMQ采用ACK保证消息正确到达，主要提供以下三种模式的ACK：</p>
+<ul>
+<li><code>AUTO_ACKNOWLEDGE</code>：Producer每发一条Broker持久化到磁盘成功都会回复一条成功消息；Consumer每消费一条都会回复Broker一条的ACK消息，如果消费异常也会发一条携带异常的消息给Broker，Broker会将该消息放入DLQ队列。自动确认并不一定是每成功一次就往Broker发送一条ACK消息，当开启optimizeACK后，会在某个时间点批量发ACK确认消息！</li>
+<li><code>CLIENT_ACKNOWLEDGE</code>：Producer每发一条消息，要等到Consumer成功消费，并发送ACK到Broker，Broker才会返回一条ACK给Producer。<code>message.acknowledge()</code>方法可以批量确认一批消息，也可以消费一条确认一条。</li>
+<li><code>DUPS_OK_ACKNOWLEDGE</code>：消息批量确认，Broker不每次成功持久化一条消息都发一条ACK给Producer，Producer也不用等待上一条ACK回来才再发下一条消息，他们之间采用批量ACK的方式！Consumer则由于Prefetch的存在，Broker无需等待Consumer的每一个确认ACK，而是直接填充Prefetch缓冲区，但Consumer消费消息回复ACK是采用批量回复的方式。<br>Tip：还有<code>SESSION_TRANSACTED</code>事务类型消息确认和<code>INDIVIDUAL_ACKNOWLEDGE</code>单条消息确认机制，这里不详述了。(<a href="http://shift-alt-ctrl.iteye.com/category/304508)讲的比较清楚！" target="_blank" rel="external">http://shift-alt-ctrl.iteye.com/category/304508)讲的比较清楚！</a></li>
+</ul>
+</li>
+<li><p>Networke Monitor<br>网络环节上，ActiveMQ为保证链路的通畅，会创建<code>readCheck</code>和<code>writeCheck</code>定时监测线程，实时的监测链路的可用性！</p>
+</li>
+<li><p>Failover<br>网络环节上，我们可以配置failover模式（单机也可以配置），ActiveMQ为保证链路故障后的可自动恢复，会开启<code>ActiveMQ Task-x</code>的线程池，来连接和重连，保证连接断开后能再次连上。</p>
+</li>
+</ol>
+<p><strong>最后，</strong>上面列出了我运维开发中理解较深刻的五类消息可靠性的策略，当然，ActiveMQ在保证消息可靠性上远不止这些，保证消息的可靠性是一个MQ最基本也是最重要的部分，而且整个中间件的设计都是在围绕可靠性基础上的。</p>
+<h2 id="二，-Client"><a href="#二，-Client" class="headerlink" title="二， Client"></a>二， Client</h2><p>核心部分，上面的是ActiveMQ提供的可靠性，在实际开发中，保证消息的可靠性，我们也有许多要做的，先问几个问题：</p>
+<ol>
+<li>系统重启或网络故障，consumer端收到的broker消息如何保证消息不丢失？</li>
+<li>系统重启或网络故障，producer端收到业务逻辑消息如何保证消息不丢失？</li>
+<li>原生提供的消费策略是线程池单线程消费模式，当采用线程池多线程消费消息时，太多的消息会导致Reject策略，consumer端如何保证消息不丢失？</li>
+<li>当Broker短暂不可用，原生client策略是阻塞或异常抛弃，阻塞是调用线程的阻塞，这就会导致很多问题，那么如何保证期间producer发送的消息不会丢失？</li>
+</ol>
+<p>带着以上几个问题，我这里给出我解决策略：</p>
+<h3 id="1-Consumer"><a href="#1-Consumer" class="headerlink" title="1. Consumer"></a>1. Consumer</h3><p><code>activemq-client.jar</code>（后面用client替代）提供的消费策略是，开启一个线程池，每次拿一个线程去消费Broker push过来的消息，如果异常，则抛给Broker保存到DLQ队列中。<br>这种策略当系统重启或网络故障，未收到ACK的消息Broker会再次发送给其他的消费者。<br>当需要消费大量消息时，client策略肯定不行，理所当然使用多线程来解决，如果使用<code>SynchronousQueue</code>或指定长度的<code>LinkedBlockingQueue</code>太多消息过来会导致Reject，如果<code>LinkedBlockingQueue</code>设置太长，很容器导致OOM（亲身体会），不啰嗦，给出我的策略。</p>
+<ol>
+<li>设置线程池如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">service = new ThreadPoolExecutor(nThread, nThread, 0L, TimeUnit.SECONDS,</div><div class="line">                new LinkedBlockingQueue&lt;Runnable&gt;(queueSize),</div><div class="line">                new ThreadFactory() &#123;</div><div class="line">                    @Override</div><div class="line">                    public Thread newThread(Runnable r) &#123;</div><div class="line">                        logger.info(&quot;create thread,current thread:&#123;&#125;,poolNumber:&#123;&#125;&quot;, Thread.currentThread().getName(), poolNumber.get());</div><div class="line">                        return new Thread(r, &quot;MQConsumer-Thread-&quot; + poolNumber.incrementAndGet());</div><div class="line">                    &#125;</div><div class="line">                &#125;, new ThreadPoolExecutor.CallerRunsPolicy());</div><div class="line">registerShutdownHook();</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>线程个数和阻塞队列长度可根据情况设置，我这里是10个线程，1000的阻塞队列长度，再来消息，由<code>ActiveMQ Session</code>线程自己处理，这样有效控制了消费速度！<br>随之而来的问题，就是，保存1000条消息的阻塞队列，<code>ActiveMQ Session</code>线程将消息递给线程池就认为消费成功，当系统重启，这些消息都有可能丢失，所以这里采用钩子线程！<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">public void registerShutdownHook() &#123;</div><div class="line">        shutdownHook = new Thread(new Runnable() &#123;</div><div class="line">            @Override</div><div class="line">            public void run() &#123;</div><div class="line">                try &#123;</div><div class="line">                    shutdownSemaphore.acquire();</div><div class="line">                    if (service.isTerminating() || service.isShutdown() || service.isTerminated()) &#123;</div><div class="line">                        return;</div><div class="line">                    &#125;</div><div class="line">                    logger.info(&quot;shutdown hook,&#123;&#125; task retain in the queue&quot;, service.getQueue().size());</div><div class="line">                    closeThreadPool();</div><div class="line">                    logger.info(&quot;close pool finish,isTerminated:&#123;&#125;&quot;, service.isTerminated());</div><div class="line">                &#125; catch (InterruptedException e) &#123;</div><div class="line">                    logger.error(&quot;shutdown semaphore acquire exception.&quot;, e);</div><div class="line">                &#125; finally &#123;</div><div class="line">                    shutdownSemaphore.release();</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;, &quot;MessageProcessor-shutdown-hook-thread&quot;);</div><div class="line">        Runtime.getRuntime().addShutdownHook(shutdownHook);</div><div class="line">        shutdownSemaphore = new Semaphore(1);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">private void closeThreadPool() &#123;</div><div class="line">        if (service != null &amp;&amp; !service.isShutdown()) &#123;</div><div class="line">            service.shutdown();</div><div class="line">            try &#123;</div><div class="line">                service.awaitTermination(1, TimeUnit.HOURS);</div><div class="line">            &#125; catch (InterruptedException e) &#123;</div><div class="line">                logger.error(&quot;await pooled task execute finish error.&quot;, e);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>如果，消费消息依赖Spring的bean，那么很可能，在hook线程执行时，Spring已经销毁了，所以在spring的销毁<code>ContextClosedEvent</code>事件上调用一个close方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">public void close() &#123;</div><div class="line">        if (isUsedThreadPool) &#123;</div><div class="line">            try &#123;</div><div class="line">                shutdownSemaphore.acquire();</div><div class="line">                if (service.isTerminating() || service.isShutdown() || service.isTerminated()) &#123;</div><div class="line">                    return;</div><div class="line">                &#125;</div><div class="line">                Runtime.getRuntime().removeShutdownHook(shutdownHook);</div><div class="line">                logger.info(&quot;close MessageProcessor,&#123;&#125; task retain in the queue&quot;, service.getQueue().size());</div><div class="line">                closeThreadPool();</div><div class="line">                logger.info(&quot;close MessageProcessor finish,isTerminated:&#123;&#125;&quot;, service.isTerminated());</div><div class="line">            &#125; catch (InterruptedException e) &#123;</div><div class="line">                logger.error(&quot;shutdown semaphore acquire exception.&quot;, e);</div><div class="line">            &#125; finally &#123;</div><div class="line">                shutdownSemaphore.release();</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p><code>shutdownSemaphore</code>信号量保证，不管是hook还是close，只被调用一次，且保证了spring要等到线程池关闭后才能销毁（这里用锁也可以实现）！<br>经过实践和测试，上面保证了大量消息的及时快速消费，也保证了每次发布系统重启，消息的不丢失，具体代码可参见我的github：<a href="https://github.com/runingriver/activemq-simple-client" target="_blank" rel="external">activemq-simple-client</a><br>Tip：如果使用线程池的其他reject策略，还需需要注意<code>isTerminating()=true</code>时，新任务到来的情景。</p>
+<h3 id="2-Producer"><a href="#2-Producer" class="headerlink" title="2. Producer"></a>2. Producer</h3><p>Producer的client端，系统重启或网络故障在《【ActiveMQ】从源码解析到Client客户端开发(七)》文中有详细讲，这种情况下，client是不能保证消息不丢失的，或者说是不稳定的。<br>不啰嗦，此时已经很晚了- -，给出我的策略：<br>采用failover当连接断开时，阻塞在该条消息发送处，一直等待连接重新建立完成，设置一个缓冲区，将新来的消息缓存在其中！<br>代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line">public void sendImportantMessage(final String message) &#123;</div><div class="line">        if (message == null || message.isEmpty()) &#123;</div><div class="line">            logger.error(&quot;parameter of send message is empty.&quot;);</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        sendMessagePool.execute(new Runnable() &#123;</div><div class="line">            @Override</div><div class="line">            public void run() &#123;</div><div class="line">                try &#123;</div><div class="line">                    TextMessage textMessage = queueSession.createTextMessage(message);</div><div class="line">                    producer.send(textMessage);</div><div class="line">                &#125; catch (Exception e) &#123;</div><div class="line">                    logger.error(&quot;send message error.message:&#123;&#125;&quot;, message, e);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private static final AtomicInteger poolNumber = new AtomicInteger(0);</div><div class="line">    private static final int CACHE_MESSAGE_SIZE = 10000;</div><div class="line">    private ThreadPoolExecutor sendMessagePool;</div><div class="line"></div><div class="line">    public void initSendMessagePool() &#123;</div><div class="line">        //注意并发问题</div><div class="line">        if (sendMessagePool != null) &#123;</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line">        sendMessagePool = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.SECONDS,</div><div class="line">                new LinkedBlockingQueue&lt;Runnable&gt;(CACHE_MESSAGE_SIZE),</div><div class="line">                new ThreadFactory() &#123;</div><div class="line">                    @Override</div><div class="line">                    public Thread newThread(Runnable r) &#123;</div><div class="line">                        return new Thread(r, &quot;MQSendMessage-Thread-&quot; + poolNumber.incrementAndGet());</div><div class="line">                    &#125;</div><div class="line">                &#125;, new ThreadPoolExecutor.DiscardOldestPolicy());</div><div class="line">        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() &#123;</div><div class="line">            @Override</div><div class="line">            public void run() &#123;</div><div class="line">                closeSendMessagePool();</div><div class="line">            &#125;</div><div class="line">        &#125;, &quot;Producer-shutdown-hook-thread&quot;));</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>每条消息过来，都直接交给线程池处理，线程池中LinkedBlockingQueue默认是10000，即可缓存1w条消息，当连接断开，会阻塞在<code>producer.send(textMessage);</code><br>但是仍可以接收外面传过来的消息，当连接恢复，这些消息再被push到broker。</p>
+<p>同样，要设置一个hook，系统重启上，spring是否销毁不会影响后续发送：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">private synchronized void closeSendMessagePool() &#123;</div><div class="line">        try &#123;</div><div class="line">            if (sendMessagePool == null || sendMessagePool.isShutdown() || sendMessagePool.isTerminated()) &#123;</div><div class="line">                return;</div><div class="line">            &#125;</div><div class="line">            logger.info(&quot;Producer shutdown,queue size:&#123;&#125;&quot;, sendMessagePool.getQueue().size());</div><div class="line">            sendMessagePool.shutdown();</div><div class="line">            sendMessagePool.awaitTermination(1, TimeUnit.HOURS);</div><div class="line">            logger.info(&quot;Producer close pool finish,isTerminated:&#123;&#125;&quot;, sendMessagePool.isTerminated());</div><div class="line">        &#125; catch (Exception e) &#123;</div><div class="line">            logger.error(&quot;close producer pool exception.&quot;, e);</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>但是要保证在producer关闭前发送完这些消息，所以要下面的close：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">public void close() &#123;</div><div class="line">       if (sendMessagePool != null &amp;&amp; !sendMessagePool.isShutdown()) &#123;</div><div class="line">           closeSendMessagePool();</div><div class="line">       &#125;</div><div class="line">       try &#123;</div><div class="line">           producer.close();</div><div class="line">       &#125; catch (JMSException e) &#123;</div><div class="line">           logger.error(&quot;close producer exception&quot;, e);</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       try &#123;</div><div class="line">           queueSession.close();</div><div class="line">       &#125; catch (JMSException e) &#123;</div><div class="line">           logger.error(&quot;close queueSession exception&quot;, e);</div><div class="line">       &#125;</div><div class="line">       try &#123;</div><div class="line">           queueConnection.close();</div><div class="line">       &#125; catch (JMSException e) &#123;</div><div class="line">           logger.error(&quot;close queueConnection exception&quot;, e);</div><div class="line">       &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
+<p>当使用者在关闭应用时关闭连接，此时，hook和close，其中之一会执行剩余消息的发送逻辑，如果是hook发送，close会阻塞在 <code>closeSendMessagePool();</code>方法上，保证了连接在消费完消息后再关闭。</p>
+<p>此时，可能会有个疑问，为什么不使用client提供的<code>producerWindowSize+useAsyncSend</code>方式提供的异步发送模式呢？<br>答：当然，这种方式是可以的，但是有几个问题，这种方式并没有一个线程来负责将消息放入<code>producerWindowSize</code>的<code>buffer</code>中，如果failover url中不加timeout，会阻塞调用线程，从而阻塞主逻辑。当加timeout，同样阻塞主逻辑，等待timeout超时，主逻辑才能执行下一条。但是，我的这个逻辑加上<code>producerWindowSize+useAsyncSend</code>这个逻辑也是可以，没问题的，但是得看场景吧。</p>
+<p>OK，全篇完，作者原创，欢迎转载 ^ _ ^<br>.</p>
 <hr>
 <p>博客暂不支持评论，如有任何疑问，建议，观点，Email me：702143700@qq.com ,非常感谢！～</p>
   
@@ -168,13 +196,6 @@
 
 </div>  
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
-
-  <div id="toc" class="toc-aside">
-  <strong class="toc-title">文章目录</strong>
- 
- 
- 
-  </div>
 
 <div id="asidepart">
 <div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
@@ -255,6 +276,10 @@
 			
 		
 			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
 			
 		
@@ -263,15 +288,15 @@
 			
 		
 			
-				<li><a href="/tags/定时任务/" title="定时任务">定时任务<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/JVM参数/" title="JVM参数">JVM参数<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
@@ -279,7 +304,7 @@
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
 			
 		
 			
@@ -295,11 +320,7 @@
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+				<li><a href="/tags/定时任务/" title="定时任务">定时任务<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -441,8 +462,6 @@ $(document).ready(function(){
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
-      
-      $('#toc.toc-aside').css('display', 'none');
         
     }
   });

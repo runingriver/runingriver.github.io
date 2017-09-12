@@ -11,22 +11,22 @@
     
 
     
-    <meta name="description" content="前言: 占位…
-
-博客暂不支持评论，如有任何疑问，建议，观点，Email me：702143700@qq.com ,非常感谢！～">
+    <meta name="description" content="前言: 本篇是根据网上资料编辑整理出来的，主要在broker端配置topic和queue的分发策略，二者有很多的相似之处。个人不建议在broker端配置topic和queue的分发策略，只有在极端特殊情况下，进行配置，通常使用默认配置即可。
+一. topic 订阅/发布
+所有topic策略（policyEntry）&amp;lt;policyEntry topic=&amp;quot;&amp;gt;&amp;quot; pro">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【ActiveMQ】PolicyEntry整理(三)">
 <meta property="og:url" content="huzongzhe.cn/2017/07/07/ActiveMQ PolicyEntry整理/index.html">
 <meta property="og:site_name" content="running river">
-<meta property="og:description" content="前言: 占位…
-
-博客暂不支持评论，如有任何疑问，建议，观点，Email me：702143700@qq.com ,非常感谢！～">
-<meta property="og:updated_time" content="2017-09-12T11:24:10.451Z">
+<meta property="og:description" content="前言: 本篇是根据网上资料编辑整理出来的，主要在broker端配置topic和queue的分发策略，二者有很多的相似之处。个人不建议在broker端配置topic和queue的分发策略，只有在极端特殊情况下，进行配置，通常使用默认配置即可。
+一. topic 订阅/发布
+所有topic策略（policyEntry）&amp;lt;policyEntry topic=&amp;quot;&amp;gt;&amp;quot; pro">
+<meta property="og:updated_time" content="2017-09-12T12:38:13.251Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【ActiveMQ】PolicyEntry整理(三)">
-<meta name="twitter:description" content="前言: 占位…
-
-博客暂不支持评论，如有任何疑问，建议，观点，Email me：702143700@qq.com ,非常感谢！～">
+<meta name="twitter:description" content="前言: 本篇是根据网上资料编辑整理出来的，主要在broker端配置topic和queue的分发策略，二者有很多的相似之处。个人不建议在broker端配置topic和queue的分发策略，只有在极端特殊情况下，进行配置，通常使用默认配置即可。
+一. topic 订阅/发布
+所有topic策略（policyEntry）&amp;lt;policyEntry topic=&amp;quot;&amp;gt;&amp;quot; pro">
 
     
     <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
@@ -102,11 +102,84 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#一-topic-订阅-发布"><span class="toc-number">1.</span> <span class="toc-text">一. topic 订阅/发布</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#二-queue-生产-消费"><span class="toc-number">2.</span> <span class="toc-text">二. queue 生产/消费</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol>
 		
 		</div>
 		
-		<p><strong>前言:</strong> 占位…</p>
+		<p><strong>前言:</strong> 本篇是根据网上资料编辑整理出来的，主要在broker端配置topic和queue的分发策略，二者有很多的相似之处。<br>个人不建议在broker端配置topic和queue的分发策略，只有在极端特殊情况下，进行配置，通常使用默认配置即可。</p>
+<h2 id="一-topic-订阅-发布"><a href="#一-topic-订阅-发布" class="headerlink" title="一. topic 订阅/发布"></a>一. topic 订阅/发布</h2><ol>
+<li><p>所有topic策略（policyEntry）<br><code>&lt;policyEntry topic=&quot;&gt;&quot; producerFlowControl=&quot;true&quot; optimizedDispatch=&quot;true&quot;  memoryLimit=&quot;16mb&quot;&gt;</code><br><code>&gt;</code>是通配符，这里指所有Topic消息，<code>optimizedDispatch</code>优化策略，<code>memoryLimit</code>非持久化消息最大内存。<br>Tip：这些也可以通过Client端配置。</p>
+</li>
+<li><p>限制策略（pendingMessageLimitStrategy）</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;pendingMessageLimitStrategy&gt;</div><div class="line">&lt;!-- 如果prefetchSize为100，则保留10 * 100条消息 --&gt;</div><div class="line">&lt;prefetchRatePendingMessageLimitStrategy multiplier=&quot;10&quot;/&gt;</div><div class="line">&lt;/pendingMessageLimitStrategy&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>针对Slow Consumer，Topic，nondurable订阅者有效，当通道中有大量的消息积压时，broker可以保留的消息量。<br>为了防止Topic中有慢速消费者，导致整个通道消息积压。(对于Topic，一条消息只有所有的订阅者都消费才会被删除)<br>可选参数：<br><code>ConstantPendingMessageLimitStrategy</code>: 保留固定条数的消息，如果消息量超过limit，将使用“MessageEvictionStrategy”移除消息。<br><code>PrefetchRatePendingMessageLimitStrategy</code>: 保留prefetchSize倍数条消息。</p>
+<ol>
+<li><p>消息剔除策略（MessageEvictionStrategy）</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;messageEvictionStrategy&gt;</div><div class="line">      &lt;OldestMessageWithLowestPriorityEvictionStrategy /&gt;</div><div class="line">&lt;/messageEvictionStrategy&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>针对Slow Consumer，Topic，nondurable订阅者有效，当通道中有大量的消息积压时，PendingMessage的数量超过限制时，broker该如何剔除多余的消息。<br>当Topic接收到信息消息后，会将消息“Copy”给每个订阅者，在保存这个消息时(保存策略”PendingSubscriberMessageStoragePolicy”)，<br>将会检测pendingMessages的数量是否超过限制(由”PendingMessageLimitStrategy”来检测)，如果超过限制，将会在pendingMessages中使用MessageEvicationStrategy移除多余的消息，<br>此后将新消息保存在PendingMessages中。</p>
+<p>可选参数：<br><code>OldestMessageEvictionStrategy</code>: 移除旧消息，默认策略。<br><code>OldestMessageWithLowestPriorityEvictionStrategy</code>: 旧数据中权重较低的消息，将会被移除。<br><code>UniquePropertyMessageEvictionStrategy</code>: 移除具有指定property的旧消息。开发者可以指定property的名称，从此属性值相同的消息列表中移除较旧的（根据消息的创建时间）。</p>
+<ol>
+<li><p>慢速消费者策略</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;slowConsumerStrategy&gt;</div><div class="line">      &lt;abortSlowConsumerStrategy abortConnection=&quot;false&quot;/&gt;</div><div class="line">&lt;/slowConsumerStrategy&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>Broker将如何处理慢消费者。Broker将会启动一个后台线程用来检测所有的慢速消费者，并定期关闭关闭它们。<br>abortConnection表示是否关闭连接，但不关闭底层链接。maxTimeSinceLastAck表示最后一个ACK距离现在的时间间隔阀值。</p>
+<ol>
+<li><p>转发策略 将消息转发给消费者的方式</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;dispatchPolicy&gt;</div><div class="line">     &lt;strictOrderDispatchPolicy/&gt;</div><div class="line">&lt;/dispatchPolicy&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p><code>RoundRobinDispatchPolicy</code>: “轮询”，消息将依次发送给每个“订阅者”。“订阅者”列表默认按照订阅的先后顺序排列，<br>在转发消息时，对于匹配消息的第一个订阅者，将会被移动到“订阅者”列表的尾部，这也意味着“下一条”消息，将会较晚的转发给它。<br><code>StrictOrderDispatchPolicy</code>: 严格有序，消息依次发送给每个订阅者，按照“订阅者”订阅的时间先后。它和RoundRobin最大的区别是，没有移动“订阅者”顺序的操作。<br><code>PriorityDispatchPolicy</code>: 基于“property”权重对“订阅者”排序。它要求开发者首先需要对每个订阅者指定priority，默认每个consumer的权重都一样。<br><code>SimpleDispatchPolicy</code>: 默认值，按照当前“订阅者”列表的顺序。其中PriorityDispatchPolicy是其子类。</p>
+<ol>
+<li><p>恢复策略 MQ重启恢复数据策略</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;subscriptionRecoveryPolicy&gt;</div><div class="line">&lt;!--恢复最近30分钟内的信息--&gt;</div><div class="line">&lt;timedSubscriptionRecoveryPolicy recoverDuration=&quot;1800000&quot;/&gt;</div><div class="line">&lt;/subscriptionRecoveryPolicy&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>可选参数：<br><code>FixedSizedSubscriptionRecoveryPolicy</code>: 保存一定size的消息，broker将为此Topic开辟定额的RAM用来保存最新的消息。使用maximumSize属性指定保存的size数量<br><code>FixedCountSubscriptionRecoveryPolicy</code>: 保存一定条数的消息。 使用maximumSize属性指定保存的size数量<br><code>LastImageSubscriptionRecoveryPolicy</code>: 只保留最新的一条数据<br><code>QueryBasedSubscriptionRecoveryPolicy</code>: 符合置顶selector的消息都将被保存，具体能够“恢复”多少消息，由底层存储机制决定；比如对于非持久化消息，只要内存中还存在，则都可以恢复。<br><code>TimedSubscriptionRecoveryPolicy</code>: 保留最近一段时间的消息。使用recoverDuration属性指定保存时间 单位毫秒<br><code>NoSubscriptionRecoveryPolicy</code>: 关闭“恢复机制”。默认值。</p>
+<ol>
+<li><p>“死信”策略 DLQ策略</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;deadLetterStrategy&gt;</div><div class="line">&lt;individualDeadLetterStrategy  queuePrefix=&quot;DLQ.&quot; useQueueForQueueMessages=&quot;true&quot;/&gt;</div><div class="line"> &lt;sharedDeadLetterStrategy deadLetterQueue=&quot;DLQ-QUEUE&quot;/&gt; </div><div class="line">&lt;/deadLetterStrategy&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p><code>IndividualDeadLetterStrategy</code>: 把DeadLetter放入各自的死信通道中,queuePrefix自定义死信前缀，useQueueForQueueMessages使用队列保存死信，还有一个属性为“useQueueForTopicMessages”，此值表示是否将Topic的DeadLetter保存在Queue中，默认为true。<br><code>SharedDeadLetterStrategy</code>: 将所有的DeadLetter保存在一个共享的队列中，这是ActiveMQ broker端默认的策略。共享队列默认为“ActiveMQ.DLQ”，可以通过“deadLetterQueue”属性来设定。还有2个很重要的可选参数，“processExpired”表示是否将过期消息放入死信队列，默认为true；“processNonPersistent”表示是否将“非持久化”消息放入死信队列，默认为false。<br><code>DiscardingDeadLetterStrateg</code>y: broker将直接抛弃DeadLeatter。如果开发者不需要关心DeadLetter，可以使用此策略。<br>AcitveMQ提供了一个便捷的插件：DiscardingDLQBrokerPlugin，来抛弃DeadLetter：<br>指定队列的所有消息，全部，正则匹配：<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;discardingDLQBrokerPlugin dropOnly=&quot;MY.EXAMPLE.TOPIC.29 MY.EXAMPLE.QUEUE.87&quot; reportInterval=&quot;1000&quot; /&gt;</div><div class="line">&lt;discardingDLQBrokerPlugin dropAll=&quot;true&quot; dropTemporaryTopics=&quot;true&quot; dropTemporaryQueues=&quot;true&quot; /&gt;</div><div class="line">&lt;discardingDLQBrokerPlugin dropOnly=&quot;MY.EXAMPLE.TOPIC.[0-9]&#123;3&#125; MY.EXAMPLE.QUEUE.[0-9]&#123;3&#125;&quot;reportInterval=&quot;3000&quot; /&gt;</div></pre></td></tr></table></figure></p>
+<p>Tip： 默认所有死信消息都会放入<code>ActiveMQ.DLQ</code>队列，</p>
+<ol>
+<li><p>非持久化消息策略</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;pendingSubscriberPolicy&gt;</div><div class="line">&lt;fileCursor/&gt;</div><div class="line">&lt;/pendingSubscriberPolicy&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>支持三种策略：storeCursor, vmCursor和fileCursor。</p>
+<ol>
+<li><p>持久化消息策略</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;pendingDurableSubscriberPolicy&gt;</div><div class="line">    &lt;storeDurableSubscriberCursor/&gt;</div><div class="line">&lt;/pendingDurableSubscriberPolicy&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>支持三种策略：storeDurableSubscriberCursor, vmDurableCursor和 fileDurableSubscriberCursor</p>
+<h2 id="二-queue-生产-消费"><a href="#二-queue-生产-消费" class="headerlink" title="二. queue 生产/消费"></a>二. queue 生产/消费</h2><ol>
+<li><p>所有queue策略（policyEntry）<br><code>&lt;policyEntry queue=&quot;&gt;&quot; producerFlowControl=&quot;true&quot; optimizedDispatch=&quot;true&quot; memoryLimit=&quot;16mb&quot;&gt;</code><br><code>&lt;policyEntry queue=&quot;&gt;&quot; producerFlowControl=&quot;true&quot; memoryLimit=&quot;4mb&quot; queuePrefetch=&quot;1000&quot; useCache=&quot;true&quot;&gt;</code></p>
+</li>
+<li><p>与Topic相同的部分</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">&lt;pendingMessageLimitStrategy&gt;</div><div class="line">    &lt;prefetchRatePendingMessageLimitStrategy multiplier=&quot;10&quot;/&gt;</div><div class="line">&lt;/pendingMessageLimitStrategy&gt;</div><div class="line">&lt;messageEvictionStrategy&gt;</div><div class="line">    &lt;OldestMessageWithLowestPriorityEvictionStrategy /&gt;</div><div class="line">&lt;/messageEvictionStrategy&gt;</div><div class="line">&lt;slowConsumerStrategy&gt;</div><div class="line">    &lt;abortSlowConsumerStrategy abortConnection=&quot;false&quot;/&gt;</div><div class="line">&lt;/slowConsumerStrategy&gt;</div><div class="line">&lt;dispatchPolicy&gt;</div><div class="line">    &lt;strictOrderDispatchPolicy/&gt;</div><div class="line">&lt;/dispatchPolicy&gt;</div><div class="line">&lt;subscriptionRecoveryPolicy&gt;</div><div class="line">    &lt;timedSubscriptionRecoveryPolicy recoverDuration=&quot;1800000&quot;/&gt;</div><div class="line">&lt;/subscriptionRecoveryPolicy&gt;</div><div class="line">&lt;deadLetterStrategy&gt;</div><div class="line">    &lt;individualDeadLetterStrategy  queuePrefix=&quot;DLQ.QUEUE.&quot; useQueueForQueueMessages=&quot;true&quot;/&gt;</div><div class="line">&lt;/deadLetterStrategy&gt;</div></pre></td></tr></table></figure>
+</li>
+<li><p>持久化和非持久化消息<br>持久化和非持久化采用vmQueueCursor：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;pendingQueuePolicy&gt;</div><div class="line">&lt;vmQueueCursor/&gt;</div><div class="line">&lt;/pendingQueuePolicy&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>非持久化采用fileQueueCursor：</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;pendingQueuePolicy&gt;</div><div class="line">&lt;storeCursor&gt;</div><div class="line">&lt;nonPersistent&gt;</div><div class="line">&lt;fileQueueCursor/&gt;</div><div class="line">&lt;/nonPersistent&gt;</div><div class="line">&lt;/storeCursor&gt;</div><div class="line">&lt;/pendingQueuePolicy&gt;</div></pre></td></tr></table></figure>
+</code></pre><p>AcitveMQ提供了几个的Cursor机制，它就是用来保存Pending Messages。<br><code>vmQueueCursor</code>: 将待转发消息保存在额外的内存(JVM linkeList)的存储结构中。是“非持久化消息”的默认设置，如果Broker不支持Persistent，它是任何类型消息的默认设置。有OOM风险。<br><code>fileQueueCursor</code>: 将消息保存到临时文件中。文件存储方式有broker的tempDataStore属性决定。是“持久化消息”的默认设置。<br><code>storeCursor</code>: “综合”设置，对于非持久化消息，将采用vmQueueCursor存储，对于持久化消息采用<br><code>fileQueueCursor</code>：这是强烈推荐的策略，也是效率最好的策略。</p>
+<p>Tip：具体配置方法查看官方文档。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a href="http://activemq.apache.org/per-destination-policies.html" target="_blank" rel="external">http://activemq.apache.org/per-destination-policies.html</a></li>
+<li><a href="http://activemq.apache.org/dispatch-policies.html" target="_blank" rel="external">http://activemq.apache.org/dispatch-policies.html</a></li>
+<li><a href="https://my.oschina.net/coderedrain/blog/724943?utm_source=tuicool&amp;utm_medium=referral" target="_blank" rel="external">https://my.oschina.net/coderedrain/blog/724943?utm_source=tuicool&amp;utm_medium=referral</a></li>
+<li><a href="http://shift-alt-ctrl.iteye.com/blog/2061859" target="_blank" rel="external">http://shift-alt-ctrl.iteye.com/blog/2061859</a></li>
+</ol>
+<p>全篇完<br>.</p>
 <hr>
 <p>博客暂不支持评论，如有任何疑问，建议，观点，Email me：702143700@qq.com ,非常感谢！～</p>
   
@@ -172,7 +245,7 @@
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
  
- 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#一-topic-订阅-发布"><span class="toc-number">1.</span> <span class="toc-text">一. topic 订阅/发布</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#二-queue-生产-消费"><span class="toc-number">2.</span> <span class="toc-text">二. queue 生产/消费</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol>
  
   </div>
 
@@ -255,6 +328,10 @@
 			
 		
 			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
 			
 		
@@ -263,15 +340,15 @@
 			
 		
 			
-				<li><a href="/tags/定时任务/" title="定时任务">定时任务<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/JVM参数/" title="JVM参数">JVM参数<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
@@ -279,7 +356,7 @@
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
 			
 		
 			
@@ -295,11 +372,7 @@
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+				<li><a href="/tags/定时任务/" title="定时任务">定时任务<sup>1</sup></a></li>
 			
 		
 		</ul>
