@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>ZooKeeper——基于Curator的开发(四) | running river</title>
+    <title>【ZooKeeper】基于Curator的开发(四) | running river</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="奔跑的小河">
@@ -12,21 +12,18 @@
 
     
     <meta name="description" content="Curator开发介绍当前基于zookeeper的client开发有zookeeper提供的原生jar包，也有第三方ZKClient jar包，但是更多的是使用Curator的jar包。
-封装Curator一个使用Zookeeper的帮助类，帮助创建和销毁连接,建立CuratorFramework对象,简化业务逻辑中Zookeeper操作代码逻辑.
-123456789101112131415161">
+封装Curator通常简单使用Zookeeper的场景,直接使用Curator即可,无需进行更多的封装。但是，在较复杂的场景下，对Curator进行进一步封装显得很有必要。一方面，不同环境使用不同的zk集群，或者">
 <meta property="og:type" content="article">
-<meta property="og:title" content="ZooKeeper——基于Curator的开发(四)">
+<meta property="og:title" content="【ZooKeeper】基于Curator的开发(四)">
 <meta property="og:url" content="huzongzhe.cn/2017/06/23/Zookeeper——基于Curator的开发/index.html">
 <meta property="og:site_name" content="running river">
 <meta property="og:description" content="Curator开发介绍当前基于zookeeper的client开发有zookeeper提供的原生jar包，也有第三方ZKClient jar包，但是更多的是使用Curator的jar包。
-封装Curator一个使用Zookeeper的帮助类，帮助创建和销毁连接,建立CuratorFramework对象,简化业务逻辑中Zookeeper操作代码逻辑.
-123456789101112131415161">
-<meta property="og:updated_time" content="2017-07-28T08:49:25.001Z">
+封装Curator通常简单使用Zookeeper的场景,直接使用Curator即可,无需进行更多的封装。但是，在较复杂的场景下，对Curator进行进一步封装显得很有必要。一方面，不同环境使用不同的zk集群，或者">
+<meta property="og:updated_time" content="2017-09-12T11:21:48.591Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ZooKeeper——基于Curator的开发(四)">
+<meta name="twitter:title" content="【ZooKeeper】基于Curator的开发(四)">
 <meta name="twitter:description" content="Curator开发介绍当前基于zookeeper的client开发有zookeeper提供的原生jar包，也有第三方ZKClient jar包，但是更多的是使用Curator的jar包。
-封装Curator一个使用Zookeeper的帮助类，帮助创建和销毁连接,建立CuratorFramework对象,简化业务逻辑中Zookeeper操作代码逻辑.
-123456789101112131415161">
+封装Curator通常简单使用Zookeeper的场景,直接使用Curator即可,无需进行更多的封装。但是，在较复杂的场景下，对Curator进行进一步封装显得很有必要。一方面，不同环境使用不同的zk集群，或者">
 
     
     <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
@@ -86,7 +83,7 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2017/06/23/Zookeeper——基于Curator的开发/" title="ZooKeeper——基于Curator的开发(四)" itemprop="url">ZooKeeper——基于Curator的开发(四)</a>
+      <a href="/2017/06/23/Zookeeper——基于Curator的开发/" title="【ZooKeeper】基于Curator的开发(四)" itemprop="url">【ZooKeeper】基于Curator的开发(四)</a>
   </h1>
   <p class="article-author">By
        
@@ -102,14 +99,52 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Curator开发介绍"><span class="toc-number">1.</span> <span class="toc-text">Curator开发介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#封装Curator"><span class="toc-number">2.</span> <span class="toc-text">封装Curator</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Curator开发介绍"><span class="toc-number">1.</span> <span class="toc-text">Curator开发介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#封装Curator"><span class="toc-number">2.</span> <span class="toc-text">封装Curator</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#基本配置"><span class="toc-number">2.1.</span> <span class="toc-text">基本配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ZkHelper封装示例"><span class="toc-number">2.2.</span> <span class="toc-text">ZkHelper封装示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用示例"><span class="toc-number">3.</span> <span class="toc-text">使用示例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#示例代码"><span class="toc-number">4.</span> <span class="toc-text">示例代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考"><span class="toc-number">5.</span> <span class="toc-text">参考</span></a></li></ol>
 		
 		</div>
 		
 		<h2 id="Curator开发介绍"><a href="#Curator开发介绍" class="headerlink" title="Curator开发介绍"></a>Curator开发介绍</h2><p>当前基于zookeeper的client开发有zookeeper提供的原生jar包，也有第三方ZKClient jar包，但是更多的是使用Curator的jar包。</p>
-<h2 id="封装Curator"><a href="#封装Curator" class="headerlink" title="封装Curator"></a>封装Curator</h2><p>一个使用Zookeeper的帮助类，帮助创建和销毁连接,建立CuratorFramework对象,简化业务逻辑中Zookeeper操作代码逻辑.</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div></pre></td><td class="code"><pre><div class="line">@Component</div><div class="line">public class ZookeeperHelper &#123;</div><div class="line">    private static final Logger logger = LoggerFactory.getLogger(ZookeeperHelper.class);</div><div class="line">    private String connString;</div><div class="line">    private volatile Map&lt;String, ZKClient&gt; clientMap = Maps.newConcurrentMap();</div><div class="line"></div><div class="line">    @PostConstruct</div><div class="line">    public void init() &#123;</div><div class="line">        connString = FileProperty.getPropertyValues(&quot;zookeeper.address&quot;);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @PreDestroy</div><div class="line">    public void closeZkClient() &#123;</div><div class="line">        for (ZKClient zkClient : clientMap.values()) &#123;</div><div class="line">            try &#123;</div><div class="line">                zkClient.getZkCuratorClient().close();</div><div class="line">            &#125; catch (Exception e) &#123;</div><div class="line">                logger.error(&quot;close Curator client exception.&quot;, e);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        logger.info(&quot;zkClients closed.&quot;);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public ZKClient getDefaultZKClient() &#123;</div><div class="line">        ZKClient zkClient = getZKClient(connString);</div><div class="line">        return zkClient;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public ZKClient getZKClient(String address) &#123;</div><div class="line">        Preconditions.checkArgument(StringUtils.isNotBlank(address), &quot;address is illegal.&quot;);</div><div class="line"></div><div class="line">        if (clientMap.containsKey(address)) &#123;</div><div class="line">            return clientMap.get(address);</div><div class="line">        &#125;</div><div class="line">        synchronized (this) &#123;</div><div class="line">            if (clientMap.containsKey(address)) &#123;</div><div class="line">                return clientMap.get(address);</div><div class="line">            &#125; else &#123;</div><div class="line">                ZKClient zkClient = new ZKClient(address);</div><div class="line">                clientMap.put(address, zkClient);</div><div class="line">                return zkClient;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static class ZKClient &#123;</div><div class="line">        private String connectString;</div><div class="line">        private CuratorFramework client;</div><div class="line"></div><div class="line">        public ZKClient(String address) &#123;</div><div class="line">            this.connectString = address;</div><div class="line">            client = CuratorFrameworkFactory.newClient(address, new RetryNTimes(3, 5000));</div><div class="line">            client.start();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        public CuratorFramework getZkCuratorClient() &#123;</div><div class="line">            return client;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        public String getConnectString() &#123;</div><div class="line">            return connectString;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        public String create(String path, byte[] data) &#123;</div><div class="line">            try &#123;</div><div class="line">                String result = client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(path, data);</div><div class="line">                return result;</div><div class="line">            &#125; catch (Exception e) &#123;</div><div class="line">                logger.error(&quot;create node exception.&quot;, e);</div><div class="line">            &#125;</div><div class="line">            return &quot;&quot;;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        public String getData(String path) &#123;</div><div class="line">            byte[] bytes = new byte[0];</div><div class="line">            try &#123;</div><div class="line">                bytes = client.getData().forPath(path);</div><div class="line">            &#125; catch (Exception e) &#123;</div><div class="line">                logger.error(&quot;get zk node data exception.&quot;, e);</div><div class="line">            &#125;</div><div class="line">            return new String(bytes);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        public void setData(String path, byte[] data) &#123;</div><div class="line">            try &#123;</div><div class="line">                client.setData().forPath(path, data);</div><div class="line">            &#125; catch (Exception e) &#123;</div><div class="line">                logger.error(&quot;set zk node data exception.&quot;, e);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        public void setNodeWatcher(String path, CuratorWatcher curatorWatcher) &#123;</div><div class="line">            Preconditions.checkArgument(StringUtils.isNotBlank(path), &quot;path is null&quot;);</div><div class="line">            try &#123;</div><div class="line">                client.getData().usingWatcher(curatorWatcher).forPath(path);</div><div class="line">            &#125; catch (Exception e) &#123;</div><div class="line">                logger.error(&quot;set &#123;&#125; watcher exception.&quot;, path, e);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        public void setChildrenWatcher(String path, CuratorWatcher curatorWatcher) &#123;</div><div class="line">            try &#123;</div><div class="line">                client.getChildren().usingWatcher(curatorWatcher).forPath(path);</div><div class="line">            &#125; catch (Exception e) &#123;</div><div class="line">                logger.error(&quot;set &#123;&#125; watcher exception.&quot;, path, e);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        public void setConnWatcher(ConnectionStateListener connWatcher) &#123;</div><div class="line">            client.getConnectionStateListenable().addListener(connWatcher);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>更进一步,待续……</p>
+<h2 id="封装Curator"><a href="#封装Curator" class="headerlink" title="封装Curator"></a>封装Curator</h2><p>通常简单使用Zookeeper的场景,直接使用Curator即可,无需进行更多的封装。但是，在较复杂的场景下，对Curator进行进一步封装显得很有必要。<br>一方面，不同环境使用不同的zk集群，或者spring下使用，针对业务需要的封装以方便使用；另一方面，将业务逻辑和zookeeper的执行逻辑分开！<br>下面主要描述如何结合spring封装Curator，封装类为ZkHelper：</p>
+<h3 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h3><ol>
+<li><p>引入下面两个jar包：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">    &lt;groupId&gt;org.apache.zookeeper&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;zookeeper&lt;/artifactId&gt;</div><div class="line">    &lt;version&gt;3.4.9&lt;/version&gt;</div><div class="line">&lt;/dependency&gt;</div><div class="line"></div><div class="line">&lt;dependency&gt;</div><div class="line">    &lt;groupId&gt;org.apache.curator&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;curator-recipes&lt;/artifactId&gt;</div><div class="line">    &lt;version&gt;4.0.0&lt;/version&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure>
+</li>
+<li><p>引入配置，配合spring根据不同环境，使用不同的zookeeper的连接地址：<br>可以通过下面两种方式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">//1. 属性注入</div><div class="line">@Value(&quot;$&#123;zookeeper.address&#125;&quot;)</div><div class="line">String connectionUrl;</div><div class="line"></div><div class="line">//2. 后构造函数中初始化</div><div class="line">@PostConstruct</div><div class="line">public void init() &#123;</div><div class="line">    connectionString = FileProperty.getPropertyValues(&quot;zookeeper.address&quot;);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h3 id="ZkHelper封装示例"><a href="#ZkHelper封装示例" class="headerlink" title="ZkHelper封装示例"></a>ZkHelper封装示例</h3><p>请勿用于实际环境，为缩减篇幅，忽略了日志和异常处理等情况，删除了一些封装方法：</p>
+<hr>
+<p>代码较长，置于文尾….</p>
+<hr>
+<p>上面封装仅做参考，目的：</p>
+<ol>
+<li><strong>统一管理zk对象；</strong></li>
+<li><strong>统一开启关闭zk；</strong></li>
+<li><strong>封装PathChild和NodeCache的逻辑。</strong></li>
+<li><strong>进一步封装Curator操作zk数据树的方法。</strong><br>所有的<strong>目的</strong>就是做到对业务代码无侵入，与业务逻辑分开。 </li>
+</ol>
+<h2 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h2><p>以设置某个路径下的所有节点变化的监听为例：</p>
+<ol>
+<li>获取实例： ZkHelper.ZKClient zkClient = zkHelper.getDefaultZKClient();</li>
+<li>设置监听：zkClient.setPathChildListener(“zk_path…”, nodeListener());</li>
+<li>实现具体业务逻辑<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">private PathChildrenCacheListener nodeListener() &#123;</div><div class="line">    return new PathChildrenCacheListener() &#123;</div><div class="line">        @Override</div><div class="line">        public void childEvent(CuratorFramework client, PathChildrenCacheEvent event) throws Exception &#123;</div><div class="line">            if (event == null || event.getData() == null || event.getData().getPath() == null) &#123;</div><div class="line">                /*do something*/</div><div class="line">                return;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            switch (event.getType()) &#123;</div><div class="line">                case CHILD_ADDED: /*do something*/ break;</div><div class="line">                case CHILD_REMOVED: /*do something*/ break;</div><div class="line">                case CONNECTION_RECONNECTED: /*do something*/ break;</div><div class="line">                case CONNECTION_LOST: /*do something*/ break;</div><div class="line">                default:break;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>ok，所有操作完成，但是如果你还想动态监听：可以关闭<code>zkClient.closePathChildrenCache(“zk_listener_path...”);</code>，然后重新设置！</p>
+<p>这里，也许在设置<code>NodeCacheListener</code>时，需要区别不同的listener，可以采用下面方法进一步封装：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">public static abstract class NodeDataListener implements NodeCacheListener &#123;</div><div class="line">    private String nodePath;</div><div class="line"></div><div class="line">    public NodeDataListener(String nodePath) &#123;</div><div class="line">        this.nodePath = nodePath;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public String getNodePath() &#123;</div><div class="line">        return nodePath;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><strong>注意的点：</strong></p>
+<ol>
+<li>curator实现了重复监听，但是系统启动的时候会默认触发一下监听的事件！</li>
+<li>临时节点删除的通知的时间间隔,依赖于client和zk server配置的session timeout和connection timeout时间!</li>
+</ol>
+<h2 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div><div class="line">183</div><div class="line">184</div><div class="line">185</div><div class="line">186</div><div class="line">187</div><div class="line">188</div><div class="line">189</div><div class="line">190</div><div class="line">191</div><div class="line">192</div><div class="line">193</div><div class="line">194</div><div class="line">195</div><div class="line">196</div><div class="line">197</div><div class="line">198</div><div class="line">199</div><div class="line">200</div><div class="line">201</div><div class="line">202</div><div class="line">203</div><div class="line">204</div><div class="line">205</div><div class="line">206</div><div class="line">207</div><div class="line">208</div><div class="line">209</div><div class="line">210</div><div class="line">211</div><div class="line">212</div><div class="line">213</div><div class="line">214</div><div class="line">215</div><div class="line">216</div><div class="line">217</div><div class="line">218</div><div class="line">219</div><div class="line">220</div><div class="line">221</div><div class="line">222</div><div class="line">223</div><div class="line">224</div><div class="line">225</div><div class="line">226</div><div class="line">227</div><div class="line">228</div><div class="line">229</div><div class="line">230</div><div class="line">231</div><div class="line">232</div><div class="line">233</div><div class="line">234</div><div class="line">235</div><div class="line">236</div><div class="line">237</div><div class="line">238</div><div class="line">239</div><div class="line">240</div><div class="line">241</div><div class="line">242</div><div class="line">243</div><div class="line">244</div><div class="line">245</div><div class="line">246</div><div class="line">247</div><div class="line">248</div><div class="line">249</div><div class="line">250</div><div class="line">251</div><div class="line">252</div><div class="line">253</div><div class="line">254</div><div class="line">255</div><div class="line">256</div><div class="line">257</div><div class="line">258</div><div class="line">259</div><div class="line">260</div><div class="line">261</div><div class="line">262</div><div class="line">263</div><div class="line">264</div><div class="line">265</div><div class="line">266</div><div class="line">267</div><div class="line">268</div><div class="line">269</div></pre></td><td class="code"><pre><div class="line">@Component</div><div class="line">public class ZkHelper &#123;</div><div class="line">    //用于同时多个zk集群的使用和操作</div><div class="line">    private volatile Map&lt;String, ZKClient&gt; clientMap = Maps.newConcurrentMap();</div><div class="line"></div><div class="line">    @Value(&quot;$&#123;zookeeper.address&#125;&quot;)</div><div class="line">    String connectionUrl;</div><div class="line"></div><div class="line">    @PreDestroy</div><div class="line">    public void closeZkClient() &#123;</div><div class="line">        for (ZKClient zkClient : clientMap.values()) &#123;</div><div class="line">            try &#123;</div><div class="line">                zkClient.close();</div><div class="line">            &#125; catch (Exception e) &#123;</div><div class="line">                //...</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * 获取默认连接的zk对象</div><div class="line">     */</div><div class="line">    public ZKClient getDefaultZKClient() &#123;</div><div class="line">        ZKClient zkClient = getZKClient(connectionUrl);</div><div class="line">        return zkClient;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * 根据连接地址来实例化并使用zk</div><div class="line">     */</div><div class="line">    public ZKClient getZKClient(String address) &#123;</div><div class="line">        Preconditions.checkArgument(StringUtils.isNotBlank(address), &quot;address is illegal.&quot;);</div><div class="line"></div><div class="line">        if (clientMap.containsKey(address)) &#123;</div><div class="line">            return clientMap.get(address);</div><div class="line">        &#125;</div><div class="line">        synchronized (this) &#123;</div><div class="line">            if (clientMap.containsKey(address)) &#123;</div><div class="line">                return clientMap.get(address);</div><div class="line">            &#125; else &#123;</div><div class="line">                ZKClient zkClient = new ZKClient(address);</div><div class="line">                clientMap.put(address, zkClient);</div><div class="line">                return zkClient;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * 具体对业务逻辑的封装</div><div class="line">     */</div><div class="line">    public static class ZKClient &#123;</div><div class="line">        private String connectString;</div><div class="line">        private CuratorFramework client;</div><div class="line">        private static final int TIMEOUT = 5000;</div><div class="line"></div><div class="line">        //注册,仅用作关闭!</div><div class="line">        private Map&lt;String, NodeCache&gt; nodeCacheMap = Maps.newConcurrentMap();</div><div class="line">        private Map&lt;String, PathChildrenCache&gt; pathChildrenCacheMap = Maps.newConcurrentMap();</div><div class="line"></div><div class="line">        public ZKClient(String address) &#123;</div><div class="line">            this.connectString = address;</div><div class="line">            client = CuratorFrameworkFactory.newClient(address, TIMEOUT, TIMEOUT, new ExponentialBackoffRetry(TIMEOUT, 3));</div><div class="line">            client.start();</div><div class="line">            this.setConnWatcher(new ConnectionStateListener() &#123;</div><div class="line">                @Override</div><div class="line">                public void stateChanged(CuratorFramework client, ConnectionState newState) &#123;</div><div class="line">                    //...</div><div class="line">                &#125;</div><div class="line">            &#125;);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        public CuratorFramework getZkCuratorClient() &#123;</div><div class="line">            return client;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        public boolean createNode(String path, CreateMode mode, byte[] data) &#123;</div><div class="line">            try &#123;</div><div class="line">                ZKPaths.mkdirs(client.getZookeeperClient().getZooKeeper(), path, false);</div><div class="line">                client.create().creatingParentsIfNeeded().withMode(mode).forPath(path, data);</div><div class="line">                return true;</div><div class="line">            &#125; catch (Exception e) &#123;</div><div class="line">                //...</div><div class="line">            &#125;</div><div class="line">            return false;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        public boolean createNode(String path, CreateMode mode) &#123;</div><div class="line">            //...</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        public String getData(String path) &#123;</div><div class="line">            //...</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        public boolean setData(String path, byte[] data) &#123;</div><div class="line">            try &#123;</div><div class="line">                if (!checkNodeExisted(path)) &#123;</div><div class="line">                    ZKPaths.mkdirs(client.getZookeeperClient().getZooKeeper(), path, true);</div><div class="line">                &#125;</div><div class="line">                client.setData().forPath(path, data);</div><div class="line">            &#125; catch (Exception e) &#123;</div><div class="line">                return false;</div><div class="line">            &#125;</div><div class="line">            return true;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        /**</div><div class="line">         * 给指定路径节点设置一个监控,监控zk节点的变化,只监控一次</div><div class="line">         */</div><div class="line">        public void setNodeWatcher(String path, CuratorWatcher curatorWatcher) &#123;</div><div class="line">            Preconditions.checkArgument(checkNodeExisted(path), &quot;the node does not exist.&quot;);</div><div class="line">            try &#123;</div><div class="line">                client.getData().usingWatcher(curatorWatcher).forPath(path);</div><div class="line">            &#125; catch (Exception e) &#123;</div><div class="line">                //...</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        public boolean deleteNode(String path) &#123;</div><div class="line">            if (!checkNodeExisted(path)) &#123;</div><div class="line">                return false;</div><div class="line">            &#125;</div><div class="line">            try &#123;</div><div class="line">                client.delete().forPath(path);</div><div class="line">            &#125; catch (Exception e) &#123;</div><div class="line">                //...</div><div class="line">                return false;</div><div class="line">            &#125;</div><div class="line">            return true;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        /**</div><div class="line">         * 给指定路径节点的所有子节点设置一个监控,只监控一次</div><div class="line">         */</div><div class="line">        public void setChildrenWatcher(String path, CuratorWatcher curatorWatcher) &#123;</div><div class="line">            Preconditions.checkArgument(checkNodeExisted(path), &quot;the node does not exist.&quot;);</div><div class="line">            try &#123;</div><div class="line">                client.getChildren().usingWatcher(curatorWatcher).forPath(path);</div><div class="line">            &#125; catch (Exception e) &#123;</div><div class="line">                //...</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        public boolean checkNodeExisted(String path) &#123;</div><div class="line">            if (StringUtils.isBlank(path)) &#123;</div><div class="line">                return false;</div><div class="line">            &#125;</div><div class="line">            Stat stat = null;</div><div class="line">            try &#123;</div><div class="line">                stat = client.checkExists().forPath(path);</div><div class="line">            &#125; catch (Exception e) &#123;</div><div class="line">                //...</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            return stat == null ? false : true;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        public boolean checkAndCreatePath(String path) &#123;</div><div class="line">            if (checkNodeExisted(path)) &#123;</div><div class="line">                return true;</div><div class="line">            &#125;</div><div class="line">            try &#123;</div><div class="line">                ZKPaths.mkdirs(client.getZookeeperClient().getZooKeeper(), path, true);</div><div class="line">            &#125; catch (Exception e) &#123;</div><div class="line">                //...</div><div class="line">                return false;</div><div class="line">            &#125;</div><div class="line">            return true;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        /**</div><div class="line">         * 给该连接设置一个监控,连接每发生一次变化,都会回调,重复监听</div><div class="line">         * Curator具有连接中断重连机制!</div><div class="line">         */</div><div class="line">        public void setConnWatcher(ConnectionStateListener connWatcher) &#123;</div><div class="line">            client.getConnectionStateListenable().addListener(connWatcher);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        /**</div><div class="line">         * 监听Node节点中数据改变事件,自动重复监听</div><div class="line">         */</div><div class="line">        public boolean setNodeCacheListener(String path, NodeCacheListener listener) &#123;</div><div class="line">            if (!checkNodeExisted(path)) &#123;</div><div class="line">                return false;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            NodeCache nodeCache = new NodeCache(client, path);</div><div class="line">            nodeCacheMap.put(path, nodeCache);</div><div class="line">            try &#123;</div><div class="line">                nodeCache.start();</div><div class="line">                nodeCache.getListenable().addListener(listener);</div><div class="line">            &#125; catch (Exception e) &#123;</div><div class="line">                return false;</div><div class="line">            &#125;</div><div class="line">            return true;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        /**</div><div class="line">         * 关闭指定path的NodeCache</div><div class="line">         */</div><div class="line">        public void closeNodeCache(String path) &#123;</div><div class="line">            if (nodeCacheMap.containsKey(path)) &#123;</div><div class="line">                try &#123;</div><div class="line">                    nodeCacheMap.get(path).close();</div><div class="line">                &#125; catch (IOException e) &#123;</div><div class="line">                    //...</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        public void closePathChildrenCache(String path) &#123;</div><div class="line">            if (pathChildrenCacheMap.containsKey(path)) &#123;</div><div class="line">                PathChildrenCache childrenCache = pathChildrenCacheMap.get(path);</div><div class="line">                closePathChildrenCache(childrenCache);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        private void closePathChildrenCache(PathChildrenCache childrenCache) &#123;</div><div class="line">            try &#123;</div><div class="line">                childrenCache.close();</div><div class="line">                //清空缓存值</div><div class="line">                childrenCache.clear();</div><div class="line">                //清除map中的listener对象</div><div class="line">                childrenCache.getListenable().clear();</div><div class="line">            &#125; catch (IOException e) &#123;</div><div class="line">                //...</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        /**</div><div class="line">         * 关闭ZKClient对象</div><div class="line">         */</div><div class="line">        public void close() &#123;</div><div class="line">            for (NodeCache nodeCache : nodeCacheMap.values()) &#123;</div><div class="line">                try &#123;</div><div class="line">                    nodeCache.close();</div><div class="line">                &#125; catch (IOException e) &#123;</div><div class="line">                    //...</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            for (PathChildrenCache childrenCache : pathChildrenCacheMap.values()) &#123;</div><div class="line">                closePathChildrenCache(childrenCache);</div><div class="line">            &#125;</div><div class="line">            try &#123;</div><div class="line">                client.close();</div><div class="line">            &#125; catch (Exception e) &#123;</div><div class="line">                //...</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        public boolean setPathChildListener(String path, PathChildrenCacheListener listener) &#123;</div><div class="line">            if (!checkNodeExisted(path)) &#123;</div><div class="line">                //...</div><div class="line">                return false;</div><div class="line">            &#125;</div><div class="line">            PathChildrenCache childrenCache = new PathChildrenCache(this.getZkCuratorClient(), path, false);</div><div class="line">            pathChildrenCacheMap.put(path, childrenCache);</div><div class="line">            try &#123;</div><div class="line">                childrenCache.start();</div><div class="line">                childrenCache.getListenable().addListener(listener);</div><div class="line">            &#125; catch (Exception e) &#123;</div><div class="line">                //...</div><div class="line">                return false;</div><div class="line">            &#125;</div><div class="line">            return true;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a href="https://zookeeper.apache.org/doc/trunk/zookeeperAdmin.html" target="_blank" rel="external">https://zookeeper.apache.org/doc/trunk/zookeeperAdmin.html</a></li>
+<li><a href="http://www.cnblogs.com/LiZhiW/tag/ZooKeeper/" target="_blank" rel="external">http://www.cnblogs.com/LiZhiW/tag/ZooKeeper/</a></li>
+</ol>
+<hr>
+<p>博客暂不支持评论，如有任何疑问，建议，观点，Email me：702143700@qq.com ,非常感谢！～</p>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -132,7 +167,7 @@
 
 	<div class="article-share" id="share">
 	
-	  <div data-url="huzongzhe.cn/2017/06/23/Zookeeper——基于Curator的开发/" data-title="ZooKeeper——基于Curator的开发(四) | running river" data-tsina="null" class="share clearfix">
+	  <div data-url="huzongzhe.cn/2017/06/23/Zookeeper——基于Curator的开发/" data-title="【ZooKeeper】基于Curator的开发(四) | running river" data-tsina="null" class="share clearfix">
 	  </div>
 	
 	</div>
@@ -145,11 +180,19 @@
 	
 <nav class="article-nav clearfix">
  
+ <div class="prev" >
+ <a href="/2017/07/05/ActiveMQ知识整理/" title="【ActiveMQ】知识整理(一)">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【ActiveMQ】知识整理(一)</span>
+</a>
+</div>
+
 
 <div class="next">
-<a href="/2017/06/23/ZooKeeper——集群配置/"  title="ZooKeeper——集群配置（三）">
+<a href="/2017/06/23/ZooKeeper——集群配置/"  title="【ZooKeeper】集群配置（三）">
  <strong>下一篇：</strong><br/> 
- <span>ZooKeeper——集群配置（三）
+ <span>【ZooKeeper】集群配置（三）
 </span>
 </a>
 </div>
@@ -165,7 +208,7 @@
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
  
- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Curator开发介绍"><span class="toc-number">1.</span> <span class="toc-text">Curator开发介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#封装Curator"><span class="toc-number">2.</span> <span class="toc-text">封装Curator</span></a></li></ol>
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Curator开发介绍"><span class="toc-number">1.</span> <span class="toc-text">Curator开发介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#封装Curator"><span class="toc-number">2.</span> <span class="toc-text">封装Curator</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#基本配置"><span class="toc-number">2.1.</span> <span class="toc-text">基本配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ZkHelper封装示例"><span class="toc-number">2.2.</span> <span class="toc-text">ZkHelper封装示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用示例"><span class="toc-number">3.</span> <span class="toc-text">使用示例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#示例代码"><span class="toc-number">4.</span> <span class="toc-text">示例代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考"><span class="toc-number">5.</span> <span class="toc-text">参考</span></a></li></ol>
  
   </div>
 
@@ -177,6 +220,10 @@
 <div class="categorieslist">
 	<p class="asidetitle">分类</p>
 		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>8</sup></a></li>
+		  
 		
 		  
 			<li><a href="/categories/HBase/" title="HBase">HBase<sup>1</sup></a></li>
@@ -220,11 +267,15 @@
 		<ul class="clearfix">
 		
 			
-				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>8</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
 			
 		
 			
@@ -240,19 +291,11 @@
 			
 		
 			
-				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
 			
 		
 			
@@ -260,7 +303,7 @@
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
 			
 		
 			
@@ -268,11 +311,11 @@
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
@@ -287,6 +330,14 @@
 				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
 			
 		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+			
+		
 		</ul>
 </div>
 
@@ -294,6 +345,12 @@
   <div class="linkslist">
   <p class="asidetitle">友情链接</p>
     <ul>
+        
+          <li>
+            
+            	<a href="http://qsli.github.io/" target="_blank" title="李大腿">李大腿</a>
+            
+          </li>
         
           <li>
             

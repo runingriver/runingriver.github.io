@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>mysql主从复制原理整理 | running river</title>
+    <title>【Mysql】主从复制原理整理 | running river</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="奔跑的小河">
@@ -17,7 +17,7 @@
 
 二进制日志(binl">
 <meta property="og:type" content="article">
-<meta property="og:title" content="mysql主从复制原理整理">
+<meta property="og:title" content="【Mysql】主从复制原理整理">
 <meta property="og:url" content="huzongzhe.cn/2016/11/23/mysql主从复制原理整理/index.html">
 <meta property="og:site_name" content="running river">
 <meta property="og:description" content="1. 介绍当前用的比较多的mysql高可用架构一般是HA或MMM,Master-Slaver之间通过binlog实现主从数据一致性,有必要理解一下主从复制的基本原理。首先从理解数据的日志类型入手，数据库提供了以下几种日志： 错误日志、binlog日志(二进制日志)、查询日志、慢查询日志。
@@ -25,9 +25,9 @@
 错误日志记录mysql启动和停止，以及服务器运行过程中发生任何严重性错误的相关信息。
 
 二进制日志(binl">
-<meta property="og:updated_time" content="2017-07-26T11:25:20.595Z">
+<meta property="og:updated_time" content="2017-09-12T11:23:09.487Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="mysql主从复制原理整理">
+<meta name="twitter:title" content="【Mysql】主从复制原理整理">
 <meta name="twitter:description" content="1. 介绍当前用的比较多的mysql高可用架构一般是HA或MMM,Master-Slaver之间通过binlog实现主从数据一致性,有必要理解一下主从复制的基本原理。首先从理解数据的日志类型入手，数据库提供了以下几种日志： 错误日志、binlog日志(二进制日志)、查询日志、慢查询日志。
 
 错误日志记录mysql启动和停止，以及服务器运行过程中发生任何严重性错误的相关信息。
@@ -92,7 +92,7 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2016/11/23/mysql主从复制原理整理/" title="mysql主从复制原理整理" itemprop="url">mysql主从复制原理整理</a>
+      <a href="/2016/11/23/mysql主从复制原理整理/" title="【Mysql】主从复制原理整理" itemprop="url">【Mysql】主从复制原理整理</a>
   </h1>
   <p class="article-author">By
        
@@ -140,6 +140,9 @@
 <li>异步复制：主只执行自己的，从服务器的同步不理会</li>
 <li>半同步复制：主服务器只等一个从服务器复制完(或者等大部分slaver复制完),就认为同步结束，而不等其他的服务器。</li>
 </ol>
+<p>推荐博客：<code>http://www.penglixun.com/archives</code> 和 <code>http://hedengcheng.com/?cat=4</code></p>
+<hr>
+<p>博客暂不支持评论，如有任何疑问，建议，观点，Email me：702143700@qq.com ,非常感谢！～</p>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -162,7 +165,7 @@
 
 	<div class="article-share" id="share">
 	
-	  <div data-url="huzongzhe.cn/2016/11/23/mysql主从复制原理整理/" data-title="mysql主从复制原理整理 | running river" data-tsina="null" class="share clearfix">
+	  <div data-url="huzongzhe.cn/2016/11/23/mysql主从复制原理整理/" data-title="【Mysql】主从复制原理整理 | running river" data-tsina="null" class="share clearfix">
 	  </div>
 	
 	</div>
@@ -185,9 +188,9 @@
 
 
 <div class="next">
-<a href="/2016/11/22/mysql日志知备忘/"  title="mysql日志备忘">
+<a href="/2016/11/22/mysql日志知备忘/"  title="【Mysql】日志备忘">
  <strong>下一篇：</strong><br/> 
- <span>mysql日志备忘
+ <span>【Mysql】日志备忘
 </span>
 </a>
 </div>
@@ -215,6 +218,10 @@
 <div class="categorieslist">
 	<p class="asidetitle">分类</p>
 		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>8</sup></a></li>
+		  
 		
 		  
 			<li><a href="/categories/HBase/" title="HBase">HBase<sup>1</sup></a></li>
@@ -258,11 +265,15 @@
 		<ul class="clearfix">
 		
 			
-				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>8</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
 			
 		
 			
@@ -278,19 +289,11 @@
 			
 		
 			
-				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
 			
 		
 			
@@ -298,7 +301,7 @@
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
 			
 		
 			
@@ -306,11 +309,11 @@
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
@@ -325,6 +328,14 @@
 				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
 			
 		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+			
+		
 		</ul>
 </div>
 
@@ -332,6 +343,12 @@
   <div class="linkslist">
   <p class="asidetitle">友情链接</p>
     <ul>
+        
+          <li>
+            
+            	<a href="http://qsli.github.io/" target="_blank" title="李大腿">李大腿</a>
+            
+          </li>
         
           <li>
             

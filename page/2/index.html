@@ -78,6 +78,178 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
+    <a href="/2017/06/23/Zookeeper——集群搭建/" title="【ZooKeeper】集群搭建(二)" itemprop="url">
+  
+    <h1 itemprop="name">【ZooKeeper】集群搭建(二)</h1>
+    
+     
+           <p itemprop="description" >前言在实际搭建zk集群过程中遇到不少困难,简单配置可以google到,但是想深入一点,对zk的配置做更为深入自定义配置,就有点力不从心了,而且很多的配置都没有做深入的研究.记录此博客,一方面整理记录一下zk常用操作,将网上人云亦云的杂乱中整理成可用的部分,另一方面,根据zk启动脚</p>
+        
+    
+    <time datetime="2017-06-23T11:50:12.000Z" itemprop="datePublished">2017-06-23</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2017/06/23/ZooKeeper——我认识的zk/" title="【ZooKeeper】我认识的zk(一)" itemprop="url">
+  
+    <h1 itemprop="name">【ZooKeeper】我认识的zk(一)</h1>
+    
+     
+           <p itemprop="description" >一. zk使用场景
+服务发现： 对集群中节点机器的变化，做出对应的对策！如，dubbo中消费者访问某个服务可以通过zk知道哪些机器在提供服务，从而实现负载均衡策略。
+配置管理：集中管理配置文件，配置实时更新。
+分布式锁：集群中存在独占资源时，利用zk的顺序节点或节点version</p>
+        
+    
+    <time datetime="2017-06-23T11:29:12.000Z" itemprop="datePublished">2017-06-23</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2017/03/26/记一次22亿大数据分析处理踩坑经历/" title="记一次22亿大数据分析处理踩坑经历" itemprop="url">
+  
+    <h1 itemprop="name">记一次22亿大数据分析处理踩坑经历</h1>
+    
+     
+           <p itemprop="description" >前言：用最简单最少的语言，分享我的坑，理不理解需求不重要，问题都在shell代码中，看shell极度枯燥，这里采用叙述的方法,精简很多东西,不必注重细节,希望能有帮助！可以看看,shell中hive,mysql等是如何处理较大数据的- -!
+一. 起因需求，分析hive表中两年内</p>
+        
+    
+    <time datetime="2017-03-26T13:12:22.000Z" itemprop="datePublished">2017-03-26</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2017/03/19/记一次HBase rowkey设计演化之路/" title="记一次HBase rowkey设计演化之路" itemprop="url">
+  
+    <h1 itemprop="name">记一次HBase rowkey设计演化之路</h1>
+    
+     
+           <p itemprop="description" >前言：一次HBase的rowkey设计，走了些弯路，踩了些坑，故这里记录下来，供参考引以为戒吧。在介绍rowkey设计之前，必须对HBase有个最基本的了解，本文先介绍关于HBase的基础知识，再根据简化场景介绍rowkey设计的演化过程。
+一. HBase基础知识整理Hbase</p>
+        
+    
+    <time datetime="2017-03-19T14:42:12.000Z" itemprop="datePublished">2017-03-19</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2017/03/13/记一次蛋疼的mongo to hive导数过程/" title="记一次蛋疼的mongo to hive导数过程" itemprop="url">
+  
+    <h1 itemprop="name">记一次蛋疼的mongo to hive导数过程</h1>
+    
+     
+           <p itemprop="description" >1. 起因一次hive查数过程中，发现hive中缺省了10天的近3000w的数据，自问自答：怎么办，当然是要补数啊！从哪里补，mongo啊（还好mongo中有一份）！
+mongo中数据是bson保存，而且数据列与hive不一样！
+2. 解决方案方案1：mongoexport思路：</p>
+        
+    
+    <time datetime="2017-03-13T12:42:25.000Z" itemprop="datePublished">2017-03-13</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2017/03/13/java排查常用工具(jvisualvm,jps,jmap,jstack)/" title="java排查常用工具(jvisualvm,jps,jmap,jstack)" itemprop="url">
+  
+    <h1 itemprop="name">java排查常用工具(jvisualvm,jps,jmap,jstack)</h1>
+    
+     
+           <p itemprop="description" >前言：总结java开发中常用到的一些工具，这里都是实际操作命令，很多时候在服务器上操作需要注意的地方，如果有疑问建议加google来看，这里精简描述。
+1. jps 查看jvm中运行的Java进程参数说明:-q 不输出类名、Jar名和传入main方法的参数-m 输出传入main方</p>
+        
+    
+    <time datetime="2017-03-13T07:32:12.000Z" itemprop="datePublished">2017-03-13</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2017/03/10/JVM实用参数整理/" title="JVM实用参数整理" itemprop="url">
+  
+    <h1 itemprop="name">JVM实用参数整理</h1>
+    
+     
+           <p itemprop="description" >前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&amp;lt;&amp;lt;深入理解Java虚拟机&amp;gt;&amp;gt;这本书，正好配合日常所需好好地整理下。
+一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -</p>
+        
+    
+    <time datetime="2017-03-10T13:33:02.000Z" itemprop="datePublished">2017-03-10</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2017/03/04/awk——强大的文本处理命令/" title="awk——强大的文本处理命令" itemprop="url">
+  
+    <h1 itemprop="name">awk——强大的文本处理命令</h1>
+    
+     
+           <p itemprop="description" >一. 语法：基本语法awk [选项参数] &amp;#39;script&amp;#39; var=value file(s) 或  awk [选项参数] -f scriptfile var=value file(s)   执行awk脚本
+awk脚本三个部分:
+
+BEGIN{ 这里面放的是执行前</p>
+        
+    
+    <time datetime="2017-03-04T14:01:22.000Z" itemprop="datePublished">2017-03-04</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
     <a href="/2017/02/11/Linux文本操作命令/" title="Linux文本操作命令" itemprop="url">
   
     <h1 itemprop="name">Linux文本操作命令</h1>
@@ -121,137 +293,9 @@ crontab调度的任务是不会加载任何环境变量的,这就</p>
 
 
 
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2016/11/23/mysql主从复制原理整理/" title="mysql主从复制原理整理" itemprop="url">
-  
-    <h1 itemprop="name">mysql主从复制原理整理</h1>
-    
-     
-           <p itemprop="description" >1. 介绍当前用的比较多的mysql高可用架构一般是HA或MMM,Master-Slaver之间通过binlog实现主从数据一致性,有必要理解一下主从复制的基本原理。首先从理解数据的日志类型入手，数据库提供了以下几种日志： 错误日志、binlog日志(二进制日志)、查询日志、慢查</p>
-        
-    
-    <time datetime="2016-11-23T07:32:12.000Z" itemprop="datePublished">2016-11-23</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2016/11/22/mysql日志知备忘/" title="mysql日志备忘" itemprop="url">
-  
-    <h1 itemprop="name">mysql日志备忘</h1>
-    
-     
-           <p itemprop="description" >1. 介绍mysql常用日志有 错误日志，binlog日志(二进制日志)，慢查询日志，查询日志等，日志的作用参见另一篇博客mysql主从复制原理。当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。
-2. 相关命令mysql 配置</p>
-        
-    
-    <time datetime="2016-11-22T13:32:12.000Z" itemprop="datePublished">2016-11-22</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2016/11/12/shell，bash操作快捷键/" title="shell,bash操作快捷键" itemprop="url">
-  
-    <h1 itemprop="name">shell,bash操作快捷键</h1>
-    
-     
-           <p itemprop="description" >前言： 在命令行(CLI)或者bash中编辑命令的时候，了解一些基本的快捷键，和编辑技巧，会让你效率更高，节约更多的时间，看到的都是缘分 - -。下面是我的总结：
-1. 编辑命令Ctrl + xx：在命令行首和光标之间移动,比较特殊！Ctrl + a ：移到命令行首Ctrl + </p>
-        
-    
-    <time datetime="2016-11-12T14:11:11.000Z" itemprop="datePublished">2016-11-12</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2016/10/12/Ubuntu分区删除后恢复/" title="Ubuntu分区删除后恢复" itemprop="url">
-  
-    <h1 itemprop="name">Ubuntu分区删除后恢复</h1>
-    
-     
-           <p itemprop="description" >前言由于一次手误，在Windows中把Ubuntu的系统分区和swap分区删除了，导致不能进系统。开机直接error no such partition和grub rescue mode。下面讲述一下系统恢复过程！
-
-系统是Windows7和Ubuntu14.04双系统。DELL</p>
-        
-    
-    <time datetime="2016-10-12T13:11:12.000Z" itemprop="datePublished">2016-10-12</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2016/08/23/synchronized，volatile我的理解整理/" title="synchronized，volatile之我的理解整理" itemprop="url">
-  
-    <h1 itemprop="name">synchronized，volatile之我的理解整理</h1>
-    
-     
-           <p itemprop="description" >前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。
-基础介绍Java 关键字volatile 可以让变量的修改在多个线程之间可见，即cpu核心1对volatile修饰的变量进行修改会立即刷新该变量在L</p>
-        
-    
-    <time datetime="2016-08-23T09:25:12.000Z" itemprop="datePublished">2016-08-23</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2016/06/23/hexo-jacman/" title="使用hexo和jacman搭建博客简记" itemprop="url">
-  
-    <h1 itemprop="name">使用hexo和jacman搭建博客简记</h1>
-    
-     
-           <p itemprop="description" >写一篇博客
-在创建博客目录的.blog/source/_posts文件夹中创建一个md文件.
-支持markdown写博客, 不同之处在于文件开头需要添加一个描述:
-1234567891011---title: 记一次22亿大数据分析处理踩坑经历date: 2017/3/23 21</p>
-        
-    
-    <time datetime="2016-06-23T07:32:12.000Z" itemprop="datePublished">2016-06-23</time>
-  </a>
-</section>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix unexpand">
-    <a class="extend prev" rel="prev" href="/"><span></span>Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+    <a class="extend prev" rel="prev" href="/"><span></span>Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/">Next<span></span></a>
   </nav>
 
 </div>
@@ -265,6 +309,10 @@ crontab调度的任务是不会加载任何环境变量的,这就</p>
 <div class="categorieslist">
 	<p class="asidetitle">分类</p>
 		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>8</sup></a></li>
+		  
 		
 		  
 			<li><a href="/categories/HBase/" title="HBase">HBase<sup>1</sup></a></li>
@@ -308,11 +356,15 @@ crontab调度的任务是不会加载任何环境变量的,这就</p>
 		<ul class="clearfix">
 		
 			
-				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>8</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
 			
 		
 			
@@ -328,19 +380,11 @@ crontab调度的任务是不会加载任何环境变量的,这就</p>
 			
 		
 			
-				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
 			
 		
 			
@@ -348,7 +392,7 @@ crontab调度的任务是不会加载任何环境变量的,这就</p>
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
 			
 		
 			
@@ -356,11 +400,11 @@ crontab调度的任务是不会加载任何环境变量的,这就</p>
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
@@ -375,6 +419,14 @@ crontab调度的任务是不会加载任何环境变量的,这就</p>
 				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
 			
 		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+			
+		
 		</ul>
 </div>
 
@@ -382,6 +434,12 @@ crontab调度的任务是不会加载任何环境变量的,这就</p>
   <div class="linkslist">
   <p class="asidetitle">友情链接</p>
     <ul>
+        
+          <li>
+            
+            	<a href="http://qsli.github.io/" target="_blank" title="李大腿">李大腿</a>
+            
+          </li>
         
           <li>
             

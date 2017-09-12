@@ -20,7 +20,7 @@
 <meta property="og:description" content="前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&amp;lt;&amp;lt;深入理解Java虚拟机&amp;gt;&amp;gt;这本书，正好配合日常所需好好地整理下。
 一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不一样。标准参数格式如下：-XX:+&amp;lt;option&amp;gt; 开启option参数-XX:">
 <meta property="og:image" content="huzongzhe.cn/images/garbage.jpg">
-<meta property="og:updated_time" content="2017-08-24T06:41:17.803Z">
+<meta property="og:updated_time" content="2017-09-12T09:15:22.994Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="JVM实用参数整理">
 <meta name="twitter:description" content="前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&amp;lt;&amp;lt;深入理解Java虚拟机&amp;gt;&amp;gt;这本书，正好配合日常所需好好地整理下。
@@ -385,10 +385,14 @@
 <li><code>-verbose:gc</code>： verbose详细的意思,显示详细的GC信息(即类似<code>[GC [PSYoungGen: 230112K-&gt;960K(219648K)] 265174K-&gt;36086K(303616K), 0.0045880 secs]</code>的输出)</li>
 <li><code>-xx:+printGCdetails</code>：打印GC详情到输出设备 </li>
 <li><code>-XX:+PrintTenuringDistribution</code>：指定JVM 在每次新生代GC时，输出幸存区中对象的年龄分布。</li>
+<li><code>-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${PATH}/</code>: 当发生OOM时,dump下堆内存,<code>HeapDumpPath</code>指定目录时会自动生成<code>java_pid[xxx].hprof</code>的文件,这里也可以指定生成的文件名!</li>
+<li><code>-XX:ErrorFile</code>: 当jvm出现致命错误时，会生成一个错误文件 <code>hs_err_pid&lt;pid&gt;.log</code>，其中包括了导致jvm crash的重要信息，当出现crash时，该文件默认会生成到工作目录下，也可通过<code>ErrorFile</code>参数指定:<code>-XX:ErrorFile=${PATH}/hs_err_pid_%p.log</code></li>
 </ul>
 <p>注意：<br>一般系统都加上了这两个参数：<code>-verbose:gc</code>和<code>-xx:+printGCdetails</code> ，但是测试删掉<code>-verbose:gc</code>参数并没有什么改变！<br>当只有<code>-verbose:gc</code>参数，则GC样式为：<code>[GC 223188K-&gt;40186K(2260992K), 0.0315090 secs]</code><br>当只有 <code>-xx:+printGCdetails</code> 样式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[GC [PSYoungGen: 1221316K-&gt;88958K(1279488K)] 1382475K-&gt;259135K(3114496K), 0.0625040 secs] [Times: user=0.18 sys=0.03, real=0.06 secs]</div></pre></td></tr></table></figure></p>
 <p>Tip：通常配置GC日志的方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">-XX:+DisableExplicitGC -verbose:gc -XX:+PrintGCDateStamps -XX:+PrintGCDetails -Xloggc:$CATALINA_BASE/logs/gc.log</div></pre></td></tr></table></figure></p>
 <p>Tip：如果只有<code>-verbose:gc</code>参数，gc日志会输出到控制台上，如果<code>-verbose:gc</code>和<code>-Xloggc:filename</code>参数共存，以<code>-Xloggc</code>为准。</p>
+<hr>
+<p>博客暂不支持评论，如有任何疑问，建议，观点，Email me：702143700@qq.com ,非常感谢！～</p>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -466,6 +470,10 @@
 		<ul>
 		
 		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>8</sup></a></li>
+		  
+		
+		  
 			<li><a href="/categories/HBase/" title="HBase">HBase<sup>1</sup></a></li>
 		  
 		
@@ -507,11 +515,15 @@
 		<ul class="clearfix">
 		
 			
-				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>8</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
 			
 		
 			
@@ -527,19 +539,11 @@
 			
 		
 			
-				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
 			
 		
 			
@@ -547,7 +551,7 @@
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
 			
 		
 			
@@ -555,11 +559,11 @@
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
@@ -574,6 +578,14 @@
 				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
 			
 		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+			
+		
 		</ul>
 </div>
 
@@ -581,6 +593,12 @@
   <div class="linkslist">
   <p class="asidetitle">友情链接</p>
     <ul>
+        
+          <li>
+            
+            	<a href="http://qsli.github.io/" target="_blank" title="李大腿">李大腿</a>
+            
+          </li>
         
           <li>
             

@@ -22,7 +22,7 @@
 <meta property="og:image" content="huzongzhe.cn/images/hbase-processe.png">
 <meta property="og:image" content="huzongzhe.cn/images/hfile.png">
 <meta property="og:image" content="huzongzhe.cn/images/rowkey-design-result.png">
-<meta property="og:updated_time" content="2017-08-24T06:57:27.491Z">
+<meta property="og:updated_time" content="2017-09-12T09:15:22.990Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="记一次HBase rowkey设计演化之路">
 <meta name="twitter:description" content="前言：一次HBase的rowkey设计，走了些弯路，踩了些坑，故这里记录下来，供参考引以为戒吧。在介绍rowkey设计之前，必须对HBase有个最基本的了解，本文先介绍关于HBase的基础知识，再根据简化场景介绍rowkey设计的演化过程。
@@ -199,6 +199,8 @@
 </ol>
 <p>有个问题：如果具体业务中历史数据随着时间的推移使用和查询几率越来越小，会不会因为历史数据和最新数据混合在一起导致查询效率的降低？<br>答：不会！首先rowkey的设计一般会根据时间递增或递减，所以在Region中数据会按照时间排列在一起，最新的数据始终会在最前或最后，rowkey的范围查询，并不会遍历到历史数据！</p>
 <p>最后，在实际的情景中，可能由于各种问题，得有些折中。这里不是为了做抛砖引玉的作用，仅作引以为界罢了。</p>
+<hr>
+<p>博客暂不支持评论，如有任何疑问，建议，观点，Email me：702143700@qq.com ,非常感谢！～</p>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -269,6 +271,10 @@
 		<ul>
 		
 		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>8</sup></a></li>
+		  
+		
+		  
 			<li><a href="/categories/HBase/" title="HBase">HBase<sup>1</sup></a></li>
 		  
 		
@@ -310,11 +316,15 @@
 		<ul class="clearfix">
 		
 			
-				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>8</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
 			
 		
 			
@@ -330,19 +340,11 @@
 			
 		
 			
-				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
 			
 		
 			
@@ -350,7 +352,7 @@
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
 			
 		
 			
@@ -358,11 +360,11 @@
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
@@ -377,6 +379,14 @@
 				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
 			
 		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+			
+		
 		</ul>
 </div>
 
@@ -384,6 +394,12 @@
   <div class="linkslist">
   <p class="asidetitle">友情链接</p>
     <ul>
+        
+          <li>
+            
+            	<a href="http://qsli.github.io/" target="_blank" title="李大腿">李大腿</a>
+            
+          </li>
         
           <li>
             

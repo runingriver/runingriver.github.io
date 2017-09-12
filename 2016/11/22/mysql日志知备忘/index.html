@@ -4,32 +4,32 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>mysql日志备忘 | running river</title>
+    <title>【Mysql】日志备忘 | running river</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="奔跑的小河">
     
 
     
-    <meta name="description" content="1. 介绍mysql常用日志有 错误日志，binlog日志(二进制日志)，慢查询日志，查询日志等，日志的作用参见另一篇博客mysql主从复制原理。当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。
+    <meta name="description" content="1. 介绍mysql常用日志有 错误日志，binlog日志(二进制日志)，慢查询日志，查询日志等. 当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。
 2. 相关命令mysql 配置文件一般是：/etc/my.cnf （目录位置可能不同但都是my.cnf）
 2.1 系统变量查看和设置
-显示系统日志开启">
+显示系统日志开启情况和位置：show variables li">
 <meta property="og:type" content="article">
-<meta property="og:title" content="mysql日志备忘">
+<meta property="og:title" content="【Mysql】日志备忘">
 <meta property="og:url" content="huzongzhe.cn/2016/11/22/mysql日志知备忘/index.html">
 <meta property="og:site_name" content="running river">
-<meta property="og:description" content="1. 介绍mysql常用日志有 错误日志，binlog日志(二进制日志)，慢查询日志，查询日志等，日志的作用参见另一篇博客mysql主从复制原理。当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。
+<meta property="og:description" content="1. 介绍mysql常用日志有 错误日志，binlog日志(二进制日志)，慢查询日志，查询日志等. 当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。
 2. 相关命令mysql 配置文件一般是：/etc/my.cnf （目录位置可能不同但都是my.cnf）
 2.1 系统变量查看和设置
-显示系统日志开启">
-<meta property="og:updated_time" content="2017-07-26T11:25:20.595Z">
+显示系统日志开启情况和位置：show variables li">
+<meta property="og:updated_time" content="2017-09-12T11:23:09.487Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="mysql日志备忘">
-<meta name="twitter:description" content="1. 介绍mysql常用日志有 错误日志，binlog日志(二进制日志)，慢查询日志，查询日志等，日志的作用参见另一篇博客mysql主从复制原理。当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。
+<meta name="twitter:title" content="【Mysql】日志备忘">
+<meta name="twitter:description" content="1. 介绍mysql常用日志有 错误日志，binlog日志(二进制日志)，慢查询日志，查询日志等. 当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。
 2. 相关命令mysql 配置文件一般是：/etc/my.cnf （目录位置可能不同但都是my.cnf）
 2.1 系统变量查看和设置
-显示系统日志开启">
+显示系统日志开启情况和位置：show variables li">
 
     
     <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
@@ -89,7 +89,7 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2016/11/22/mysql日志知备忘/" title="mysql日志备忘" itemprop="url">mysql日志备忘</a>
+      <a href="/2016/11/22/mysql日志知备忘/" title="【Mysql】日志备忘" itemprop="url">【Mysql】日志备忘</a>
   </h1>
   <p class="article-author">By
        
@@ -109,7 +109,7 @@
 		
 		</div>
 		
-		<h2 id="1-介绍"><a href="#1-介绍" class="headerlink" title="1. 介绍"></a>1. 介绍</h2><p>mysql常用日志有<strong> 错误日志</strong>，<strong>binlog日志(二进制日志)</strong>，<strong>慢查询日志</strong>，查询日志等，日志的作用参见另一篇博客<a href="http://huzongzhe.cn/2017/06/30/mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%8E%9F%E7%90%86/">mysql主从复制原理</a>。<br>当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。</p>
+		<h2 id="1-介绍"><a href="#1-介绍" class="headerlink" title="1. 介绍"></a>1. 介绍</h2><p>mysql常用日志有<strong> 错误日志</strong>，<strong>binlog日志(二进制日志)</strong>，<strong>慢查询日志</strong>，查询日志等. 当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。</p>
 <h2 id="2-相关命令"><a href="#2-相关命令" class="headerlink" title="2. 相关命令"></a>2. 相关命令</h2><p>mysql 配置文件一般是：<code>/etc/my.cnf</code> （目录位置可能不同但都是<code>my.cnf</code>）</p>
 <h3 id="2-1-系统变量查看和设置"><a href="#2-1-系统变量查看和设置" class="headerlink" title="2.1 系统变量查看和设置"></a>2.1 系统变量查看和设置</h3><ul>
 <li>显示系统日志开启情况和位置：<code>show variables like &#39;log_%&#39;;</code> \<br><code>show global variables like &#39;%log%&#39;;</code>（显示全局所有类型日志情况）</li>
@@ -135,11 +135,14 @@
 <li><p>数据恢复<br>语法：<code>mysqlbinlog -d db_name mysql-bin.0000xx | mysql -u用户名 -p密码 数据库名</code><br>其实就是用mysqlbinlog翻译成sql语句，然后管道传给mysql 客户端执行！<br>所以，可以先<code>./mysqlbinlog /home/q/data/mysql/mysql-bin.000028 &gt; ~/a.sql</code>到出sql，再给mysql执行,注意指定数据库名！。<br>恢复期间，先要<code>flush logs;</code>另启一个日志文件，且需要找到恢复的起始点（找到备份开始点，回滚结束点（记录时间和pos都可以））。</p>
 </li>
 </ol>
-<p>binlog在主从复制中的作用和原理过程参见另一篇博客<a href="http://huzongzhe.cn/2017/06/30/mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%8E%9F%E7%90%86/">mysql主从复制原理</a>。</p>
+<p><strong>Tip:上述数据恢复适合离线恢复，对于线上mysql数据还在实时写入的情况，需要闪回，可以使用<code>binlog2sql</code>，但是此时必须是<code>row</code>模式，而且也不能恢复DDL的操作！</strong></p>
 <h2 id="4-错误日志，慢查询日志，查询日志"><a href="#4-错误日志，慢查询日志，查询日志" class="headerlink" title="4. 错误日志，慢查询日志，查询日志"></a>4. 错误日志，慢查询日志，查询日志</h2><p>默认错误日志开启，慢查询日志不开启，查询日志不开启，这几个日志都是以普通文本形式呈现，一般建议不开启，因为有性能丢失，<code>show global variables like &#39;%log%&#39;;</code>命令可以找到日志位置；<br>mysql为慢查询提供了一个命令行工具<code>mysqldumpslow</code>方便我们分析和查找。</p>
 <h3 id="4-1-其他日志文件说明"><a href="#4-1-其他日志文件说明" class="headerlink" title="4.1 其他日志文件说明"></a>4.1 其他日志文件说明</h3><p><code>ibdata1</code> ：InnoDB中保存数据的文件，用于存储InnoDB引擎下的数据库实际数据，索引等，库名的文件夹里面的那些表文件只是结构而已！可以配置将实际数据放到库名文件夹下，从而减小ibdata1文件的大小。</p>
 <p><code>ib_logfile0，ib_logfile1</code>：INNODB的REDO、UNDO日志（也称事务日志），事务执行中暂时保留一些事务信息(记录对数据文件数据修改的物理位置或叫做偏移量)，主要是在事务中起一个前滚或后滚的作用。</p>
 <p>binlog中的事务日志是已经commit执行成功的事务，只有在事务执行成功才会刷入binlog的事务日志。</p>
+<p>推荐博客：<code>http://www.penglixun.com/archives</code> 和 <code>http://hedengcheng.com/?cat=4</code></p>
+<hr>
+<p>博客暂不支持评论，如有任何疑问，建议，观点，Email me：702143700@qq.com ,非常感谢！～</p>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -162,7 +165,7 @@
 
 	<div class="article-share" id="share">
 	
-	  <div data-url="huzongzhe.cn/2016/11/22/mysql日志知备忘/" data-title="mysql日志备忘 | running river" data-tsina="null" class="share clearfix">
+	  <div data-url="huzongzhe.cn/2016/11/22/mysql日志知备忘/" data-title="【Mysql】日志备忘 | running river" data-tsina="null" class="share clearfix">
 	  </div>
 	
 	</div>
@@ -176,10 +179,10 @@
 <nav class="article-nav clearfix">
  
  <div class="prev" >
- <a href="/2016/11/23/mysql主从复制原理整理/" title="mysql主从复制原理整理">
+ <a href="/2016/11/23/mysql主从复制原理整理/" title="【Mysql】主从复制原理整理">
   <strong>上一篇：</strong><br/>
   <span>
-  mysql主从复制原理整理</span>
+  【Mysql】主从复制原理整理</span>
 </a>
 </div>
 
@@ -215,6 +218,10 @@
 <div class="categorieslist">
 	<p class="asidetitle">分类</p>
 		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>8</sup></a></li>
+		  
 		
 		  
 			<li><a href="/categories/HBase/" title="HBase">HBase<sup>1</sup></a></li>
@@ -258,11 +265,15 @@
 		<ul class="clearfix">
 		
 			
-				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>8</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
 			
 		
 			
@@ -278,19 +289,11 @@
 			
 		
 			
-				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
 			
 		
 			
@@ -298,7 +301,7 @@
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
 			
 		
 			
@@ -306,11 +309,11 @@
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
@@ -325,6 +328,14 @@
 				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
 			
 		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+			
+		
 		</ul>
 </div>
 
@@ -332,6 +343,12 @@
   <div class="linkslist">
   <p class="asidetitle">友情链接</p>
     <ul>
+        
+          <li>
+            
+            	<a href="http://qsli.github.io/" target="_blank" title="李大腿">李大腿</a>
+            
+          </li>
         
           <li>
             
