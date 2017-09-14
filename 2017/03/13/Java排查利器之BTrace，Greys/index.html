@@ -1,0 +1,662 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>Java排查利器之BTrace，Greys | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="前言： 关于btrace和greys的使用方法，网上不计其数。这里根据我的使用整理了个精简版，零复制纯手打，高度概括，适用快速入门。萝卜青菜各有所爱，greys好用太多有木有！
+一. BTrace安装
+https://github.com/btraceio/btrace/tags 下载压缩包。
+添加环境变量：sudo nano /etc/profile12export BTRACE_HOME=/u">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java排查利器之BTrace，Greys">
+<meta property="og:url" content="huzongzhe.cn/2017/03/13/Java排查利器之BTrace，Greys/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="前言： 关于btrace和greys的使用方法，网上不计其数。这里根据我的使用整理了个精简版，零复制纯手打，高度概括，适用快速入门。萝卜青菜各有所爱，greys好用太多有木有！
+一. BTrace安装
+https://github.com/btraceio/btrace/tags 下载压缩包。
+添加环境变量：sudo nano /etc/profile12export BTRACE_HOME=/u">
+<meta property="og:updated_time" content="2017-09-14T10:10:29.128Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java排查利器之BTrace，Greys">
+<meta name="twitter:description" content="前言： 关于btrace和greys的使用方法，网上不计其数。这里根据我的使用整理了个精简版，零复制纯手打，高度概括，适用快速入门。萝卜青菜各有所爱，greys好用太多有木有！
+一. BTrace安装
+https://github.com/btraceio/btrace/tags 下载压缩包。
+添加环境变量：sudo nano /etc/profile12export BTRACE_HOME=/u">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/author.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/author.png">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/03/13/Java排查利器之BTrace，Greys/" title="Java排查利器之BTrace，Greys" itemprop="url">Java排查利器之BTrace，Greys</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2017-03-13T09:32:12.000Z" itemprop="datePublished"> 发表于 2017-03-13</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#一-BTrace"><span class="toc-number">1.</span> <span class="toc-text">一. BTrace</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装"><span class="toc-number">1.1.</span> <span class="toc-text">安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#遇到的问题"><span class="toc-number">1.1.1.</span> <span class="toc-text">遇到的问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用"><span class="toc-number">1.2.</span> <span class="toc-text">使用</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#二-Greys"><span class="toc-number">2.</span> <span class="toc-text">二. Greys</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装-1"><span class="toc-number">2.1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用-1"><span class="toc-number">2.2.</span> <span class="toc-text">使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#远程调试"><span class="toc-number">2.2.1.</span> <span class="toc-text">远程调试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#命令使用"><span class="toc-number">2.3.</span> <span class="toc-text">命令使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#程序排查命令"><span class="toc-number">2.3.1.</span> <span class="toc-text">程序排查命令</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#其他命令"><span class="toc-number">2.4.</span> <span class="toc-text">其他命令</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol>
+		
+		</div>
+		
+		<p><strong>前言：</strong> 关于btrace和greys的使用方法，网上不计其数。这里根据我的使用整理了个精简版，零复制纯手打，高度概括，适用快速入门。萝卜青菜各有所爱，greys好用太多有木有！</p>
+<h1 id="一-BTrace"><a href="#一-BTrace" class="headerlink" title="一. BTrace"></a>一. BTrace</h1><h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><ol>
+<li><code>https://github.com/btraceio/btrace/tags</code> 下载压缩包。</li>
+<li>添加环境变量：<code>sudo nano /etc/profile</code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">export BTRACE_HOME=/usr/develop/btrace     </div><div class="line">export PATH=$PATH:$BTRACE_HOME/bin</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>其中，<code>BTRACE_HOME</code>是解压路径<br>使配置生效<code>source /etc/profile</code>，<code>btrace</code>命令将可以在任何地方使用。<br>Tip：这步可以省略，上面配置仅仅保证在任何位置可以使用btrace命令；也可觉得路径方式执行。<br>如：<code>sudo -u tomcat /home/q/tools/btrace/bin/btrace 13451 /home/q/tools/btrace/samples/JInfo.java</code>   </p>
+<ol>
+<li>btrace命令<br><code>btracec script.java</code> 编译脚本，查看是否报错！<br><code>sudo -u &lt;user role&gt; btrace &lt;PID&gt; &lt;script.java&gt;</code> 执行脚本。<br>Tip：jvisualvm也有BTrace的插件可以安装！</li>
+</ol>
+<p><strong>Btrace参数：</strong><br><code>-v</code> 输出详细信息，多用于，执行发生错误，查看错误的具体原因，如：<code>sudo -u root /home/q/tools/btrace/bin/btrace -v 32257 Memory.java</code>查看此此运行的详细信息！<br><code>-o &lt;file&gt;</code> 指定输出到文件，不再输出到控制台。文件路径默认是程序启动路径，所以<strong>必须要指定为绝对路径</strong>，且指定以后，所有btrace命令的输入都重定向到那里！<br><code>-d &lt;path&gt;</code>  Dump the instrumented classes to the specified path，指定Btrace脚本编译后的路径，默认编译后的class文件放在当前目录下！</p>
+<h3 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h3><ol>
+<li>使用报错：<code>Invalid path 13451 specified: 2/No such file or directory</code><br>首先 <code>which btrace</code> 查看btrace命令是否有冲突。<br>有，则需要安装如下命令执行：<code>sudo -u tomcat /home/q/tools/btrace/bin/btrace 13451 /home/q/tools/btrace/samples/JInfo.java</code></li>
+<li><code>Port 2020 unavailable.</code><br>当服务器上多个服务同时使用Btrace时，端口会发生冲突，BTrace默认使用<code>2020</code>端口。<br>所以，多个服务时，可以指定端口：<code>sudo -u root /home/q/tools/btrace/bin/btrace -p 6767 32257 JInfo.java</code></li>
+</ol>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>先看一个例子：监控一个指定方法的执行时间！<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">package com.sun.btrace.samples;</div><div class="line"></div><div class="line">import com.sun.btrace.annotations.*;</div><div class="line">import static com.sun.btrace.BTraceUtils.*;</div><div class="line"></div><div class="line">@BTrace</div><div class="line">public class Method&#123;</div><div class="line">    @TLS</div><div class="line">    static long beginTime;</div><div class="line">    @OnMethod(</div><div class="line">            clazz = &quot;com.xxx.sms.xxx.controller.outer.InterfaceController&quot;,</div><div class="line">            method = &quot;getNewTemplate&quot;</div><div class="line">    )</div><div class="line">    public static void traceGetByNameBegin() &#123;</div><div class="line">        beginTime = timeMillis();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @OnMethod(</div><div class="line">            clazz = &quot;com.xxx.xxx.web.controller.outer.InterfaceController&quot;,</div><div class="line">            method = &quot;getNewTemplate&quot;,</div><div class="line">            location = @Location(Kind.RETURN)</div><div class="line">    )</div><div class="line">    public static void traceGetByNameEnd() &#123;</div><div class="line">        println(strcat(strcat(&quot;getNewTemplate cost:&quot;, str(timeMillis() - beginTime)), &quot;ms&quot;));</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>注意点：</p>
+<ol>
+<li>类名和文件名要一致！</li>
+<li><code>package</code> 和<code>import</code>必须有！</li>
+</ol>
+<p>最后，日常问题，根据例子来改进即可，BTrace自带的sample是学习BTrace的最好的资料,可以快速的熟悉BTrace。自带的sample基本能满足大部分需求，在其基础上更改即可。</p>
+<h1 id="二-Greys"><a href="#二-Greys" class="headerlink" title="二. Greys"></a>二. Greys</h1><h2 id="安装-1"><a href="#安装-1" class="headerlink" title="安装"></a>安装</h2><p>安装非常简单</p>
+<ol>
+<li>直接安装：<code>mkdir greys;cd greys</code>，<code>curl -sLk http://ompc.oss.aliyuncs.com/greys/install.sh|bash</code> 然后运行<code>greys.sh &lt;pid&gt;</code>即可！</li>
+<li>手动下载安装：<code>http://ompc.oss.aliyuncs.com/greys/release/greys-stable-bin.zip</code> 解压然后：<code>cd greys; ./install-local.sh</code><br>如果没有权限，给目录权限即可：<code>chmod 777 -R greys</code></li>
+</ol>
+<h2 id="使用-1"><a href="#使用-1" class="headerlink" title="使用"></a>使用</h2><h3 id="远程调试"><a href="#远程调试" class="headerlink" title="远程调试"></a>远程调试</h3><p>比如你没有A机器的权限，小伙伴需要你帮忙定位A机器上程序的问题时：</p>
+<ol>
+<li>先在A机器运行<code>greys.sh 24449</code>脚本，并执行<code>jvm</code>命令，获得<code>MACHINE-NAME : 24449@xxx.xxx.xxx</code><br>其中，<code>24449</code>表示A机器上应用程序的PID，<code>xxx.xxx.xxx</code>表示A机器名</li>
+<li>本地用greys连接上A机器：<code>sudo ./greys.sh 24449@xxx.xxx.xxx:3658</code><br>其中，<code>3658</code>是greys默认的通信端口，如果在第一步中指定了特点的端口（如：<code>./greys.sh 24449@127.0.0.1:2727</code>），这里命令应该为：<code>sudo ./greys.sh 24449@xxx.xxx.xxx:2727</code><br>OK 完成 ～！</li>
+</ol>
+<h2 id="命令使用"><a href="#命令使用" class="headerlink" title="命令使用"></a>命令使用</h2><p>首先，可以通过<code>help</code>和<code>help [cmd]</code>命令来查看帮助，其中<code>[cmd]</code>表示greys支持的命令。<br>另外，终止命令运行<code>Ctrl + D</code> !</p>
+<h3 id="程序排查命令"><a href="#程序排查命令" class="headerlink" title="程序排查命令"></a>程序排查命令</h3><ol>
+<li><code>sc</code> 查看已经加载到JVM的Class信息<br>如：<code>sc -df com.xx.xx.xx.xxxxService</code> 不仅输出类的信息，还可以输出成员变量的值。</li>
+<li><code>sm</code> 查方法信息：<code>sm -d com.xx.xxx.service.AClass</code> 查看AClass类下所有方法的定义。</li>
+<li><code>monitor -c 5 *xxxService insert</code></li>
+<li><code>trace</code> 查看<code>insert</code>方法的调用栈，并输出执行时间信息。<br>eg：<code>trace *xxxxService insert</code><br>[2,1ms]的含义，<code>2</code>所代表的含义是：当前节点的整体耗时；<code>1</code>的含义是：当前节点在当前步骤的耗时；二者逗号分割，单位<code>ms</code>。</li>
+<li><code>ptrace</code> 是<code>trace</code>的增强版，命令比较强大，可以查看<code>help ptrace</code>或官方文档<br>eg：<code>ptrace -t com.xxx.xx.service.xxxService insert --path=com.xx.xx.service*</code> </li>
+<li><p><code>watch</code> 观察方法的<code>入参</code>，<code>返回值</code>，<code>异常</code>。</p>
+<ul>
+<li><code>watch -b com.xxx.xxx.service.ConsumerService insertMapToHBase params[0]+&quot;--&quot;+params[1]</code> 输出入参<code>params[0]+&quot;--&quot;+params[1]</code> 参数格式！</li>
+<li><code>watch -s com.xxx.xxx.service.ConsumerService insertMapToHBase returnObj</code> 输出方法返回值！</li>
+</ul>
+</li>
+<li><p><code>tt</code> 同<code>watch</code>，但是<code>tt</code>能记录一段时间方法调用的现场，并支持检索调用，方便定位问题。</p>
+<ul>
+<li><code>tt -i 1766</code> 显示INDEX为1766的方法调用的现场！包含调用栈，方法入参，返回值，异常等信息。</li>
+<li><code>tt -i 1766 -p</code>重新执行一次1766的这次调用，其中，<code>1766</code>是<code>tt -l</code> 或<code>tt -s method.name==&quot;inset&quot;</code>检索获得的INDEX编号！</li>
+<li>重载方法，通过如下方法指定特点重载方法：<code>tt -t *Test print &#39;params[1].class == Integer.class&#39;</code>，通过指定参数的类型，来判定。</li>
+</ul>
+</li>
+<li><p><code>stack</code> 查看方法的调用栈，确定是谁调用了某个方法！</p>
+</li>
+</ol>
+<p>上面，简略说明各个命令使用，最好的方法还是官方文档和<code>help</code>命令～</p>
+<h2 id="其他命令"><a href="#其他命令" class="headerlink" title="其他命令"></a>其他命令</h2><ol>
+<li><code>js</code>，现有命令可能无法满足需求，需要通过自己编写脚本来实现，<code>js</code>命令支持js脚本。</li>
+<li><code>session</code> 查看当前回话的信息，主要包含：源端口，目的端口，监控的应用PID等。</li>
+<li><code>quit</code> 仅退出greys命令行，关闭session！</li>
+<li><code>shutdown</code> 关闭socket，释放端口，重置所有被greys增强的类（即：<code>reset</code>）</li>
+</ol>
+<p>最后，greys相对与btrace，真的好用太多！</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li><a href="https://github.com/btraceio/btrace" target="_blank" rel="external">https://github.com/btraceio/btrace</a></li>
+<li><a href="https://github.com/oldmanpushcart/greys-anatomy" target="_blank" rel="external">https://github.com/oldmanpushcart/greys-anatomy</a></li>
+</ol>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/java/">java</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/开发工具/">开发工具</a><a href="/tags/BTrace/">BTrace</a><a href="/tags/Greys/">Greys</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="huzongzhe.cn/2017/03/13/Java排查利器之BTrace，Greys/" data-title="Java排查利器之BTrace，Greys | running river" data-tsina="null" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/03/13/记一次蛋疼的mongo to hive导数过程/" title="记一次蛋疼的mongo to hive导数过程">
+  <strong>上一篇：</strong><br/>
+  <span>
+  记一次蛋疼的mongo to hive导数过程</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/03/13/java排查常用工具(jvisualvm,jps,jmap,jstack)/"  title="java排查常用工具(jvisualvm,jps,jmap,jstack)">
+ <strong>下一篇：</strong><br/> 
+ <span>java排查常用工具(jvisualvm,jps,jmap,jstack)
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#一-BTrace"><span class="toc-number">1.</span> <span class="toc-text">一. BTrace</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装"><span class="toc-number">1.1.</span> <span class="toc-text">安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#遇到的问题"><span class="toc-number">1.1.1.</span> <span class="toc-text">遇到的问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用"><span class="toc-number">1.2.</span> <span class="toc-text">使用</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#二-Greys"><span class="toc-number">2.</span> <span class="toc-text">二. Greys</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装-1"><span class="toc-number">2.1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用-1"><span class="toc-number">2.2.</span> <span class="toc-text">使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#远程调试"><span class="toc-number">2.2.1.</span> <span class="toc-text">远程调试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#命令使用"><span class="toc-number">2.3.</span> <span class="toc-text">命令使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#程序排查命令"><span class="toc-number">2.3.1.</span> <span class="toc-text">程序排查命令</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#其他命令"><span class="toc-number">2.4.</span> <span class="toc-text">其他命令</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/脚本/" title="脚本">脚本<sup>2</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>8</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zk集群/" title="zk集群">zk集群<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/BTrace/" title="BTrace">BTrace<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greys/" title="Greys">Greys<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM参数/" title="JVM参数">JVM参数<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/定时任务/" title="定时任务">定时任务<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rowkey设计/" title="rowkey设计">rowkey设计<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://qsli.github.io/" target="_blank" title="李大腿">李大腿</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2EX">V2EX</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com/" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/" target="_blank" title="github">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.cnblogs.com/huzongzhe/" target="_blank" title="博客园 Blog">博客园 Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="CSDN Blog">CSDN Blog</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code. <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2017 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

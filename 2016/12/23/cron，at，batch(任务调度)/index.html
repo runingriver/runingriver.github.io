@@ -25,7 +25,7 @@ corntab周期执行任务,anacron调度每日、每周或每月执行的作业,a
 batch 命令被用来在系统平均负载达到 0.8% 以下时执行一次性的任务，通俗的所就是系统空闲时执行任务。
 crontab调度的任务是不会加载任何环境变量的,这就是为什么shell中可以执行,cron中不行的原因.
 crond守护进程每分钟唤醒一次，并检查 crontab 判断需要">
-<meta property="og:updated_time" content="2017-09-12T09:15:22.994Z">
+<meta property="og:updated_time" content="2017-09-12T13:09:27.215Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="cron，at，batch(任务调度)">
 <meta name="twitter:description" content="一，基础知识
@@ -154,7 +154,7 @@ crond守护进程每分钟唤醒一次，并检查 crontab 判断需要">
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">!/bin/sh</div><div class="line">source /etc/profile #只要是cron任务,都加上吧</div><div class="line">export RUN_CONF=/home/d139/conf/platform/cbp/cbp_jboss.conf</div><div class="line">/usr/local/jboss-4.0.5/bin/run.sh -c mev &amp;</div></pre></td></tr></table></figure>
 <p>或 <code>0 * * * * . /etc/profile;/bin/sh /var/bin/restart_audit.sh</code></p>
 <hr>
-<p>博客暂不支持评论，如有任何疑问，建议，观点，Email me：702143700@qq.com ,非常感谢！～</p>
+<p>博客暂不支持评论，如有任何疑问，建议，观点，欢迎Email me：702143700@qq.com ,非常感谢！～</p>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -248,7 +248,7 @@ crond守护进程每分钟唤醒一次，并检查 crontab 判断需要">
 		  
 		
 		  
-			<li><a href="/categories/java/" title="java">java<sup>3</sup></a></li>
+			<li><a href="/categories/java/" title="java">java<sup>4</sup></a></li>
 		  
 		
 		  
@@ -281,11 +281,11 @@ crond守护进程每分钟唤醒一次，并检查 crontab 判断需要">
 			
 		
 			
-				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
 			
 		
 			
@@ -297,19 +297,23 @@ crond守护进程每分钟唤醒一次，并检查 crontab 判断需要">
 			
 		
 			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
+				<li><a href="/tags/BTrace/" title="BTrace">BTrace<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
+				<li><a href="/tags/Greys/" title="Greys">Greys<sup>1</sup></a></li>
 			
 		
 			
@@ -317,11 +321,15 @@ crond守护进程每分钟唤醒一次，并检查 crontab 判断需要">
 			
 		
 			
-				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/定时任务/" title="定时任务">定时任务<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
 			
 		
 			
@@ -329,7 +337,11 @@ crond守护进程每分钟唤醒一次，并检查 crontab 判断需要">
 			
 		
 			
-				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 			
@@ -341,11 +353,7 @@ crond守护进程每分钟唤醒一次，并检查 crontab 判断需要">
 			
 		
 			
-				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/定时任务/" title="定时任务">定时任务<sup>1</sup></a></li>
+				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
 			
 		
 		</ul>

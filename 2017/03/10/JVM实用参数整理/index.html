@@ -20,7 +20,7 @@
 <meta property="og:description" content="前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&amp;lt;&amp;lt;深入理解Java虚拟机&amp;gt;&amp;gt;这本书，正好配合日常所需好好地整理下。
 一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不一样。标准参数格式如下：-XX:+&amp;lt;option&amp;gt; 开启option参数-XX:">
 <meta property="og:image" content="huzongzhe.cn/images/garbage.jpg">
-<meta property="og:updated_time" content="2017-09-12T09:15:22.994Z">
+<meta property="og:updated_time" content="2017-09-14T07:12:45.154Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="JVM实用参数整理">
 <meta name="twitter:description" content="前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&amp;lt;&amp;lt;深入理解Java虚拟机&amp;gt;&amp;gt;这本书，正好配合日常所需好好地整理下。
@@ -106,7 +106,7 @@
 		</div>
 		
 		<p><strong>前言</strong>：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看&lt;&lt;深入理解Java虚拟机&gt;&gt;这本书，正好配合日常所需好好地整理下。</p>
-<h2 id="一，说明"><a href="#一，说明" class="headerlink" title="一，说明"></a>一，说明</h2><p>JVM参数分为标准参数（以<code>-XX:</code>开头）和非标准参数（<code>java -X</code>命令查看），他们之间格式不一样。<br>标准参数格式如下：<br><code>-XX:+&lt;option&gt;</code> 开启option参数<br><code>-XX:-&lt;option&gt;</code> 关闭option参数<br><code>-XX:&lt;option&gt;=&lt;value&gt;</code> 设置option参数值<br>其他的为非标准参数。</p>
+<h2 id="一，说明"><a href="#一，说明" class="headerlink" title="一，说明"></a>一，说明</h2><p>JVM参数分为标准参数（以<code>-XX:</code>开头）和非标准参数（<code>java -X</code>命令查看），他们之间格式不一样。<br>标准参数格式如下：<br><code>-XX:+&lt;option&gt;</code> 开启option参数<br><code>-XX:-&lt;option&gt;</code> 关闭option参数<br><code>-XX:&lt;option&gt;=&lt;value&gt;</code> 设置option参数值<br>其他的为非标准参数,默认参数可以通过：<code>java -XX:+PrintFlagsInitial</code>命令查看!。</p>
 <p>分代叫法对比：<br>年轻代：<code>Young Generation</code>，也称新生代<code>New Generation</code><br>年老代：<code>Old Generation</code>，也称终身代<code>Tenured Generation</code><br>永久代：<code>Perm Generation</code></p>
 <h2 id="二，内存分配相关参数"><a href="#二，内存分配相关参数" class="headerlink" title="二，内存分配相关参数"></a>二，内存分配相关参数</h2><table>
 <thead>
@@ -486,7 +486,7 @@
 		  
 		
 		  
-			<li><a href="/categories/java/" title="java">java<sup>3</sup></a></li>
+			<li><a href="/categories/java/" title="java">java<sup>4</sup></a></li>
 		  
 		
 		  
@@ -519,11 +519,11 @@
 			
 		
 			
-				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
 			
 		
 			
@@ -535,19 +535,23 @@
 			
 		
 			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
+				<li><a href="/tags/BTrace/" title="BTrace">BTrace<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
+				<li><a href="/tags/Greys/" title="Greys">Greys<sup>1</sup></a></li>
 			
 		
 			
@@ -555,11 +559,15 @@
 			
 		
 			
-				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>1</sup></a></li>
+				<li><a href="/tags/cron/" title="cron">cron<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/定时任务/" title="定时任务">定时任务<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
 			
 		
 			
@@ -567,7 +575,11 @@
 			
 		
 			
-				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 			
@@ -579,11 +591,7 @@
 			
 		
 			
-				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/定时任务/" title="定时任务">定时任务<sup>1</sup></a></li>
+				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
 			
 		
 		</ul>
