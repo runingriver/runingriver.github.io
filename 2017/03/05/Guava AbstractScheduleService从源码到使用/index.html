@@ -24,7 +24,7 @@ AbstractScheduledService和Listener的生命周期
 AbstractScheduledService概述
 AbstractScheduledService抽象类提供和JDK提供的ScheduledExecutorService相同的功">
 <meta property="og:image" content="huzongzhe.cn/images/scheduler-service.png">
-<meta property="og:updated_time" content="2017-09-15T12:40:59.101Z">
+<meta property="og:updated_time" content="2017-09-15T13:02:04.277Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【Guava】AbstractScheduleService从源码到使用">
 <meta name="twitter:description" content="前言： AbstractScheduledService是guava提供的一个定时任务的实现，提供更简便的使用，并提供任务生命周期的监听。
@@ -114,21 +114,22 @@ AbstractScheduledService抽象类提供和JDK提供的ScheduledExecutorService�
 		<p><strong>前言：</strong> AbstractScheduledService是guava提供的一个定时任务的实现，提供更简便的使用，并提供任务生命周期的监听。</p>
 <h2 id="AbstractScheduledService和Listener的生命周期"><a href="#AbstractScheduledService和Listener的生命周期" class="headerlink" title="AbstractScheduledService和Listener的生命周期"></a>AbstractScheduledService和Listener的生命周期</h2><p><img src="/images/scheduler-service.png" alt=""></p>
 <h2 id="AbstractScheduledService概述"><a href="#AbstractScheduledService概述" class="headerlink" title="AbstractScheduledService概述"></a>AbstractScheduledService概述</h2><ol>
-<li><code>AbstractScheduledService</code>抽象类提供和JDK提供的<code>ScheduledExecutorService</code>相同的功能，其优势在于，能够管理执行线程的生命周期，并提供监听器。</li>
-<li>继承 <code>AbstractScheduledService</code>必须实现以下两个方法<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">public class TaskScheduler extends AbstractScheduledService &#123;</div><div class="line">    @Override</div><div class="line">    protected void runOneIteration() throws Exception &#123; /*执行逻辑*/ &#125;</div><div class="line"></div><div class="line">    protected Scheduler scheduler() &#123;</div><div class="line">        //Scheduler.newFixedDelaySchedule(1,1, TimeUnit.SECONDS);</div><div class="line">        return Scheduler.newFixedRateSchedule(1, 1, TimeUnit.SECONDS);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<li><p><code>AbstractScheduledService</code>抽象类提供和JDK提供的<code>ScheduledExecutorService</code>相同的功能，其优势在于，能够管理执行线程的生命周期，并提供监听器。</p>
 </li>
-</ol>
+<li><p>继承 <code>AbstractScheduledService</code>必须实现以下两个方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">public class TaskScheduler extends AbstractScheduledService &#123;</div><div class="line">    @Override</div><div class="line">    protected void runOneIteration() throws Exception &#123; /*执行逻辑*/ &#125;</div><div class="line"></div><div class="line">    protected Scheduler scheduler() &#123;</div><div class="line">        //Scheduler.newFixedDelaySchedule(1,1, TimeUnit.SECONDS);</div><div class="line">        return Scheduler.newFixedRateSchedule(1, 1, TimeUnit.SECONDS);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>其中，<code>scheduler()</code>方法除上面两种方法外，我们可以自定义执行计划，比如想<code>cron</code>表达式那样执行！<code>runOneIteration()</code>中是你的业务逻辑代码！<br>Tip：后面将给出如何实现<code>cron</code>的调度！</p>
-<ol>
-<li>还可以覆写以下方法<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">public class TaskScheduler extends AbstractScheduledService &#123;</div><div class="line">    //可以自定义ScheduledExecutorService,默认是newSingleThreadScheduledExecutor</div><div class="line">    protected ScheduledExecutorService executor() &#123; return super.executor(); &#125;</div><div class="line"></div><div class="line">    //自定义定时任务线程名</div><div class="line">    protected String serviceName() &#123; return super.serviceName(); &#125;</div><div class="line"></div><div class="line">    //关闭定时任务线程时调用</div><div class="line">    protected void shutDown() throws Exception &#123; super.shutDown(); &#125;</div><div class="line"></div><div class="line">    //开启定时任务时(startAsync().awaitRunning())调用</div><div class="line">    protected void startUp() throws Exception &#123; super.startUp(); &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected void runOneIteration() throws Exception &#123; /*执行逻辑*/ &#125;</div><div class="line"></div><div class="line">    protected Scheduler scheduler() &#123;</div><div class="line">        //Scheduler.newFixedDelaySchedule(1,1, TimeUnit.SECONDS);</div><div class="line">        return Scheduler.newFixedRateSchedule(1, 1, TimeUnit.SECONDS);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 </li>
-</ol>
+<li><p>还可以覆写以下方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">public class TaskScheduler extends AbstractScheduledService &#123;</div><div class="line">    //可以自定义ScheduledExecutorService,默认是newSingleThreadScheduledExecutor</div><div class="line">    protected ScheduledExecutorService executor() &#123; return super.executor(); &#125;</div><div class="line"></div><div class="line">    //自定义定时任务线程名</div><div class="line">    protected String serviceName() &#123; return super.serviceName(); &#125;</div><div class="line"></div><div class="line">    //关闭定时任务线程时调用</div><div class="line">    protected void shutDown() throws Exception &#123; super.shutDown(); &#125;</div><div class="line"></div><div class="line">    //开启定时任务时(startAsync().awaitRunning())调用</div><div class="line">    protected void startUp() throws Exception &#123; super.startUp(); &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected void runOneIteration() throws Exception &#123; /*执行逻辑*/ &#125;</div><div class="line"></div><div class="line">    protected Scheduler scheduler() &#123;</div><div class="line">        //Scheduler.newFixedDelaySchedule(1,1, TimeUnit.SECONDS);</div><div class="line">        return Scheduler.newFixedRateSchedule(1, 1, TimeUnit.SECONDS);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p><strong><code>executor()</code></strong> 方法是定义定时任务的线程池，默认使用<code>Executors.newSingleThreadScheduledExecutor</code>，如果我们需要将多个任务放在同一个线程池中执行可以覆写此方法！</p>
 <p>由于一个<code>TaskScheduler</code>对象代表一个任务，所以默认情况下多个任务开启多个<code>Executors.newSingleThreadScheduledExecutor</code>线程池！且每个线程池始终之后有一个线程来执行定时任务，即使一个任务的执行时长大于执行周期，也只会有一个线程顺序执行这些任务(虽已达到执行时间但是仍要等到上一次任务执行结束)！</p>
-<p>另外，覆写<code>executor()</code>方法，可以多个<code>TaskScheduler</code>对象共用同一个线程池，如<code>Executors.newScheduledThreadPool(10);</code>，初始开启10个线程（即：<code>corePoolSize=10</code>，<code>maximumPoolSize=Integer.MAX_VALUE</code>，<code>DelayedWorkQueue()</code>），即10个线程不会被销毁，如果有<code>&gt;10</code>的<code>TaskScheduler</code>存在，则会将任务放入<code>DelayedWorkQueue()</code>延时队列，直到执行时间到或有空余线程，如果线程不足该任务会等到有空余线程后才执行！<br>所以，只推荐仅在线程资源紧缺时使用：<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">public class TaskScheduler extends AbstractScheduledService &#123;</div><div class="line">    public static final int THREAD_NUM = 2;</div><div class="line">    private String taskName;</div><div class="line">    private static final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(THREAD_NUM);</div><div class="line"></div><div class="line">    public ScheduledExecutorService executor() &#123;</div><div class="line">        addListener( new Listener() &#123;</div><div class="line">                    public void terminated(State from) &#123;  executorService.shutdown();  &#125;</div><div class="line">                    public void failed(State from, Throwable failure) &#123; executorService.shutdown();  &#125;</div><div class="line">                &#125;,executorService);</div><div class="line">        return executorService;</div><div class="line">    &#125;</div><div class="line">    protected String serviceName() &#123;</div><div class="line">        return taskName;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>另外，覆写<code>executor()</code>方法，可以多个<code>TaskScheduler</code>对象共用同一个线程池，如<code>Executors.newScheduledThreadPool(10);</code>，初始开启10个线程（即：<code>corePoolSize=10</code>，<code>maximumPoolSize=Integer.MAX_VALUE</code>，<code>DelayedWorkQueue()</code>），即10个线程不会被销毁，如果有<code>&gt;10</code>的<code>TaskScheduler</code>存在，则会将任务放入<code>DelayedWorkQueue()</code>延时队列，直到执行时间到或有空余线程，如果线程不足该任务会等到有空余线程后才执行！<br>所以，只推荐仅在线程资源紧缺时使用：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">public class TaskScheduler extends AbstractScheduledService &#123;</div><div class="line">    public static final int THREAD_NUM = 2;</div><div class="line">    private String taskName;</div><div class="line">    private static final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(THREAD_NUM);</div><div class="line"></div><div class="line">    public ScheduledExecutorService executor() &#123;</div><div class="line">        addListener( new Listener() &#123;</div><div class="line">                    public void terminated(State from) &#123;  executorService.shutdown();  &#125;</div><div class="line">                    public void failed(State from, Throwable failure) &#123; executorService.shutdown();  &#125;</div><div class="line">                &#125;,executorService);</div><div class="line">        return executorService;</div><div class="line">    &#125;</div><div class="line">    protected String serviceName() &#123;</div><div class="line">        return taskName;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>注：这里<code>addListener</code>目的是，任务关闭或失败后(<code>terminated</code>和<code>failed</code>)，关闭线程池！<br><strong>serviceName()</strong>，线程每到生命周期的一个阶段，线程池都会更新线程名（<code>serviceName() + &quot; &quot; + Stat</code>的格式），所以无需自定义<code>ThreadFactory</code>！</p>
-<ol>
-<li>启动关闭<br>启动：<code>taskScheduler.startAsync().awaitRunning()</code>，并添加监听器：<code>taskScheduler.addListener(new ScheduleListener(), listenerService);</code><br>关闭：<code>taskScheduler.stopAsync().awaitTerminated()</code>，该方法会等到本次任务执行完毕后才退出（不执行下一周期任务）！<br>Tip：<code>listenerService</code>是一个新线程池专门执行监听！</li>
+</li>
+<li><p>启动关闭<br><strong>启动：</strong><code>taskScheduler.startAsync().awaitRunning()</code><br>启动时添加监听器：<code>taskScheduler.addListener(new ScheduleListener(), listenerService);</code><br><strong>关闭：</strong><code>taskScheduler.stopAsync().awaitTerminated()</code>，该方法会等到本次任务执行完毕后才退出（不执行下一周期任务）！<br>Tip：<code>listenerService</code>是一个新线程池专门执行监听！</p>
+</li>
 </ol>
 <h3 id="监听器ScheduleListener实现"><a href="#监听器ScheduleListener实现" class="headerlink" title="监听器ScheduleListener实现"></a>监听器<code>ScheduleListener</code>实现</h3><p>我们可以根据业务逻辑实现定时任务生命周期的监听：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">private static class ScheduleListener extends Service.Listener &#123;</div><div class="line">    public void failed(Service.State from, Throwable failure) &#123;&#125;</div><div class="line">    public void running() &#123; logger.info(&quot;Listener:开始运行,监听线程:&#123;&#125;&quot;, Thread.currentThread().getName()); &#125;</div><div class="line">    public void starting() &#123; logger.info(&quot;Listener:任务启动,当前监听定时任务线程:&#123;&#125;&quot;, Thread.currentThread().getName()); &#125;</div><div class="line">    //只可能有两种状态:RUNNING,STARTING</div><div class="line">    public void stopping(Service.State from) &#123; logger.info(&quot;Listener: 开始停止,线程:&#123;&#125;&quot;, Thread.currentThread().getName()); &#125;</div><div class="line">    //State:转换成TERMINATED状态,之前的状态</div><div class="line">    public void terminated(Service.State from) &#123;</div><div class="line">        logger.info(&quot;Listener:任务终止. State:&#123;&#125;&quot;, from.toString());</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <h3 id="自定义scheduler-实现"><a href="#自定义scheduler-实现" class="headerlink" title="自定义scheduler()实现"></a>自定义<code>scheduler()</code>实现</h3><p>下面给出借助spring 的cron解析类，实现cron形式的定时任务调度：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">// 解析cron表达式,每次执行完任务都要重新获取并设置延迟,每个任务对应一个CronTrigger实例</div><div class="line">private final static class CronTrigger extends AbstractScheduledService.CustomScheduler &#123;</div><div class="line">    private final CronSequenceGenerator sequenceGenerator;</div><div class="line">    private Date nextExecutionDate;</div><div class="line">    private CronTrigger(String cronExpression) &#123;</div><div class="line">        this.sequenceGenerator = new CronSequenceGenerator(cronExpression);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public Date getNextExecutionDate() &#123;</div><div class="line">        return sequenceGenerator.next(nextExecutionDate);</div><div class="line">    &#125;</div><div class="line">    protected Schedule getNextSchedule() throws Exception &#123;</div><div class="line">        Date now = new Date();</div><div class="line">        nextExecutionDate = sequenceGenerator.next(now);</div><div class="line">        // 如果timeDiff&lt;0,ScheduleExecutorService会自动处理:将delay置0,立即执行</div><div class="line">        long timeDiff = nextExecutionDate.getTime() - now.getTime();</div><div class="line">        return new Schedule(timeDiff, TimeUnit.MILLISECONDS);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
@@ -264,7 +265,7 @@ AbstractScheduledService抽象类提供和JDK提供的ScheduledExecutorService�
 			
 		
 			
-				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
 			
 		
 			
@@ -272,11 +273,7 @@ AbstractScheduledService抽象类提供和JDK提供的ScheduledExecutorService�
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+				<li><a href="/tags/shell/" title="shell">shell<sup>4</sup></a></li>
 			
 		
 			
@@ -284,11 +281,15 @@ AbstractScheduledService抽象类提供和JDK提供的ScheduledExecutorService�
 			
 		
 			
-				<li><a href="/tags/zk集群/" title="zk集群">zk集群<sup>2</sup></a></li>
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zk集群/" title="zk集群">zk集群<sup>2</sup></a></li>
 			
 		
 			
@@ -300,15 +301,15 @@ AbstractScheduledService抽象类提供和JDK提供的ScheduledExecutorService�
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/BTrace/" title="BTrace">BTrace<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Greys/" title="Greys">Greys<sup>1</sup></a></li>
+				<li><a href="/tags/AbstractScheduleService/" title="AbstractScheduleService">AbstractScheduleService<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
 			
 		
 			
@@ -320,11 +321,11 @@ AbstractScheduledService抽象类提供和JDK提供的ScheduledExecutorService�
 			
 		
 			
-				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
+				<li><a href="/tags/Greys/" title="Greys">Greys<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/AbstractScheduleService/" title="AbstractScheduleService">AbstractScheduleService<sup>1</sup></a></li>
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
 			
 		
 			
