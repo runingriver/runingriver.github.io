@@ -22,7 +22,7 @@
 <meta property="og:image" content="huzongzhe.cn/images/hbase-processe.png">
 <meta property="og:image" content="huzongzhe.cn/images/hfile.png">
 <meta property="og:image" content="huzongzhe.cn/images/rowkey-design-result.png">
-<meta property="og:updated_time" content="2017-09-12T09:15:22.990Z">
+<meta property="og:updated_time" content="2017-10-20T08:16:31.766Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="记一次HBase rowkey设计演化之路">
 <meta name="twitter:description" content="前言：一次HBase的rowkey设计，走了些弯路，踩了些坑，故这里记录下来，供参考引以为戒吧。在介绍rowkey设计之前，必须对HBase有个最基本的了解，本文先介绍关于HBase的基础知识，再根据简化场景介绍rowkey设计的演化过程。
@@ -101,12 +101,15 @@
 	<div class="article-content">
 		
 		<p><strong>前言</strong>：一次HBase的rowkey设计，走了些弯路，踩了些坑，故这里记录下来，供参考引以为戒吧。在介绍rowkey设计之前，必须对HBase有个最基本的了解，本文先介绍关于HBase的基础知识，再根据简化场景介绍rowkey设计的演化过程。</p>
-<h1 id="一-HBase基础知识整理"><a href="#一-HBase基础知识整理" class="headerlink" title="一. HBase基础知识整理"></a>一. HBase基础知识整理</h1><p>Hbase是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，Zookeeper + Master+Region Server + HLog保证高可靠，面向列的存储提供了高性能（通常写入性能要好，读要差点，虽然号称有百万吞吐量每秒）.<br>Region的自动分裂机制保证了系统的可伸缩性。当一台服务down掉，可以自动恢复（补充）。<br>Hbase无法使用sql，但是可以联合Phonenix或 Hive，但是会有一定的性能损失，联合hive就无法绕过MapReduce，Phonenix性能优于hive但是会部分改变Hbase原有数据组织。<br>缺点：不支持二级索引(如果要实现二级索引可以通过建立索引表的形式,二级索引无非就是将scan查询改为get查询!)，不支持事务。</p>
+<h1 id="一-HBase基础知识整理"><a href="#一-HBase基础知识整理" class="headerlink" title="一. HBase基础知识整理"></a>一. HBase基础知识整理</h1><p>Hbase是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，Zookeeper + Master+Region Server + HLog保证高可靠，面向列的存储提供了高性能（通常写入性能要好，读要差点，虽然号称有百万吞吐量每秒）.<br>Region的自动分裂机制保证了系统的可伸缩性。当一台服务down掉，可以自动恢复（HLOG恢复数据），这保证了其可靠性。<br>Hbase无法使用sql，但是可以联合Phonenix或 Hive，但是会有一定的性能损失，联合hive就无法绕过MapReduce，Phonenix性能优于hive但是会部分改变Hbase原有数据组织。<br>缺点：不支持二级索引(如果要实现二级索引可以通过建立索引表的形式,二级索引无非就是将scan查询改为get查询!)，不支持事务。</p>
 <h2 id="1，Hbase组件介绍"><a href="#1，Hbase组件介绍" class="headerlink" title="1，Hbase组件介绍"></a>1，Hbase组件介绍</h2><ol>
 <li><code>Master</code>：HBase Master 用于协调多个 Region Server，侦测各个 Region Server 之间的状态，并平衡 Region Server 之间的负载。<br>HBase Master 还有一个职责就是负责分配 Region 给 Region Server。HBase 允许多个 Master 节点共存，但是这需要 Zookeeper 的帮助。<br>不过当多个 Master 节点共存时，只有一个 Master 是提供服务的，其他的 Master 节点处于待命的状态。当正在工作的 Master 节点宕机时，其他的 Master 则会接管 HBase 的集群。</li>
 <li><code>Region Server</code>：一个Region Server管理多个Region。Region Server的作用只是管理表格，以及实现读写操作。Client 直接连接 Region Server，并通信获取 HBase 中的数据。<br>Region是真实存放 HBase 数据的地方，也就说 Region 是 HBase 可用性和分布式的基本单位，也是HBase高并发的基础。<br>如果当一个表格很大，并由多个 CF 组成时，那么表的数据将存放在多个 Region 之间，并且在每个 Region 中会关联多个存储的单元（Store）。<br>一个Region对应一个CF，一个CF可以有多个Region（按Rowkey区间进行分裂，且当Region数据达到上限就会自动分裂成多个Region）</li>
 <li><code>Region</code>：每个Region用于保存一个CF中的某一段（rowkey范围划分）数据，Region的自动分裂实现了类似的水平分表。<br>开始一张表的Region可能保存在同一个Region Server中，随着Region分裂变多，同一张表的Region可能会被分配到不同的Region Server中。</li>
-<li><code>MemStore,Store,StoreFile</code>关系：Stroe可以理解成一个Region的数据仓库，一个Region下可能有多个Stroe（也有多个MemStroe），一个Stroe下有多个StoreFile。<br>MemStore满后会刷到磁盘对应生产一个新的StoreFile，当多次MemStore刷写到磁盘后StoreFile会变多，最后多个小的StoreFile会合并成一个大的StroeFile。<br>一个store对应一个MemStore，一个Store下有多个StoreFile，一个StoreFile对应一个HFile，HFile最后都保存在HDFS中。<br>StoreFile和HFile的关系可以看做相等，HFile只是在StroeFile上面做了一层封装。</li>
+<li><code>MemStore,Store,StoreFile</code>关系：Stroe可以理解成一个Region的数据仓库（是一个虚拟概念），一个Region下可能有多个Stroe（也有多个MemStroe，因为一个store对应一个MemStroe，一个cf对应一个Stroe），一个Stroe下有多个StoreFile。<br>MemStore满后会刷到磁盘对应生产一个新的StoreFile，当多次MemStore刷写到磁盘后StoreFile会变多，最后多个小的StoreFile会合并成一个大的StroeFile（即：compact合并操作）。<br>一个store对应一个MemStore，一个Store下有多个StoreFile，一个StoreFile对应一个HFile，HFile最后都保存在HDFS中。<br>StoreFile和HFile的关系可以看做相等，HFile只是在StroeFile上面做了一层封装。<blockquote>
+<p>HBase为了方便按照RowKey进行检索，要求HFile中数据都按照RowKey进行排序，Memstore数据在flush为HFile之前会进行一次排序，将数据有序化；</p>
+</blockquote>
+</li>
 <li><code>HLog</code>：HLog是一个实现Write Ahead Log（WAL）的类，用户的每次修改操作都会先写入到HLog保存到物理存储，<br>当Region Server意外终止后，Master会通过Zookeeper感知，Master会根据HLog文件，恢复Region Server中未持久化到HFile中的数据！从而保证<strong>数据写入的可靠性</strong><br><strong>Tip：</strong>每个Region Server中都会有一个HLog的实例，Region Server会将更新操作（如 Put，Delete）先记录到WAL（也就是 HLog）中，<br>然后再将操作写入到MemStore，MemStore到达配置的内存阀值后会将数据写入到持久化的HFile中。<br>这样就保证了HBase的写的可靠性。如果没有WAL，当Region Server宕掉的时候，MemStore还没有写入到HFile，或者StoreFile 还没有保存，数据就会丢失。</li>
 <li><code>Zookeeper</code>：首先Zookeeper是作为HBase Master的HA解决方案。也就是说，是Zookeeper保证了至少有一个HBase Master处于运行状态。<br>并且Zookeeper负责Region和Region Server的注册。</li>
 <li><code>HDFS</code>：虽然HBase也可以存储在本地文件系统，通常使用HDFS作为底层存储，HDFS保证了分布式文件系统的数据可靠性（一般每份数据有3个copy）。</li>
@@ -164,7 +167,7 @@
 <hr>
 <h1 id="三-设计Rowkey演化"><a href="#三-设计Rowkey演化" class="headerlink" title="三. 设计Rowkey演化"></a>三. 设计Rowkey演化</h1><h2 id="1，rowkey设计原则"><a href="#1，rowkey设计原则" class="headerlink" title="1，rowkey设计原则"></a>1，rowkey设计原则</h2><ol>
 <li>全局唯一，hbase以此为索引检索数据，一个rowkey对应一行数据！</li>
-<li>以字典顺序排序，最大64k，存为byte[]字节数组，尽可能短（若rowkey=100byte，1000w行，就要占近1G空间）！<br><strong>字典顺序,也可以理解成ASCII表的顺序,比如:数字+字母组合,范围可以是<code>0-z</code></strong></li>
+<li>以字典顺序排序，最大64k，存为byte[]字节数组，尽可能短（若rowkey=100byte，1000w行，就要占近1G空间）！一般设计在<code>10-100</code>byte之间,一个ASCII字符,占1byte！<br><strong>字典顺序,也可以理解成ASCII表的顺序,比如:数字+字母组合,范围可以是<code>0-z</code></strong></li>
 <li>将经常读或最近可能被访问的数据放到一起！而且要保证数据均匀分布到不同的Region中。<br>且要防止热点问题，如果热点数据都放在一个Region中，多个client访问同一个Region，造成单台服务器压力太大，出现热点问题，性能不佳！</li>
 <li>rowkey的高位设计成离散的。<br>如果将时间戳放在rowkey的高位，会导致所有数据都集中在一个Region，造成热点问题。如：201707218613512345678abcd，这种rowkey就会出现热点问题！</li>
 <li>一个rowkey对应二维表中的一行(可以看做唯一键)</li>
@@ -324,10 +327,6 @@
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
 			
 		
@@ -336,15 +335,7 @@
 			
 		
 			
-				<li><a href="/tags/guava/" title="guava">guava<sup>2</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
 			
 		
 			
@@ -352,11 +343,23 @@
 			
 		
 			
-				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/guava/" title="guava">guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM参数/" title="JVM参数">JVM参数<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
 			
 		
 			
@@ -364,11 +367,7 @@
 			
 		
 			
-				<li><a href="/tags/AbstractScheduleService/" title="AbstractScheduleService">AbstractScheduleService<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
@@ -380,15 +379,11 @@
 			
 		
 			
-				<li><a href="/tags/Greys/" title="Greys">Greys<sup>1</sup></a></li>
+				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/JVM参数/" title="JVM参数">JVM参数<sup>1</sup></a></li>
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 			
@@ -397,6 +392,14 @@
 		
 			
 				<li><a href="/tags/rowkey设计/" title="rowkey设计">rowkey设计<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
 			
 		
 		</ul>

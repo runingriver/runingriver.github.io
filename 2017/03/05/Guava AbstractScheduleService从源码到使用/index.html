@@ -24,7 +24,7 @@ AbstractScheduledService和Listener的生命周期
 AbstractScheduledService概述
 AbstractScheduledService抽象类提供和JDK提供的ScheduledExecutorService相同的功">
 <meta property="og:image" content="huzongzhe.cn/images/scheduler-service.png">
-<meta property="og:updated_time" content="2017-09-15T13:02:04.277Z">
+<meta property="og:updated_time" content="2017-09-25T08:54:02.686Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【Guava】AbstractScheduleService从源码到使用">
 <meta name="twitter:description" content="前言： AbstractScheduledService是guava提供的一个定时任务的实现，提供更简便的使用，并提供任务生命周期的监听。
@@ -128,7 +128,7 @@ AbstractScheduledService抽象类提供和JDK提供的ScheduledExecutorService�
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">public class TaskScheduler extends AbstractScheduledService &#123;</div><div class="line">    public static final int THREAD_NUM = 2;</div><div class="line">    private String taskName;</div><div class="line">    private static final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(THREAD_NUM);</div><div class="line"></div><div class="line">    public ScheduledExecutorService executor() &#123;</div><div class="line">        addListener( new Listener() &#123;</div><div class="line">                    public void terminated(State from) &#123;  executorService.shutdown();  &#125;</div><div class="line">                    public void failed(State from, Throwable failure) &#123; executorService.shutdown();  &#125;</div><div class="line">                &#125;,executorService);</div><div class="line">        return executorService;</div><div class="line">    &#125;</div><div class="line">    protected String serviceName() &#123;</div><div class="line">        return taskName;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>注：这里<code>addListener</code>目的是，任务关闭或失败后(<code>terminated</code>和<code>failed</code>)，关闭线程池！<br><strong>serviceName()</strong>，线程每到生命周期的一个阶段，线程池都会更新线程名（<code>serviceName() + &quot; &quot; + Stat</code>的格式），所以无需自定义<code>ThreadFactory</code>！</p>
 </li>
-<li><p>启动关闭<br><strong>启动：</strong><code>taskScheduler.startAsync().awaitRunning()</code><br>启动时添加监听器：<code>taskScheduler.addListener(new ScheduleListener(), listenerService);</code><br><strong>关闭：</strong><code>taskScheduler.stopAsync().awaitTerminated()</code>，该方法会等到本次任务执行完毕后才退出（不执行下一周期任务）！<br>Tip：<code>listenerService</code>是一个新线程池专门执行监听！</p>
+<li><p>启动关闭<br><strong>启动：</strong><code>taskScheduler.startAsync().awaitRunning()</code><br>启动时添加监听器：<code>taskScheduler.addListener(new ScheduleListener(), listenerService);</code><br><strong>关闭：</strong><code>taskScheduler.stopAsync().awaitTerminated()</code>，该方法会等到本次任务执行完毕后才退出（不执行下一周期任务）！并不是异步关闭,当前线程会等待直到正在执行的任务执行完毕!<br>Tip：<code>listenerService</code>是一个新线程池专门执行监听！</p>
 </li>
 </ol>
 <h3 id="监听器ScheduleListener实现"><a href="#监听器ScheduleListener实现" class="headerlink" title="监听器ScheduleListener实现"></a>监听器<code>ScheduleListener</code>实现</h3><p>我们可以根据业务逻辑实现定时任务生命周期的监听：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">private static class ScheduleListener extends Service.Listener &#123;</div><div class="line">    public void failed(Service.State from, Throwable failure) &#123;&#125;</div><div class="line">    public void running() &#123; logger.info(&quot;Listener:开始运行,监听线程:&#123;&#125;&quot;, Thread.currentThread().getName()); &#125;</div><div class="line">    public void starting() &#123; logger.info(&quot;Listener:任务启动,当前监听定时任务线程:&#123;&#125;&quot;, Thread.currentThread().getName()); &#125;</div><div class="line">    //只可能有两种状态:RUNNING,STARTING</div><div class="line">    public void stopping(Service.State from) &#123; logger.info(&quot;Listener: 开始停止,线程:&#123;&#125;&quot;, Thread.currentThread().getName()); &#125;</div><div class="line">    //State:转换成TERMINATED状态,之前的状态</div><div class="line">    public void terminated(Service.State from) &#123;</div><div class="line">        logger.info(&quot;Listener:任务终止. State:&#123;&#125;&quot;, from.toString());</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
@@ -265,10 +265,6 @@ AbstractScheduledService抽象类提供和JDK提供的ScheduledExecutorService�
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
 			
 		
@@ -277,15 +273,7 @@ AbstractScheduledService抽象类提供和JDK提供的ScheduledExecutorService�
 			
 		
 			
-				<li><a href="/tags/guava/" title="guava">guava<sup>2</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
 			
 		
 			
@@ -293,11 +281,23 @@ AbstractScheduledService抽象类提供和JDK提供的ScheduledExecutorService�
 			
 		
 			
-				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/guava/" title="guava">guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM参数/" title="JVM参数">JVM参数<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
 			
 		
 			
@@ -305,11 +305,7 @@ AbstractScheduledService抽象类提供和JDK提供的ScheduledExecutorService�
 			
 		
 			
-				<li><a href="/tags/AbstractScheduleService/" title="AbstractScheduleService">AbstractScheduleService<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
@@ -321,15 +317,11 @@ AbstractScheduledService抽象类提供和JDK提供的ScheduledExecutorService�
 			
 		
 			
-				<li><a href="/tags/Greys/" title="Greys">Greys<sup>1</sup></a></li>
+				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/JVM参数/" title="JVM参数">JVM参数<sup>1</sup></a></li>
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 			
@@ -338,6 +330,14 @@ AbstractScheduledService抽象类提供和JDK提供的ScheduledExecutorService�
 		
 			
 				<li><a href="/tags/rowkey设计/" title="rowkey设计">rowkey设计<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
 			
 		
 		</ul>

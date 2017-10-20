@@ -23,7 +23,7 @@ https://github.com/btraceio/btrace/tags 下载压缩包。
 一. BTrace安装
 https://github.com/btraceio/btrace/tags 下载压缩包。
 添加环境变量：sudo nano /etc/profile12export BTRACE_HOME=/u">
-<meta property="og:updated_time" content="2017-09-14T10:10:29.128Z">
+<meta property="og:updated_time" content="2017-10-12T07:20:21.803Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java排查利器之BTrace，Greys">
 <meta name="twitter:description" content="前言： 关于btrace和greys的使用方法，网上不计其数。这里根据我的使用整理了个精简版，零复制纯手打，高度概括，适用快速入门。萝卜青菜各有所爱，greys好用太多有木有！
@@ -105,7 +105,7 @@ https://github.com/btraceio/btrace/tags 下载压缩包。
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#一-BTrace"><span class="toc-number">1.</span> <span class="toc-text">一. BTrace</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装"><span class="toc-number">1.1.</span> <span class="toc-text">安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#遇到的问题"><span class="toc-number">1.1.1.</span> <span class="toc-text">遇到的问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用"><span class="toc-number">1.2.</span> <span class="toc-text">使用</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#二-Greys"><span class="toc-number">2.</span> <span class="toc-text">二. Greys</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装-1"><span class="toc-number">2.1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用-1"><span class="toc-number">2.2.</span> <span class="toc-text">使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#远程调试"><span class="toc-number">2.2.1.</span> <span class="toc-text">远程调试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#命令使用"><span class="toc-number">2.3.</span> <span class="toc-text">命令使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#程序排查命令"><span class="toc-number">2.3.1.</span> <span class="toc-text">程序排查命令</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#其他命令"><span class="toc-number">2.4.</span> <span class="toc-text">其他命令</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#一-BTrace"><span class="toc-number">1.</span> <span class="toc-text">一. BTrace</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装"><span class="toc-number">1.1.</span> <span class="toc-text">安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#遇到的问题"><span class="toc-number">1.1.1.</span> <span class="toc-text">遇到的问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用"><span class="toc-number">1.2.</span> <span class="toc-text">使用</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#二-Greys"><span class="toc-number">2.</span> <span class="toc-text">二. Greys</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装-1"><span class="toc-number">2.1.</span> <span class="toc-text">安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#使用问题"><span class="toc-number">2.1.1.</span> <span class="toc-text">使用问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用-1"><span class="toc-number">2.2.</span> <span class="toc-text">使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#远程调试"><span class="toc-number">2.2.1.</span> <span class="toc-text">远程调试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#命令使用"><span class="toc-number">2.3.</span> <span class="toc-text">命令使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#程序排查命令"><span class="toc-number">2.3.1.</span> <span class="toc-text">程序排查命令</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#其他命令"><span class="toc-number">2.4.</span> <span class="toc-text">其他命令</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol>
 		
 		</div>
 		
@@ -134,8 +134,9 @@ https://github.com/btraceio/btrace/tags 下载压缩包。
 <h1 id="二-Greys"><a href="#二-Greys" class="headerlink" title="二. Greys"></a>二. Greys</h1><h2 id="安装-1"><a href="#安装-1" class="headerlink" title="安装"></a>安装</h2><p>安装非常简单</p>
 <ol>
 <li>直接安装：<code>mkdir greys;cd greys</code>，<code>curl -sLk http://ompc.oss.aliyuncs.com/greys/install.sh|bash</code> 然后运行<code>greys.sh &lt;pid&gt;</code>即可！</li>
-<li>手动下载安装：<code>http://ompc.oss.aliyuncs.com/greys/release/greys-stable-bin.zip</code> 解压然后：<code>cd greys; ./install-local.sh</code><br>如果没有权限，给目录权限即可：<code>chmod 777 -R greys</code></li>
+<li>手动下载安装：<code>http://ompc.oss.aliyuncs.com/greys/release/greys-stable-bin.zip</code> 解压然后：<code>cd greys; ./install-local.sh</code><br>如果没有权限，给目录权限即可：<code>chmod 777 -R greys</code><h3 id="使用问题"><a href="#使用问题" class="headerlink" title="使用问题"></a>使用问题</h3>greys出现：<br><code>attach to target jvm(11313) failed.</code><br><code>start greys failed, because : well-known file is not secure</code><br><code>attach to target jvm(10241) failed.</code><br><code>permission denied, /home/xxx is not writeable.</code><br><code>start greys failed, because : Unable to open socket file: target process not responding or HotSpot VM not loaded</code><br><code>start greys failed, because : Operation not permitted</code></li>
 </ol>
+<p>等等，以上问题，解决：<code>sudo -u &lt;app_user&gt; -H ./greys.sh &lt;pid&gt;</code><br>如：<code>sudo -utomcat -H ./greys.sh 1024</code>，其中<code>tomcat</code>是jvm运行的用户，<code>1024</code>是进程pid。</p>
 <h2 id="使用-1"><a href="#使用-1" class="headerlink" title="使用"></a>使用</h2><h3 id="远程调试"><a href="#远程调试" class="headerlink" title="远程调试"></a>远程调试</h3><p>比如你没有A机器的权限，小伙伴需要你帮忙定位A机器上程序的问题时：</p>
 <ol>
 <li>先在A机器运行<code>greys.sh 24449</code>脚本，并执行<code>jvm</code>命令，获得<code>MACHINE-NAME : 24449@xxx.xxx.xxx</code><br>其中，<code>24449</code>表示A机器上应用程序的PID，<code>xxx.xxx.xxx</code>表示A机器名</li>
@@ -143,14 +144,14 @@ https://github.com/btraceio/btrace/tags 下载压缩包。
 </ol>
 <h2 id="命令使用"><a href="#命令使用" class="headerlink" title="命令使用"></a>命令使用</h2><p>首先，可以通过<code>help</code>和<code>help [cmd]</code>命令来查看帮助，其中<code>[cmd]</code>表示greys支持的命令。<br>另外，终止命令运行<code>Ctrl + D</code> !</p>
 <h3 id="程序排查命令"><a href="#程序排查命令" class="headerlink" title="程序排查命令"></a>程序排查命令</h3><ol>
-<li><code>sc</code> 查看已经加载到JVM的Class信息<br>如：<code>sc -df com.xx.xx.xx.xxxxService</code> 不仅输出类的信息，还可以输出成员变量的值。</li>
+<li><code>sc</code> 查看已经加载到JVM的Class信息<br>如：<code>sc -df com.xx.xx.xx.HelloService</code> 不仅输出类的信息，还可以输出成员变量的值。</li>
 <li><code>sm</code> 查方法信息：<code>sm -d com.xx.xxx.service.AClass</code> 查看AClass类下所有方法的定义。</li>
-<li><code>monitor -c 5 *xxxService insert</code></li>
-<li><code>trace</code> 查看<code>insert</code>方法的调用栈，并输出执行时间信息。<br>eg：<code>trace *xxxxService insert</code><br>[2,1ms]的含义，<code>2</code>所代表的含义是：当前节点的整体耗时；<code>1</code>的含义是：当前节点在当前步骤的耗时；二者逗号分割，单位<code>ms</code>。</li>
-<li><code>ptrace</code> 是<code>trace</code>的增强版，命令比较强大，可以查看<code>help ptrace</code>或官方文档<br>eg：<code>ptrace -t com.xxx.xx.service.xxxService insert --path=com.xx.xx.service*</code> </li>
+<li><code>monitor</code>监控方法的执行信息，包括执行时间，状态，时间等统计信息。<br>eg：<code>monitor -c 5 org.apache.commons.lang.StringUtils is*</code>监控StringUtils类中以<code>is</code>开头的所有方法的执行统计信息。</li>
+<li><code>trace</code> 查看<code>insert</code>方法的调用栈，并输出执行时间信息。<br>eg：<code>trace *HelloService insert</code><br>[2,1ms]的含义，<code>2</code>所代表的含义是：当前节点的整体耗时；<code>1</code>的含义是：当前节点在当前步骤的耗时；二者逗号分割，单位<code>ms</code>。</li>
+<li><code>ptrace</code> 是<code>trace</code>的增强版，命令比较强大，可以查看<code>help ptrace</code>或官方文档<br>eg：<code>ptrace -t com.xxx.xx.service.HelloService insert --path=com.xx.xx.service*</code> </li>
 <li><p><code>watch</code> 观察方法的<code>入参</code>，<code>返回值</code>，<code>异常</code>。</p>
 <ul>
-<li><code>watch -b com.xxx.xxx.service.ConsumerService insertMapToHBase params[0]+&quot;--&quot;+params[1]</code> 输出入参<code>params[0]+&quot;--&quot;+params[1]</code> 参数格式！</li>
+<li><code>watch -b com.xxx.xxx.service.ConsumerService insertMapToHBase params[0] + &quot;--&quot; + params[1]</code> 输出入参<code>params[0]+&quot;--&quot;+params[1]</code> 参数格式！<br>Tip：<code>target + &quot;--&quot; + clazz +&quot;--&quot; + throwExp + &quot;--&quot; + isThrow</code>，注意<code>+</code>前后空格隔开。</li>
 <li><code>watch -s com.xxx.xxx.service.ConsumerService insertMapToHBase returnObj</code> 输出方法返回值！</li>
 </ul>
 </li>
@@ -239,7 +240,7 @@ https://github.com/btraceio/btrace/tags 下载压缩包。
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
  
- <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#一-BTrace"><span class="toc-number">1.</span> <span class="toc-text">一. BTrace</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装"><span class="toc-number">1.1.</span> <span class="toc-text">安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#遇到的问题"><span class="toc-number">1.1.1.</span> <span class="toc-text">遇到的问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用"><span class="toc-number">1.2.</span> <span class="toc-text">使用</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#二-Greys"><span class="toc-number">2.</span> <span class="toc-text">二. Greys</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装-1"><span class="toc-number">2.1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用-1"><span class="toc-number">2.2.</span> <span class="toc-text">使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#远程调试"><span class="toc-number">2.2.1.</span> <span class="toc-text">远程调试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#命令使用"><span class="toc-number">2.3.</span> <span class="toc-text">命令使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#程序排查命令"><span class="toc-number">2.3.1.</span> <span class="toc-text">程序排查命令</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#其他命令"><span class="toc-number">2.4.</span> <span class="toc-text">其他命令</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol>
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#一-BTrace"><span class="toc-number">1.</span> <span class="toc-text">一. BTrace</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装"><span class="toc-number">1.1.</span> <span class="toc-text">安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#遇到的问题"><span class="toc-number">1.1.1.</span> <span class="toc-text">遇到的问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用"><span class="toc-number">1.2.</span> <span class="toc-text">使用</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#二-Greys"><span class="toc-number">2.</span> <span class="toc-text">二. Greys</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装-1"><span class="toc-number">2.1.</span> <span class="toc-text">安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#使用问题"><span class="toc-number">2.1.1.</span> <span class="toc-text">使用问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用-1"><span class="toc-number">2.2.</span> <span class="toc-text">使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#远程调试"><span class="toc-number">2.2.1.</span> <span class="toc-text">远程调试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#命令使用"><span class="toc-number">2.3.</span> <span class="toc-text">命令使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#程序排查命令"><span class="toc-number">2.3.1.</span> <span class="toc-text">程序排查命令</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#其他命令"><span class="toc-number">2.4.</span> <span class="toc-text">其他命令</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol>
  
   </div>
 
@@ -306,10 +307,6 @@ https://github.com/btraceio/btrace/tags 下载压缩包。
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
 			
 		
@@ -318,15 +315,7 @@ https://github.com/btraceio/btrace/tags 下载压缩包。
 			
 		
 			
-				<li><a href="/tags/guava/" title="guava">guava<sup>2</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
 			
 		
 			
@@ -334,11 +323,23 @@ https://github.com/btraceio/btrace/tags 下载压缩包。
 			
 		
 			
-				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/guava/" title="guava">guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM参数/" title="JVM参数">JVM参数<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
 			
 		
 			
@@ -346,11 +347,7 @@ https://github.com/btraceio/btrace/tags 下载压缩包。
 			
 		
 			
-				<li><a href="/tags/AbstractScheduleService/" title="AbstractScheduleService">AbstractScheduleService<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
@@ -362,15 +359,11 @@ https://github.com/btraceio/btrace/tags 下载压缩包。
 			
 		
 			
-				<li><a href="/tags/Greys/" title="Greys">Greys<sup>1</sup></a></li>
+				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/JVM参数/" title="JVM参数">JVM参数<sup>1</sup></a></li>
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 			
@@ -379,6 +372,14 @@ https://github.com/btraceio/btrace/tags 下载压缩包。
 		
 			
 				<li><a href="/tags/rowkey设计/" title="rowkey设计">rowkey设计<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
 			
 		
 		</ul>
