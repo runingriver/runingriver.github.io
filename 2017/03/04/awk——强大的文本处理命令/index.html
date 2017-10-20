@@ -27,7 +27,7 @@ awk脚本三个部分:
 BEGIN{ 这里面放的是执行前的语句 }
 END {这里面放的是处理完所有的行后要执行的语句 }
 {这里面放的是处理每一行时要执行的语句}；可以没有B">
-<meta property="og:updated_time" content="2017-09-12T13:09:24.031Z">
+<meta property="og:updated_time" content="2017-10-20T09:37:29.414Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="awk——强大的文本处理命令">
 <meta name="twitter:description" content="一. 语法：基本语法awk [选项参数] &amp;#39;script&amp;#39; var=value file(s) 或  awk [选项参数] -f scriptfile var=value file(s)   执行awk脚本
@@ -150,6 +150,7 @@ END {这里面放的是处理完所有的行后要执行的语句 }
 <li>从文件中找出长度大于80的行<br><code>awk &#39;lenght&gt;80&#39; log.txt</code></li>
 <li>分析access.log获得访问前10位的ip地址<br><code>awk &#39;{print $1}&#39; access.log |sort|uniq -c|sort -nr|head -10</code></li>
 <li>文本文件中第三列的所有数字求和：<code>awk &#39;{ x += $3 } END { print x }&#39;</code></li>
+<li>根据access日志计算QPS<br>设access日志格式：[26/Sep/2017:14:59:17 +0800] 10.88.65.39 “POST /shell/hive HTTP/1.1” 200 (6 ms)，其中/shell/hive是接口。<br>按分钟统计平均qps：grep ‘/shell/hive’ access_log.2017-09-26.log | cut -d “:” -f 2,3 |sort|uniq -c| awk ‘{qps=$1/60;print $2,$1,qps}’ </li>
 </ul>
 <hr>
 <p>博客暂不支持评论，如有任何疑问，建议，观点，欢迎Email me：702143700@qq.com ,非常感谢！～</p>
@@ -283,6 +284,10 @@ END {这里面放的是处理完所有的行后要执行的语句 }
 			
 		
 			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
 			
 		
@@ -291,11 +296,7 @@ END {这里面放的是处理完所有的行后要执行的语句 }
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/zk集群/" title="zk集群">zk集群<sup>2</sup></a></li>
+				<li><a href="/tags/guava/" title="guava">guava<sup>2</sup></a></li>
 			
 		
 			
@@ -303,11 +304,11 @@ END {这里面放的是处理完所有的行后要执行的语句 }
 			
 		
 			
-				<li><a href="/tags/guava/" title="guava">guava<sup>2</sup></a></li>
+				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
+				<li><a href="/tags/zk集群/" title="zk集群">zk集群<sup>2</sup></a></li>
 			
 		
 			
@@ -315,7 +316,7 @@ END {这里面放的是处理完所有的行后要执行的语句 }
 			
 		
 			
-				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+				<li><a href="/tags/Greys/" title="Greys">Greys<sup>1</sup></a></li>
 			
 		
 			
@@ -323,7 +324,11 @@ END {这里面放的是处理完所有的行后要执行的语句 }
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
 			
 		
 			
@@ -335,11 +340,15 @@ END {这里面放的是处理完所有的行后要执行的语句 }
 			
 		
 			
-				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/AbstractScheduleService/" title="AbstractScheduleService">AbstractScheduleService<sup>1</sup></a></li>
 			
 		
 			
@@ -348,14 +357,6 @@ END {这里面放的是处理完所有的行后要执行的语句 }
 		
 			
 				<li><a href="/tags/rowkey设计/" title="rowkey设计">rowkey设计<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
 			
 		
 		</ul>

@@ -22,7 +22,7 @@
 <meta property="og:image" content="huzongzhe.cn/images/hbase-processe.png">
 <meta property="og:image" content="huzongzhe.cn/images/hfile.png">
 <meta property="og:image" content="huzongzhe.cn/images/rowkey-design-result.png">
-<meta property="og:updated_time" content="2017-10-20T08:16:31.766Z">
+<meta property="og:updated_time" content="2017-10-20T09:29:22.170Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="记一次HBase rowkey设计演化之路">
 <meta name="twitter:description" content="前言：一次HBase的rowkey设计，走了些弯路，踩了些坑，故这里记录下来，供参考引以为戒吧。在介绍rowkey设计之前，必须对HBase有个最基本的了解，本文先介绍关于HBase的基础知识，再根据简化场景介绍rowkey设计的演化过程。
@@ -110,11 +110,19 @@
 <p>HBase为了方便按照RowKey进行检索，要求HFile中数据都按照RowKey进行排序，Memstore数据在flush为HFile之前会进行一次排序，将数据有序化；</p>
 </blockquote>
 </li>
+</ol>
+<p>但是,多个StroeFile之间是有序的吗？<br>这里，通过询问HBase大神，得知的结果是：<strong>多个StroeFile之间是无序的！</strong></p>
+<ol>
 <li><code>HLog</code>：HLog是一个实现Write Ahead Log（WAL）的类，用户的每次修改操作都会先写入到HLog保存到物理存储，<br>当Region Server意外终止后，Master会通过Zookeeper感知，Master会根据HLog文件，恢复Region Server中未持久化到HFile中的数据！从而保证<strong>数据写入的可靠性</strong><br><strong>Tip：</strong>每个Region Server中都会有一个HLog的实例，Region Server会将更新操作（如 Put，Delete）先记录到WAL（也就是 HLog）中，<br>然后再将操作写入到MemStore，MemStore到达配置的内存阀值后会将数据写入到持久化的HFile中。<br>这样就保证了HBase的写的可靠性。如果没有WAL，当Region Server宕掉的时候，MemStore还没有写入到HFile，或者StoreFile 还没有保存，数据就会丢失。</li>
 <li><code>Zookeeper</code>：首先Zookeeper是作为HBase Master的HA解决方案。也就是说，是Zookeeper保证了至少有一个HBase Master处于运行状态。<br>并且Zookeeper负责Region和Region Server的注册。</li>
 <li><code>HDFS</code>：虽然HBase也可以存储在本地文件系统，通常使用HDFS作为底层存储，HDFS保证了分布式文件系统的数据可靠性（一般每份数据有3个copy）。</li>
 </ol>
-<h2 id="2，Hbase工作原理流程"><a href="#2，Hbase工作原理流程" class="headerlink" title="2，Hbase工作原理流程"></a>2，Hbase工作原理流程</h2><p>综上所述，来张图，并讲述一下Hbase的工作流程：<br><img src="/images/hbase-processe.png" alt=""><br><strong>写工作流程：</strong><br>当一个Client访问HBase集群时，Client需要先和Zookeeper来通信，找到对应的Region Server，一个Region Server管理着很多个Region。<br>Client写入 -&gt; 存入内存MemStore，一直到MemStore满 -&gt; Flush成一个新StoreFile，<br>StoreFile增长到一定阈值 -&gt; 触发Compact合并操作 -&gt; 多个StoreFile合并成一个StoreFile，同时进行版本合并和数据删除。<br>当StoreFiles Compact后，逐步形成越来越大的StoreFile -&gt; 单个StoreFile大小超过一定阈值后，触发Split操作<br>把当前Region Split成2个Region（从中间切开，100G从中间切成2个50G），原Region会下线，新Split出的2个孩子Region会被HMaster分配到相应的HRegionServer上（自动rebalance），<br>使得原先1个Region的压力得以分流到2个Region上。<br>由此过程可知，HBase只是增加数据，有所得更新和删除操作，都是在Compact阶段做的，所以，用户写操作只需要进入到内存即可立即返回，从而保证I/O高性能。<br><strong>Tip：</strong>HBase的删除操作不是真正的物理删除，因为HFile文件是不可变的，只是在相应记录上做一个标记，使得scan/get不返回该记录，真正的物理删除实在合并压缩阶段！<br><strong>Tip：</strong>HBase是行锁，也即修改一行中的多个数据时要么都成功，要么都失败！<br><strong>读工作流程：</strong><br>连接过程和写相同，不同的是，读通过缓存来读取记录，使用LRU算法将HFile中热点数据缓存到内存，另外从HFile中读取一行，还要检查MemStore中未持久化到HFile的数据是否有该行的修改记录！</p>
+<h2 id="2，Hbase工作原理流程"><a href="#2，Hbase工作原理流程" class="headerlink" title="2，Hbase工作原理流程"></a>2，Hbase工作原理流程</h2><p>综上所述，来张图，并讲述一下Hbase的工作流程：<br><img src="/images/hbase-processe.png" alt=""><br><strong>写工作流程：</strong><br>当一个Client访问HBase集群时，Client需要先和Zookeeper来通信，找到对应的Region Server，一个Region Server管理着很多个Region。<br>Client写入 -&gt; 存入内存MemStore，一直到MemStore满 -&gt; Flush成一个新StoreFile，<br>StoreFile增长到一定阈值 -&gt; 触发Compact合并操作 -&gt; 多个StoreFile合并成一个StoreFile，同时进行版本合并和数据删除。<br>当StoreFiles Compact后，逐步形成越来越大的StoreFile -&gt; 单个StoreFile大小超过一定阈值后，触发Split操作<br>把当前Region Split成2个Region（可以简单理解成：从中间切开，100G从中间切成2个50G），原Region会下线，新Split出的2个孩子Region会被HMaster分配到相应的HRegionServer上（自动rebalance），使得原先1个Region的压力得以分流到2个Region上。<br>由此过程可知，HBase只是增加数据，有所得更新和删除操作，都是在Compact阶段做的，所以，用户写操作只需要进入到内存即可立即返回，从而保证I/O高性能。</p>
+<p><strong>Tip：</strong>HBase的删除操作不是真正的物理删除，因为HFile文件是不可变的，只是在相应记录上做一个标记，使得scan/get不返回该记录，真正的物理删除实在合并压缩阶段！<br><strong>Tip：</strong>HBase是行锁，也即修改一行中的多个数据时要么都成功，要么都失败！<br><strong>关于切分点：</strong></p>
+<blockquote>
+<p>切分点为，整个region中最大store中的最大文件中最中心的一个block的首个rowkey<br>另外，HBase还规定，如果定位到的rowkey是整个文件的首个rowkey或者最后一个rowkey的话，就认为没有切分点。<br>什么情况下会出现没有切分点的场景呢？<br>  最常见的就是一个文件只有一个block，执行split的时候就会发现无法切分。很多在测试split的时候都是往新表中插入几条数据并执行一下flush，再执行split，却发现&gt; 数据表并没有真正执行切分。</p>
+</blockquote>
+<p><strong>读工作流程：</strong><br>连接过程和写相同，不同的是，读通过缓存来读取记录，使用LRU算法将HFile中热点数据缓存到内存，另外从HFile中读取一行，还要检查MemStore中未持久化到HFile的数据是否有该行的修改记录！</p>
 <h2 id="3，HFile文件格式"><a href="#3，HFile文件格式" class="headerlink" title="3，HFile文件格式"></a>3，HFile文件格式</h2><p>HFile数据组织形式：<br><img src="/images/hfile.png" alt=""><br>一个HFile中有多个Data数据块，数据块中有一个header和多个k-v组成，默认64KB，HFile文件尾部有一个Trailer，其中包含数据相关的索引信息，Hbase也是通过Trailer的索引来检索数据。有没有发现，这样的组织非常类似B树！</p>
 <h2 id="4，Hbase一些术语理解"><a href="#4，Hbase一些术语理解" class="headerlink" title="4，Hbase一些术语理解"></a>4，Hbase一些术语理解</h2><ol>
 <li><code>Row Key</code>:按照字典顺序排序，最多只能存储64k的字节数据。通俗理解，用作数据分块的依据。比如：<code>row设置为20170505</code>，表示将数据按天切分开！</li>
@@ -327,6 +335,10 @@
 			
 		
 			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
 			
 		
@@ -335,11 +347,7 @@
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/zk集群/" title="zk集群">zk集群<sup>2</sup></a></li>
+				<li><a href="/tags/guava/" title="guava">guava<sup>2</sup></a></li>
 			
 		
 			
@@ -347,11 +355,11 @@
 			
 		
 			
-				<li><a href="/tags/guava/" title="guava">guava<sup>2</sup></a></li>
+				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
+				<li><a href="/tags/zk集群/" title="zk集群">zk集群<sup>2</sup></a></li>
 			
 		
 			
@@ -359,7 +367,7 @@
 			
 		
 			
-				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+				<li><a href="/tags/Greys/" title="Greys">Greys<sup>1</sup></a></li>
 			
 		
 			
@@ -367,7 +375,11 @@
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
 			
 		
 			
@@ -379,11 +391,15 @@
 			
 		
 			
-				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/AbstractScheduleService/" title="AbstractScheduleService">AbstractScheduleService<sup>1</sup></a></li>
 			
 		
 			
@@ -392,14 +408,6 @@
 		
 			
 				<li><a href="/tags/rowkey设计/" title="rowkey设计">rowkey设计<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
 			
 		
 		</ul>

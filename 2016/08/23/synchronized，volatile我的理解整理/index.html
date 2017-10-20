@@ -12,25 +12,19 @@
 
     
     <meta name="description" content="前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。
-基础介绍Java 关键字volatile 可以让变量的修改在多个线程之间可见，即cpu核心1对volatile修饰的变量进行修改会立即刷新该变量在L2，L3，RAM中的值！同时，如果其他cpu核心也缓存了该变量，那么其他cpu对应缓存会立即失效并更新相应缓存。
-
-还一">
+基础介绍Java 关键字volatile 可以让变量的修改在多个线程之间可见，即cpu核心1对volatile修饰的变量进行修改会立即刷新该变量在L2，L3，RAM中的值！同时，如果其他cpu核心也缓存了该变量，那么其他cpu对应缓存会立即失效并更新相应缓存。这里，还">
 <meta property="og:type" content="article">
 <meta property="og:title" content="synchronized，volatile之我的理解整理">
 <meta property="og:url" content="huzongzhe.cn/2016/08/23/synchronized，volatile我的理解整理/index.html">
 <meta property="og:site_name" content="running river">
 <meta property="og:description" content="前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。
-基础介绍Java 关键字volatile 可以让变量的修改在多个线程之间可见，即cpu核心1对volatile修饰的变量进行修改会立即刷新该变量在L2，L3，RAM中的值！同时，如果其他cpu核心也缓存了该变量，那么其他cpu对应缓存会立即失效并更新相应缓存。
-
-还一">
+基础介绍Java 关键字volatile 可以让变量的修改在多个线程之间可见，即cpu核心1对volatile修饰的变量进行修改会立即刷新该变量在L2，L3，RAM中的值！同时，如果其他cpu核心也缓存了该变量，那么其他cpu对应缓存会立即失效并更新相应缓存。这里，还">
 <meta property="og:image" content="huzongzhe.cn/images/command.png">
-<meta property="og:updated_time" content="2017-07-26T11:24:55.087Z">
+<meta property="og:updated_time" content="2017-10-20T11:43:43.535Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="synchronized，volatile之我的理解整理">
 <meta name="twitter:description" content="前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。
-基础介绍Java 关键字volatile 可以让变量的修改在多个线程之间可见，即cpu核心1对volatile修饰的变量进行修改会立即刷新该变量在L2，L3，RAM中的值！同时，如果其他cpu核心也缓存了该变量，那么其他cpu对应缓存会立即失效并更新相应缓存。
-
-还一">
+基础介绍Java 关键字volatile 可以让变量的修改在多个线程之间可见，即cpu核心1对volatile修饰的变量进行修改会立即刷新该变量在L2，L3，RAM中的值！同时，如果其他cpu核心也缓存了该变量，那么其他cpu对应缓存会立即失效并更新相应缓存。这里，还">
 <meta name="twitter:image" content="huzongzhe.cn/images/command.png">
 
     
@@ -107,24 +101,94 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#基础介绍"><span class="toc-number">1.</span> <span class="toc-text">基础介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-伪共享"><span class="toc-number">1.1.</span> <span class="toc-text">1. 伪共享</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-重排序"><span class="toc-number">1.2.</span> <span class="toc-text">2. 重排序</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#volatile"><span class="toc-number">2.</span> <span class="toc-text">volatile</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#synchronized"><span class="toc-number">3.</span> <span class="toc-text">synchronized</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基础介绍"><span class="toc-number">1.</span> <span class="toc-text">基础介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-伪共享-or-缓存一致性协议"><span class="toc-number">1.1.</span> <span class="toc-text">1. 伪共享 or 缓存一致性协议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-重排序"><span class="toc-number">1.2.</span> <span class="toc-text">2. 重排序</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#volatile"><span class="toc-number">2.</span> <span class="toc-text">volatile</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#synchronized"><span class="toc-number">3.</span> <span class="toc-text">synchronized</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Lock和Synchronized区别"><span class="toc-number">3.1.</span> <span class="toc-text">1. Lock和Synchronized区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Synchronized的理解"><span class="toc-number">3.2.</span> <span class="toc-text">2. Synchronized的理解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#synchronized加锁的类型"><span class="toc-number">3.2.1.</span> <span class="toc-text">synchronized加锁的类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#synchronized特点"><span class="toc-number">3.2.2.</span> <span class="toc-text">synchronized特点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-锁的实现"><span class="toc-number">3.3.</span> <span class="toc-text">3. 锁的实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#synchronized修饰的成员方法和静态方法"><span class="toc-number">3.3.1.</span> <span class="toc-text">synchronized修饰的成员方法和静态方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#synchronized修饰的成员方法代码块和静态方法代码块"><span class="toc-number">3.3.2.</span> <span class="toc-text">synchronized修饰的成员方法代码块和静态方法代码块</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#锁原理锁优化"><span class="toc-number">3.3.3.</span> <span class="toc-text">锁原理锁优化</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">4.</span> <span class="toc-text">参考</span></a></li></ol>
 		
 		</div>
 		
 		<p><strong>前言：</strong>最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。</p>
-<h2 id="基础介绍"><a href="#基础介绍" class="headerlink" title="基础介绍"></a>基础介绍</h2><p>Java 关键字<code>volatile</code> 可以让变量的修改在多个线程之间可见，即cpu核心1对<code>volatile</code>修饰的变量进行修改会立即刷新该变量在L2，L3，RAM中的值！同时，如果其他cpu核心也缓存了该变量，那么其他cpu对应缓存会立即失效并更新相应缓存。</p>
-<blockquote>
-<p>还一种说法是，<code>volatile</code>修饰的变量不会被缓存，读写直接在RAM中进行。</p>
-</blockquote>
-<h3 id="1-伪共享"><a href="#1-伪共享" class="headerlink" title="1. 伪共享"></a>1. 伪共享</h3><p>当多线程修改互相独立的变量时，如果这些变量共享同一个缓存行，即被放到同一个缓存行中，如果其中一个核心1修改了其中一个变量A，那么另一个有相同缓存行的核心2的缓存会失效需要重新加载缓存，即使变量A的修改不影响核心2的正确执行，这就导致了性能损失，这就是伪共享。也称作:缓存一致性协议!</p>
+<h1 id="基础介绍"><a href="#基础介绍" class="headerlink" title="基础介绍"></a>基础介绍</h1><p>Java 关键字<code>volatile</code> 可以让变量的修改在多个线程之间可见，即cpu核心1对<code>volatile</code>修饰的变量进行修改会立即刷新该变量在L2，L3，RAM中的值！同时，如果其他cpu核心也缓存了该变量，那么其他cpu对应缓存会立即失效并更新相应缓存。<br>这里，还一种说法是，<code>volatile</code>修饰的变量不会被缓存，读写直接在RAM中进行，我认为是错误的理解！</p>
+<h2 id="1-伪共享-or-缓存一致性协议"><a href="#1-伪共享-or-缓存一致性协议" class="headerlink" title="1. 伪共享 or 缓存一致性协议"></a>1. 伪共享 or 缓存一致性协议</h2><p>当多线程修改互相独立的变量时，如果这些变量共享同一个缓存行，即被放到同一个缓存行中，如果其中一个核心1修改了其中一个变量A，那么另一个有相同缓存行的核心2的缓存会失效需要重新加载缓存，即使变量A的修改不影响核心2的正确执行，这就导致了性能损失，这就是伪共享。也称作:缓存一致性协议!</p>
 <p><img src="/images/command.png" alt=""></p>
-<h3 id="2-重排序"><a href="#2-重排序" class="headerlink" title="2. 重排序"></a>2. 重排序</h3><ol>
+<p>一致协议的两种实现（copy自network）：</p>
+<ol>
+<li><p>一种处理一致性问题的办法是使用Bus Locking（总线锁）。当一个CPU对其缓存中的数据进行操作的时候，往总线中发送一个Lock信号。<br>这个时候，所有CPU收到这个信号之后就不操作自己缓存中的对应数据了，当操作结束，释放锁以后，所有的CPU就去内存中获取最新数据更新。<br>但是用锁的方式总是避不开性能问题。总线锁总是会导致CPU的性能下降。所以出现另外一种维护CPU缓存一致性的方式，MESI。</p>
+</li>
+<li><p>MESI是保持一致性的协议。它的方法是在CPU缓存中保存一个标记位，这个标记位有四种状态:<br>M: <code>Modify</code>，修改缓存，当前CPU的缓存已经被修改了，即与内存中数据已经不一致了<br>E: <code>Exclusive</code>，独占缓存，当前CPU的缓存和内存中数据保持一致，而且其他处理器并没有可使用的缓存数据<br>S: <code>Share</code>，共享缓存，和内存保持一致的一份拷贝，多组缓存可以同时拥有针对同一内存地址的共享缓存段<br>I: <code>Invalid</code>，实效缓存，这个说明CPU中的缓存已经不能使用了</p>
+</li>
+</ol>
+<p>CPU的读取遵循下面几点：<br>如果缓存状态是I，那么就从内存中读取，否则就从缓存中直接读取。<br>如果缓存处于M或E的CPU读取到其他CPU有读操作，就把自己的缓存写入到内存中，并将自己的状态设置为S。<br>只有缓存状态是M或E的时候，CPU才可以修改缓存中的数据，修改后，缓存状态变为M。</p>
+<p>这样，每个CPU都遵循上面的方式则CPU的效率就提高上来了。</p>
+<h2 id="2-重排序"><a href="#2-重排序" class="headerlink" title="2. 重排序"></a>2. 重排序</h2><ol>
 <li>指令重排序<br>cpu会对互相不影响的指令进行重排序，也即代码执行的顺序可能和我们写的不一样！</li>
 <li>JVM重排序<br>JVM会对对象中的变量进行排序，因为对象的起始地址以8字节对齐，所以字段顺序会以<code>double/long，int/float，short/char，bool/byte，引用，子类字段</code>重新组织。</li>
 <li>内存屏障<br>为了阻止cpu对指令的重排序，可以采用<code>内存屏障</code>（一组处理器指令）阻止指令重排。</li>
 </ol>
-<h2 id="volatile"><a href="#volatile" class="headerlink" title="volatile"></a>volatile</h2><p>占位，整理中。。。</p>
-<h2 id="synchronized"><a href="#synchronized" class="headerlink" title="synchronized"></a>synchronized</h2><p>占位，整理中。。。</p>
+<h1 id="volatile"><a href="#volatile" class="headerlink" title="volatile"></a>volatile</h1><ol>
+<li>任何线程对volatile变量的修改会对其他缓存该变量的线程立即可以见！强制刷新缓存到主内存！</li>
+<li>JVM会在volatile变量处插入一个内存屏障，防止指令重拍序！</li>
+<li>某个线程对volatile的修改，会导致其他cpu高速缓存中对应该变量的缓存行失效（CPU的L1或者L2缓存中对应的缓存行无效，即缓存一致性协议）！</li>
+<li><strong>volatile只能保证变量对各个线程的可见性，但不能保证原子性</strong>，因为对一个变量的修改包括读取变量值，修改值，刷入主内存！<br>三步完成，如果线程1读取到值后，线程2对变量值进行修改且刷入主内存，这时线程继续修改，并刷入主内存，显然会出现错误，这三步操作就不具有原子性！</li>
+</ol>
+<p>volatile使用场景：</p>
+<ol>
+<li>状态标记，方法只被执行一次，如spring的refresh事件中首次启动执行某个任务一次！</li>
+<li>双重检验锁，单利模式。</li>
+</ol>
+<h1 id="synchronized"><a href="#synchronized" class="headerlink" title="synchronized"></a>synchronized</h1><h2 id="1-Lock和Synchronized区别"><a href="#1-Lock和Synchronized区别" class="headerlink" title="1. Lock和Synchronized区别"></a>1. Lock和Synchronized区别</h2><ol>
+<li><p><code>Synchronized</code>同步代码块，不能保证等待线程进入同步块的顺序。</p>
+</li>
+<li><p><code>Synchronized</code> 不接受超时，不能被中断！</p>
+</li>
+<li><p><code>Lock</code>中<code>unLock()</code>必须放到<code>finally{}</code>中，需要收到释放锁，<code>Synchronized</code>自动释放锁。</p>
+</li>
+<li><p>锁竞争小时的性能：<code>Synchronized</code> &gt; <code>atom</code> &gt; <code>Lock</code>，竞争激烈时： <code>atom</code> &gt; <code>Lock</code> &gt; <code>Synchronized</code></p>
+</li>
+</ol>
+<h2 id="2-Synchronized的理解"><a href="#2-Synchronized的理解" class="headerlink" title="2. Synchronized的理解"></a>2. Synchronized的理解</h2><h3 id="synchronized加锁的类型"><a href="#synchronized加锁的类型" class="headerlink" title="synchronized加锁的类型"></a>synchronized加锁的类型</h3><ol>
+<li><p>对象锁: <code>synchronized (this)</code>或<code>synchronized (personObject)</code> ,<code>synchronized修饰的成员方法</code>，都是对象锁；</p>
+</li>
+<li><p>类锁: <code>synchronized (A.class)</code> 和 <code>synchronized</code>修饰的静态方法，都是类锁；</p>
+</li>
+<li><p><code>synchronized</code>包含的代码块。<code>synchronized (A.class){}</code>是类锁, <code>synchronized (this){}</code>是对象锁.</p>
+</li>
+</ol>
+<h3 id="synchronized特点"><a href="#synchronized特点" class="headerlink" title="synchronized特点"></a>synchronized特点</h3><ol>
+<li><p>不论锁的是什么, 并不影响<code>类</code>或<code>对象</code>中没有用<code>synchronized</code>修饰的<code>方法</code>,<code>变量</code>被其他线程<code>访问</code>和<code>修改</code>.</p>
+</li>
+<li><p><code>synchronized</code>锁住的<code>方法,代码块,对象</code>中的<code>变量</code>不会受到 <code>synchronized</code>的控制, 可以被其他线程随意读写.</p>
+</li>
+<li><p><strong>当一个线程获得了对象锁(类锁)，其他线程不能访问其他需要对象锁(类锁)的方法或代码块</strong></p>
+</li>
+<li><p><strong>对象锁和类锁，二者不冲突，当一个线程获得了A的对象锁，其他线程可以访问A中需要类锁的方法或代码块</strong></p>
+</li>
+<li><p><code>synchronized (this){}</code>不能用于静态方法中, 但是<code>synchronized (A.class)</code>却能用于成员方法中,加的是类锁.</p>
+</li>
+</ol>
+<h2 id="3-锁的实现"><a href="#3-锁的实现" class="headerlink" title="3. 锁的实现"></a>3. 锁的实现</h2><p>对象锁和类锁有两种实现方式：方法上的synchronized是基于方法区中<code>ACC_SYNCHRONIZED</code>标志位实现，synchronized修饰的方法块基于<code>monitorenter</code>,<code>monitorexit</code>语义实现！</p>
+<p>这两种实现方式，在重量级锁上，都依赖于操作系统提供的实现（管程(monitor)底层数据结构维护着请求该锁的线程的队列，及相关信息）。</p>
+<blockquote>
+<p>重量级锁依赖于操作系统实现，加锁需要从用户态转换到内核态加锁，这就需要操作系统进行一次上下文切换，另外加锁、释放锁会导致比较多的上下文切换和调度延时，等待锁的线程会被挂起直至锁释放。在上下文切换的时候，cpu之前缓存的指令和数据都将失效，对性能有很大的损失。</p>
+</blockquote>
+<h3 id="synchronized修饰的成员方法和静态方法"><a href="#synchronized修饰的成员方法和静态方法" class="headerlink" title="synchronized修饰的成员方法和静态方法"></a>synchronized修饰的成员方法和静态方法</h3><p>成员方法： </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">public synchronized void method(int, java.lang.String);</div><div class="line">    flags: ACC_PUBLIC, ACC_SYNCHRONIZED</div><div class="line">    Code:</div><div class="line">      stack=2, locals=4, args_size=3</div><div class="line">        0: aload_2       </div><div class="line">        ...</div><div class="line">        10: return</div></pre></td></tr></table></figure>
+<p>静态方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">public static synchronized int method2(int);</div><div class="line">    flags: ACC_PUBLIC, ACC_STATIC, ACC_SYNCHRONIZED</div><div class="line">    Code:</div><div class="line">      stack=2, locals=1, args_size=1</div><div class="line">         0: iload_0       </div><div class="line">         ...</div><div class="line">         4: return</div></pre></td></tr></table></figure>
+<p>获取锁和释放锁是在方法调用和方法返回的时候执行的，方法执行中如果抛出异常，那么锁会在抛出异常时释放。</p>
+<p>JVM可以从方法常量池中的方法表结构(method_info Structure) 中的 ACC_SYNCHRONIZED 访问标志区分一个方法是否同步方法。</p>
+<h3 id="synchronized修饰的成员方法代码块和静态方法代码块"><a href="#synchronized修饰的成员方法代码块和静态方法代码块" class="headerlink" title="synchronized修饰的成员方法代码块和静态方法代码块"></a>synchronized修饰的成员方法代码块和静态方法代码块</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">5: monitorenter  </div><div class="line">...</div><div class="line">12: monitorexit   </div><div class="line">13: goto          21</div><div class="line">...     </div><div class="line">17: aload_1       </div><div class="line">18: monitorexit   </div><div class="line">...     </div><div class="line">20: athrow        </div><div class="line">21: return</div></pre></td></tr></table></figure>
+<p><code>monitorenter</code>,<code>monitorexit</code>语义是基于堆中实例化对象的对象头中的锁标志位实现。</p>
+<p>其中，<code>ACC_SYNCHRONIZED</code>和<code>monitorenter，monitorexit</code>，在JVM上的语义不同但是在底层锁实现是一样的，因为<code>Class</code>被ClassLoader加载到内存中也是一个对象，也有对象头！</p>
+<p>实例对象由：<code>对象头</code>，<code>实例变量</code>，<code>填充对齐数据</code>组成。<br>对象头由：<code>MarkWord</code>（存储对象的hashCode、锁信息或分代年龄或GC标志等信息），<code>Class Metadata Address</code>（指向方法区class的指针）</p>
+<h3 id="锁原理锁优化"><a href="#锁原理锁优化" class="headerlink" title="锁原理锁优化"></a>锁原理锁优化</h3><p>jdk1.6之前synchronized属于重量级锁，效率低下，因为监视器锁（monitor）是依赖于底层的操作系统的Mutex Lock来实现的，而操作系统实现线程之间的切换时需要从用户态转换到核心态，</p>
+<p>这个状态之间的转换需要相对比较长的时间，时间成本相对较高。</p>
+<p>重量级锁的实现是借助操作系统实现的，多种叫法：监视器/管程/monitor。</p>
+<p> 如果被<code>Synchronized</code>修饰的方法或代码块，JVM探测出其没有竞争，会进行锁消除，即不使用锁！</p>
+<p>jdk1.6之后JVM对synchronized的锁实现优化，首先在没有锁竞争的情况下加<strong>偏向锁</strong>，当另一个线程申请该锁时升级为<strong>轻量级锁</strong>，当同一时刻多个线程申请同一个锁时，JVM将该锁升级为<strong>自旋锁</strong>，当自旋一定次数后，升级为<strong>重量级锁</strong>，也就是依赖操作系统的<code>Mutex Lock</code>来实现。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li><a href="http://blog.csdn.net/javazejian/article/details/72828483" target="_blank" rel="external">http://blog.csdn.net/javazejian/article/details/72828483</a></li>
+<li><a href="http://blog.csdn.net/javazejian/article/details/72772461" target="_blank" rel="external">http://blog.csdn.net/javazejian/article/details/72772461</a></li>
+<li><a href="https://yq.aliyun.com/articles/46661" target="_blank" rel="external">https://yq.aliyun.com/articles/46661</a></li>
+</ol>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -188,7 +252,7 @@
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
  
- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#基础介绍"><span class="toc-number">1.</span> <span class="toc-text">基础介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-伪共享"><span class="toc-number">1.1.</span> <span class="toc-text">1. 伪共享</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-重排序"><span class="toc-number">1.2.</span> <span class="toc-text">2. 重排序</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#volatile"><span class="toc-number">2.</span> <span class="toc-text">volatile</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#synchronized"><span class="toc-number">3.</span> <span class="toc-text">synchronized</span></a></li></ol>
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基础介绍"><span class="toc-number">1.</span> <span class="toc-text">基础介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-伪共享-or-缓存一致性协议"><span class="toc-number">1.1.</span> <span class="toc-text">1. 伪共享 or 缓存一致性协议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-重排序"><span class="toc-number">1.2.</span> <span class="toc-text">2. 重排序</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#volatile"><span class="toc-number">2.</span> <span class="toc-text">volatile</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#synchronized"><span class="toc-number">3.</span> <span class="toc-text">synchronized</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Lock和Synchronized区别"><span class="toc-number">3.1.</span> <span class="toc-text">1. Lock和Synchronized区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Synchronized的理解"><span class="toc-number">3.2.</span> <span class="toc-text">2. Synchronized的理解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#synchronized加锁的类型"><span class="toc-number">3.2.1.</span> <span class="toc-text">synchronized加锁的类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#synchronized特点"><span class="toc-number">3.2.2.</span> <span class="toc-text">synchronized特点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-锁的实现"><span class="toc-number">3.3.</span> <span class="toc-text">3. 锁的实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#synchronized修饰的成员方法和静态方法"><span class="toc-number">3.3.1.</span> <span class="toc-text">synchronized修饰的成员方法和静态方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#synchronized修饰的成员方法代码块和静态方法代码块"><span class="toc-number">3.3.2.</span> <span class="toc-text">synchronized修饰的成员方法代码块和静态方法代码块</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#锁原理锁优化"><span class="toc-number">3.3.3.</span> <span class="toc-text">锁原理锁优化</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">4.</span> <span class="toc-text">参考</span></a></li></ol>
  
   </div>
 
@@ -255,6 +319,10 @@
 			
 		
 			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
 			
 		
@@ -263,11 +331,7 @@
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>4</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/zk集群/" title="zk集群">zk集群<sup>2</sup></a></li>
+				<li><a href="/tags/guava/" title="guava">guava<sup>2</sup></a></li>
 			
 		
 			
@@ -275,11 +339,11 @@
 			
 		
 			
-				<li><a href="/tags/guava/" title="guava">guava<sup>2</sup></a></li>
+				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/hive/" title="hive">hive<sup>2</sup></a></li>
+				<li><a href="/tags/zk集群/" title="zk集群">zk集群<sup>2</sup></a></li>
 			
 		
 			
@@ -287,7 +351,7 @@
 			
 		
 			
-				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+				<li><a href="/tags/Greys/" title="Greys">Greys<sup>1</sup></a></li>
 			
 		
 			
@@ -295,7 +359,11 @@
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/垃圾收集器/" title="垃圾收集器">垃圾收集器<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
 			
 		
 			
@@ -307,11 +375,15 @@
 			
 		
 			
-				<li><a href="/tags/awk/" title="awk">awk<sup>1</sup></a></li>
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/AbstractScheduleService/" title="AbstractScheduleService">AbstractScheduleService<sup>1</sup></a></li>
 			
 		
 			
@@ -320,14 +392,6 @@
 		
 			
 				<li><a href="/tags/rowkey设计/" title="rowkey设计">rowkey设计<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/HBase原理/" title="HBase原理">HBase原理<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/Basic-knowledge/" title="Basic knowledge">Basic knowledge<sup>1</sup></a></li>
 			
 		
 		</ul>
