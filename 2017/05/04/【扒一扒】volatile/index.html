@@ -1,0 +1,634 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【扒一扒】volatile | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。 基础介绍Java 关键字volatile可以让变量的修改在多个线程之间可见，即cpu核心1对volatile修饰的变量进行修改会立即刷新该变量在RAM中的值！同时，使所有包含该变量的缓存行">
+<meta name="keywords" content="volatile">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【扒一扒】volatile">
+<meta property="og:url" content="http://huzongzhe.cn/2017/05/04/【扒一扒】volatile/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。 基础介绍Java 关键字volatile可以让变量的修改在多个线程之间可见，即cpu核心1对volatile修饰的变量进行修改会立即刷新该变量在RAM中的值！同时，使所有包含该变量的缓存行失效。这里，还一种说法是，volatile修饰的变量不会被缓存，读写直接在RAM">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://huzongzhe.cn/2017/05/04/【扒一扒】volatile/images/command.png">
+<meta property="og:updated_time" content="2018-02-09T06:44:40.706Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【扒一扒】volatile">
+<meta name="twitter:description" content="前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。 基础介绍Java 关键字volatile可以让变量的修改在多个线程之间可见，即cpu核心1对volatile修饰的变量进行修改会立即刷新该变量在RAM中的值！同时，使所有包含该变量的缓存行失效。这里，还一种说法是，volatile修饰的变量不会被缓存，读写直接在RAM">
+<meta name="twitter:image" content="http://huzongzhe.cn/2017/05/04/【扒一扒】volatile/images/command.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/05/04/【扒一扒】volatile/" title="【扒一扒】volatile" itemprop="url">【扒一扒】volatile</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2017-05-04T03:12:22.000Z" itemprop="datePublished"> 发表于 2017-05-04</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<p><strong>前言：</strong>最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。</p>
+<h2 id="基础介绍"><a href="#基础介绍" class="headerlink" title="基础介绍"></a>基础介绍</h2><p>Java 关键字<code>volatile</code>可以让变量的修改在多个线程之间可见，即cpu核心1对<code>volatile</code>修饰的变量进行修改会立即刷新该变量在RAM中的值！同时，使所有包含该变量的缓存行失效。<br>这里，还一种说法是，volatile修饰的变量不会被缓存，读写直接在RAM中进行，我认为是错误的理解！</p>
+<h3 id="1-伪共享-or-缓存一致性协议"><a href="#1-伪共享-or-缓存一致性协议" class="headerlink" title="1. 伪共享 or 缓存一致性协议"></a>1. 伪共享 or 缓存一致性协议</h3><p>当多线程修改互相独立的变量时，如果这些变量共享同一个缓存行，即被放到同一个缓存行中，如果其中一个核心1修改了其中一个变量A，那么另一个有相同缓存行的核心2的缓存会失效需要重新加载缓存，即使变量A的修改不影响核心2的正确执行，这就导致了性能损失，这就是伪共享。也称作:缓存一致性协议!<br><img src="./images/command.png" alt="缓存一致性协议"></p>
+<p>一致协议的两种实现（copy自network）：</p>
+<ol>
+<li><p>一种实现：（一种早期奔腾处理器上的实现）<br>一种处理一致性问题的办法是使用Bus Locking（总线锁）。当一个CPU对其缓存中的数据进行操作的时候，往总线中发送一个Lock信号。<br>这时，所有CPU收到这个信号之后就不操作自己<strong>对应</strong>缓存行中的<strong>对应</strong>数据了，当操作结束，释放锁以后，所有的CPU就去内存中获取最新d <strong>对应</strong>数据更新缓存行。<br>但是用锁的方式总是避不开性能问题。总线锁总是会导致CPU的性能下降，总线锁住期间其他CPU可能都会等待总线资源。所以出现另外一种维护CPU缓存一致性的方式，MESI。</p>
+</li>
+<li><p>另一种实现:（是第一种实现的改进）<br>MESI是保持一致性的协议。它的方法是在CPU缓存中保存一个标记位，这个标记位有四种状态:<br>M: <code>Modify</code>，修改缓存，当前CPU的缓存已经被修改了，即与内存中数据已经不一致了<br>E: <code>Exclusive</code>，独占缓存，当前CPU的缓存和内存中数据保持一致，而且其他处理器并没有可使用的缓存数据<br>S: <code>Share</code>，共享缓存，和内存保持一致的一份拷贝，多组缓存可以同时拥有针对同一内存地址的共享缓存段<br>I: <code>Invalid</code>，实效缓存，这个说明CPU中的缓存已经不能使用了</p>
+</li>
+</ol>
+<p>CPU的读取遵循下面几点：<br>如果缓存状态是I，那么就从内存中读取，否则就从缓存中直接读取。<br>如果缓存处于M或E的CPU读取到其他CPU有读操作，就把自己的缓存写入到内存中，并将自己的状态设置为S。<br>只有缓存状态是M或E的时候，CPU才可以修改缓存中的数据，修改后，缓存状态变为M。<br>这样，每个CPU都遵循上面的方式则CPU的效率就提高上来了。</p>
+<p>摘抄：</p>
+<blockquote>
+<p>intel的手册对lock前缀的说明如下：</p>
+<ol>
+<li>确保对内存的读-改-写操作原子执行。在Pentium及Pentium之前的处理器中，带有lock前缀的指令在执行期间会锁住总线，使得其他处理器暂时无法通过总线访问内存。很显然，这会带来昂贵的开销。从Pentium 4，Intel Xeon及P6处理器开始，intel在原有总线锁的基础上做了一个很有意义的优化：如果要访问的内存区域（area of memory）在lock前缀指令执行期间已经在处理器内部的缓存中被锁定（即包含该内存区域的缓存行当前处于独占或以修改状态），并且该内存区域被完全包含在单个缓存行（cache line）中，那么处理器将直接执行该指令。由于在指令执行期间该缓存行会一直被锁定，其它处理器无法读/写该指令要访问的内存区域，因此能保证指令执行的原子性。这个操作过程叫做缓存锁定（cache locking），缓存锁定将大大降低lock前缀指令的执行开销，但是当多处理器之间的竞争程度很高或者指令访问的内存地址未对齐时，仍然会锁住总线。</li>
+<li>禁止该指令与之前和之后的读和写指令重排序。</li>
+<li>把写缓冲区中的所有数据刷新到内存中。</li>
+</ol>
+</blockquote>
+<h3 id="2-重排序"><a href="#2-重排序" class="headerlink" title="2. 重排序"></a>2. 重排序</h3><ol>
+<li>指令重排序<br>cpu会对互相不影响的指令进行重排序，以提升性能，也即代码执行的顺序可能和我们写的不一样！</li>
+<li>JVM重排序<br>JVM会对对象中的变量进行排序，因为对象的起始地址以8字节对齐，所以字段顺序会以<code>double/long，int/float，short/char，bool/byte，引用，子类字段</code>重新组织。</li>
+<li>内存屏障<br>为了阻止cpu对指令的重排序，可以采用<code>内存屏障</code>（一组处理器指令）阻止指令重排。</li>
+</ol>
+<h2 id="3-happens-before（先行发送原则）"><a href="#3-happens-before（先行发送原则）" class="headerlink" title="3. happens-before（先行发送原则）"></a>3. happens-before（先行发送原则）</h2><p>Java内存模型(JMM, Java Memory Model)为保证可见性原则定义了happens-before规则，一句通俗的话解释：</p>
+<blockquote>
+<p>两个操作间具有happens-before关系，并不意味着前一个操作必须要在后一个操作之前执行。happens-before仅仅要求前一个操作对后一个操作可见。<br>更具体的解释可以参考：《深入理解Java虚拟机》12.3.6节对happens-before的阐释。<br>JMM定义的happens-before原则保证了多线程下变量的立即可见性：<br>A线程执行i=1；B线程执行j=i，只要A在B之前执行（即符合happens-before原则）那么必然j=1！</p>
+</blockquote>
+<h2 id="volatile"><a href="#volatile" class="headerlink" title="volatile"></a>volatile</h2><ol>
+<li>任何线程对volatile变量的修改会对其他缓存该变量的线程立即可以见！强制刷新缓存到主内存！</li>
+<li>JVM会在volatile变量处插入一个内存屏障，防止指令重拍序！</li>
+<li>某个线程对volatile的修改，会导致其他cpu高速缓存中对应该变量的缓存行失效（CPU的L1或者L2缓存中对应的缓存行无效，即缓存一致性协议）！</li>
+<li><strong>volatile只能保证变量对各个线程的可见性，但不能保证原子性</strong>，因为对一个变量的修改包括读取变量值，修改值，刷入主内存！<br>三步完成，如果线程1读取到值后，线程2对变量值进行修改且刷入主内存，这时线程继续修改，并刷入主内存，显然会出现错误，这三步操作就不具有原子性！</li>
+</ol>
+<p>volatile使用场景：</p>
+<ol>
+<li>状态标记，方法只被执行一次，如spring的refresh事件中首次启动执行某个任务一次！</li>
+<li>双重检验锁，单利模式。</li>
+<li><code>ConcurrentHashMap</code>中很大遍历都采用volatile修饰，如：Node的value和next指针都是volatile；数组槽，成员变量等。</li>
+<li><code>Atomic</code>系列的类中值都用volatile修饰，以便<code>compareAndSet</code>时候拿到的是最新的值。</li>
+</ol>
+<h2 id="一个你可能没有考虑过的常用场景"><a href="#一个你可能没有考虑过的常用场景" class="headerlink" title="一个你可能没有考虑过的常用场景"></a>一个你可能没有考虑过的常用场景</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">private ReentrantLock lock = new ReentrantLock();</span><br><span class="line">private int count = 0;</span><br><span class="line">lock.lock();</span><br><span class="line">try &#123;</span><br><span class="line">    count++;</span><br><span class="line">&#125; finally &#123;</span><br><span class="line">    lock.unlock();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>问题：代码完全正确，count++操作线程安全，且多线程下读是可以立即可见的，但是count并没有加volatile修饰，为什么？<br>答：以下是摘取自互联网个人认为写的比较好的：<br>从happens-before说起，假设有如下代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">int a = 0;</span><br><span class="line">volatile int b = 0;</span><br><span class="line">...</span><br><span class="line">a = 1; // line 1</span><br><span class="line">b = 2; // line 2</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>如果线程A执行完<code>line 2</code>之后，<strong>变量a的更新值也会一同被更新到内存当中</strong>，JMM的happens-before原则能保证随后线程B读取到b后，一定能够看到<code>a=1</code>。<br>也就是说volatile写操作会把在此之前的共享变量一并更新，而不只是volatile变量本身。<br>其实，底层实现上是在volatile变量后面加了一个<strong>内存屏障</strong>，防止<strong>指令重拍序</strong>。即加入了一行：<code>lock addl $0x0,(%rsp)</code>这是一个简单的对栈顶元素加0操作。<br>但是带了一个<code>lock</code>前缀，这个<code>lock</code>会触发CPU缓存回写到内存，而后通过CPU缓存一致性机制，使得其它线程能够看到最新的共享变量，实现了共享变量对于所有 CPU 的可见性。这个<code>lock</code>就是一个<strong>内存屏障</strong>，通过会写缓存防止了<strong>指令重拍序</strong>，即<code>line 2</code>之后代码不会在<code>line 2</code>行代码执行前执行。</p>
+<p><strong>继续问：synchronize代码块，又是如何保证立即可见的呢？</strong><br>答：两步：<br>当线程释放锁时，JMM会把该线程对应的本地内存中的共享变量刷新到主内存中。<br>当线程获取锁时，JMM会把该线程对应的本地内存置为无效。从而使得被监视器保护的临界区代码必须要从主内存中去读取共享变量。</p>
+<p><strong>结论：锁释放与volatile写有相同的内存语义；锁获取与volatile读有相同的内存语义。</strong></p>
+<p><strong>同理：ReentrantLock</strong><br>在ReentrantLock中，调用lock()方法获取锁；调用unlock()方法释放锁。且实现依赖于AbstractQueuedSynchronizer（AQS）。AQS使用一个整型的volatile变量来维护同步状态，加锁时首先读volatile变量state；释放锁时写volatile变量state。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a href="http://ifeve.com/java-memory-model-5/" target="_blank" rel="noopener">http://ifeve.com/java-memory-model-5/</a></li>
+<li><a href="http://blog.csdn.net/javazejian/article/details/72772461" target="_blank" rel="noopener">http://blog.csdn.net/javazejian/article/details/72772461</a></li>
+<li><a href="https://yq.aliyun.com/articles/46661" target="_blank" rel="noopener">https://yq.aliyun.com/articles/46661</a></li>
+</ol>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/java/">java</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/volatile/">volatile</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2017/05/04/【扒一扒】volatile/" data-title="【扒一扒】volatile | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/05/12/【ZooKeeper】我认识的zk(一)/" title="【ZooKeeper】我认识的zk(一)">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【ZooKeeper】我认识的zk(一)</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/05/03/【扒一扒】synchronized/"  title="【扒一扒】synchronized">
+ <strong>下一篇：</strong><br/> 
+ <span>【扒一扒】synchronized
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

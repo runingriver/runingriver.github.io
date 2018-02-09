@@ -1,0 +1,622 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【ActiveMQ】生产者消费者流控制(五) | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="前言:通常在开发Mq时,我们有必要关注一个点:消息从producer发往broker的速度,consumer消息的消费速度.而上面的点又涉及到:游标策略(Message Cursors), prefetchSize和producerWindowSize,生产者流控制(Producer Flow Control)等.对于">
+<meta name="keywords" content="ActiveMQ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【ActiveMQ】生产者消费者流控制(五)">
+<meta property="og:url" content="http://huzongzhe.cn/2017/06/16/【ActiveMQ】生产者消费者流控制(五)/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="前言:通常在开发Mq时,我们有必要关注一个点:消息从producer发往broker的速度,consumer消息的消费速度.而上面的点又涉及到:游标策略(Message Cursors), prefetchSize和producerWindowSize,生产者流控制(Producer Flow Control)等.对于消费者的Flow Control是prefetchSize,消息消费速度涉及到M">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://huzongzhe.cn/2017/06/16/【ActiveMQ】生产者消费者流控制(五)/images/DispatchFastConsumers.png">
+<meta property="og:image" content="http://huzongzhe.cn/2017/06/16/【ActiveMQ】生产者消费者流控制(五)/images/VMCursor.png">
+<meta property="og:image" content="http://huzongzhe.cn/2017/06/16/【ActiveMQ】生产者消费者流控制(五)/images/NonPersistentMsgs.png">
+<meta property="og:updated_time" content="2018-02-09T06:42:30.826Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【ActiveMQ】生产者消费者流控制(五)">
+<meta name="twitter:description" content="前言:通常在开发Mq时,我们有必要关注一个点:消息从producer发往broker的速度,consumer消息的消费速度.而上面的点又涉及到:游标策略(Message Cursors), prefetchSize和producerWindowSize,生产者流控制(Producer Flow Control)等.对于消费者的Flow Control是prefetchSize,消息消费速度涉及到M">
+<meta name="twitter:image" content="http://huzongzhe.cn/2017/06/16/【ActiveMQ】生产者消费者流控制(五)/images/DispatchFastConsumers.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/06/16/【ActiveMQ】生产者消费者流控制(五)/" title="【ActiveMQ】生产者消费者流控制(五)" itemprop="url">【ActiveMQ】生产者消费者流控制(五)</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2017-06-16T03:12:22.000Z" itemprop="datePublished"> 发表于 2017-06-16</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<p><strong>前言:</strong>通常在开发Mq时,我们有必要关注一个点:消息从producer发往broker的速度,consumer消息的消费速度.<br>而上面的点又涉及到:游标策略(Message Cursors), prefetchSize和producerWindowSize,生产者流控制(Producer Flow Control)等.<br>对于消费者的Flow Control是prefetchSize,消息消费速度涉及到Multi-thread(这点在《Client客户端的线程资源》中有提到).<br>本文主要focus生产者流控制!</p>
+<h2 id="一-生产者流量控制-Producer-Flow-Control"><a href="#一-生产者流量控制-Producer-Flow-Control" class="headerlink" title="一. 生产者流量控制(Producer Flow Control)"></a>一. 生产者流量控制(Producer Flow Control)</h2><p>在4.x的版本里ActiveMq是通过基于TCP的流量控制,但是在当有多个消费者和生产者共用这个连接的时候可能会出现死锁;所以5.x开始,引入了针对某个producer的流量控制策略,通过broker返回producer Ack的方式实现.<br>流量控制触发条件:</p>
+<ol>
+<li>当memoryUsage,storeUsage,tempUsage达到设置的阈值(即磁盘,内存容量触顶)时触发.</li>
+<li>正常情况下broker不会控制producer的发送消息速度.</li>
+<li>同步消息(持久化消息默认采用同步发送,除非启用<code>useAsyncSend</code>)默认支持Flow Control,异步消息(非持久化消息默认采用异步发送)由于发送一条消息时不用等到任何ACK回来,所以默认不支持Flow Control. 但是我们可以设置<code>connctionFactory.setProducerWindowSize(1024000);</code>实现<code>ProducerWindowSize</code>表示在等到broker的ACK回来之前,可以发送多少bytes的消息.如果想让非持久化的消息也能立即被通知(因为非持久化消息默认异步发送),可以在<code>connectionFactory</code>中设置<code>alwaysSyncSend</code>.</li>
+</ol>
+<h3 id="设置方法"><a href="#设置方法" class="headerlink" title="设置方法:"></a>设置方法:</h3><p>默认情况下,当broker发现满足Flow Control条件后,直接阻塞producer,直到memoryUsage,storeUsage,tempUsage有空余空间.</p>
+<ol>
+<li>启用,禁用Flow Control<br>启用:在<code>activemq.xml</code>文件的<code>policyEntry</code>中设置: <code>&lt;policyEntry queue=&quot;&gt;&quot; producerFlowControl=&quot;true&quot; optimizedDispatch=&quot;true&quot; memoryLimit=&quot;16mb&quot;&gt;</code><br>禁用:<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;destinationPolicy&gt;</span><br><span class="line"> &lt;policyMap&gt;</span><br><span class="line">   &lt;policyEntries&gt;</span><br><span class="line">     &lt;policyEntry topic=&quot;&gt;&quot; producerFlowControl=&quot;false&quot;/&gt;</span><br><span class="line">   &lt;/policyEntries&gt;</span><br><span class="line"> &lt;/policyMap&gt;</span><br><span class="line">&lt;/destinationPolicy&gt;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>另外一种方法,是启用<code>Message Cursors</code>策略,这个下面讲.</p>
+<ol>
+<li><p>流量控制策略<br>在<code>activemq.xml</code>文件的<code>systemUsage</code>中设置:  <code>&lt;systemUsage sendFailIfNoSpaceAfterTimeout=&quot;3000&quot;&gt;</code> 或<code>sendFailIfNoSpace=&quot;true&quot;</code>  Client端抛异常的方式.<br><code>sendFailIfNoSpaceAfterTimeout</code>和<code>sendFailIfNoSpace</code>区别在于,当<code>systemUsage</code>达到设置的limit后, 前者等待一段时间再抛异常, 后者直接抛异常.</p>
+</li>
+<li><p>异步消息设置<br><code>connctionFactory.setProducerWindowSize(1024000);</code> 异步模式下, 在broker没有全部返回ack之前, producer能发送给broker的数据大小.<br>Tip:非持久化消息默认异步发送，异步发送模式下ProducerWindowSize参数才起作用，可以在ack没有回来时，继续想broker发送消息（不阻塞）的大小。<br>Tip：默认情况下，非持久化消息、事务内的消息均采用异步发送；对于持久化消息，则采用同步发送。</p>
+</li>
+</ol>
+<h2 id="游标-Message-Cursors"><a href="#游标-Message-Cursors" class="headerlink" title="游标(Message Cursors)"></a>游标(Message Cursors)</h2><p>触发游标策略：消费者处理消息速度赶不上生产者。</p>
+<h3 id="storeCursor（store-based-cursor）"><a href="#storeCursor（store-based-cursor）" class="headerlink" title="storeCursor（store based cursor）"></a>storeCursor（store based cursor）</h3><p>broker默认情况下不使用游标，默认是直接将持久化消息分发到对应的消费者的Dispatch队列，如下图:</p>
+<p><img src="./images/DispatchFastConsumers.png" alt=""><br><img src="./images/VMCursor.png" alt=""></p>
+<p>上图，是5.x的默认方式：当消费者的消费速度能赶上生产者的速度，那么对于持久化消息会先持久化到磁盘，然后直接发给<code>Dispatch Queue</code>（左图）。<br>当消费者速度赶不上生产者时，会有部分消息pending在broker，此时broker默认的做法是启用游标（Cursor），由于还有很大旧消息未发送到consumer，且<code>Dispatch Queue</code>大小固定，新来的消息不能直接发给<code>Dispatch Queue</code>，此时会启用游标策略，将新来的消息持久化到磁盘后，发给<code>Cursor</code>。实际上这里<code>Cursor</code>起的是一个缓冲区作用，解决生产者和消费者速度不均衡的问题！<br>Tip：上图<code>Message Store</code>不一定是磁盘哈，当使用的是levelDB时，就是内存memstore，不过会持久化LOG到磁盘。<br>Tip：这里<code>Pending Cursor</code>的实现是磁盘文件，配置文件中的<code>tempUsage</code>的地方！<br>与非持久化消息处理对比：</p>
+<p><img src="./images/NonPersistentMsgs.png" alt=""></p>
+<p>默认情况下，非持久化消息由于不持久到磁盘，当消费者速度慢于生产者后，会启用游标策略，将一部分消息持久化到临时文件中。<br>注意这里不是在当内存空间不够时才去持久化到一个临时文件中。<br>参考：</p>
+<blockquote>
+<p> Note that, since the introduction of the new file cursor in ActiveMQ 5.x, non-persisted messages are shunted into the temporary file store to reduce the amount of memory used for non-persistent messaging. As a result, you may find that a queue’s memoryLimit is never reached, as the cursor doesn’t use very much memory. If you really do want to keep all your non-persistent messages in memory, and stop producers when the limit is reached, you should configure the <vmqueuecursor>.</vmqueuecursor></p>
+</blockquote>
+<h3 id="VM-Cursor和File-based-Cursor"><a href="#VM-Cursor和File-based-Cursor" class="headerlink" title="VM Cursor和File based Cursor"></a>VM Cursor和File based Cursor</h3><p>简单介绍下另外两张游标策略：<code>VM Cursor</code>和<code>File based Cursor</code></p>
+<ol>
+<li><code>VM Cursor</code>策略是将<code>pending Message</code>全部放在磁盘中，如果<code>memoryUsage</code>已满则会阻塞生产者。在存在较慢消费者或消息消费耗时场景慎用！优点是速度快！</li>
+<li><code>File based Cursor</code>策略是 <code>VM Cursor</code>的改进，当<code>memoryUsage</code>达到极限时，将消息持久化到磁盘临时文件。用于持久化消息较慢，且消费者消费消息较快的场景，且对于某些队列可能会有突发的大量消息产生的场景。</li>
+</ol>
+<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>每个队列都有一个独立的<code>dispatch Queue</code> 和<code>pending Queue</code>，所以这里配置<code>pending Queue</code>：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;destinationPolicy&gt;</span><br><span class="line">      &lt;policyMap&gt;</span><br><span class="line">        &lt;policyEntries&gt;</span><br><span class="line">          &lt;policyEntry queue=&quot;org.apache.&gt;&quot;&gt;</span><br><span class="line">            &lt;deadLetterStrategy&gt;</span><br><span class="line">              &lt;individualDeadLetterStrategy queuePrefix=&quot;Test.DLQ.&quot;/&gt;</span><br><span class="line">            &lt;/deadLetterStrategy&gt;</span><br><span class="line">            &lt;pendingQueuePolicy&gt;</span><br><span class="line">                &lt;vmQueueCursor /&gt;</span><br><span class="line">            &lt;/pendingQueuePolicy&gt;</span><br><span class="line">          &lt;/policyEntry&gt;</span><br><span class="line">        &lt;/policyEntries&gt;</span><br><span class="line">      &lt;/policyMap&gt;</span><br><span class="line"> &lt;/destinationPolicy&gt;</span><br></pre></td></tr></table></figure></p>
+<p>上述配置，使用<code>vmQueueCursor</code>，所有的pending消息都会保持在内存中（默认是将pending消息放到临时文件中），并且当内存达到限制时会阻塞生产者！</p>
+<h2 id="二-消费者流控制"><a href="#二-消费者流控制" class="headerlink" title="二. 消费者流控制"></a>二. 消费者流控制</h2><ol>
+<li>消费者比较简单通过设置<code>prefetchSize</code>控制：<br>消费者消费消息有同步方式（通过receiver()方法同步获取），异步方式（设置Listener异步回调），Broker与Client间消息交互有pull，push两种方式；<br>当<code>prefetchSize=0</code>时Client每次调用receiver()方法去Broker啦取一条消息，当<code>prefetchSize&gt;=1</code>时，Broker每次主动往prefetchSize的buffer中push数据。<br>注：使用<code>receive()</code>时，prefetchSize可以为0和任意大于0的值，当使用MessageListener异步获取消息时，prefetchSize值必须 &gt;=1，如果设置0，会抛异常。</li>
+<li>通常消费者消费某个destination的消息是单线程的，这样会导致消息处理速度较慢，若要加快消息处理速度可以采用多线程方式，具体见<code>开发中遇到的问题(八)</code></li>
+</ol>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/ActiveMQ/">ActiveMQ</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/ActiveMQ/">ActiveMQ</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2017/06/16/【ActiveMQ】生产者消费者流控制(五)/" data-title="【ActiveMQ】生产者消费者流控制(五) | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/06/17/【ActiveMQ】消息可靠性实践(六)/" title="【ActiveMQ】消息可靠性实践(六)">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【ActiveMQ】消息可靠性实践(六)</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/06/15/【ActiveMQ】PolicyEntry整理(四)/"  title="【ActiveMQ】PolicyEntry整理(三)">
+ <strong>下一篇：</strong><br/> 
+ <span>【ActiveMQ】PolicyEntry整理(三)
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

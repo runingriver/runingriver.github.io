@@ -1,0 +1,604 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【ActiveMQ】消息可靠性实践(六) | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="一. Broker HA架构ActiveMQ提供Master-Slaver模式的主从架构模式，简单Master-Slaver只能保证消息的可恢复，Master-Slaver-Slaver模式能保证系统的高可用，其中一台宕掉，仍能正常提供服务。 持久化Broker支持基于Kahadb和LevelDB的消息持久化，另一方面">
+<meta name="keywords" content="ActiveMQ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【ActiveMQ】消息可靠性实践(六)">
+<meta property="og:url" content="http://huzongzhe.cn/2017/06/17/【ActiveMQ】消息可靠性实践(六)/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="一. Broker HA架构ActiveMQ提供Master-Slaver模式的主从架构模式，简单Master-Slaver只能保证消息的可恢复，Master-Slaver-Slaver模式能保证系统的高可用，其中一台宕掉，仍能正常提供服务。 持久化Broker支持基于Kahadb和LevelDB的消息持久化，另一方面支持消息统一的数据库和共享存储模式，消息的持久化是消息可靠性的最重要环节，如果系">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-02-09T06:42:37.446Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【ActiveMQ】消息可靠性实践(六)">
+<meta name="twitter:description" content="一. Broker HA架构ActiveMQ提供Master-Slaver模式的主从架构模式，简单Master-Slaver只能保证消息的可恢复，Master-Slaver-Slaver模式能保证系统的高可用，其中一台宕掉，仍能正常提供服务。 持久化Broker支持基于Kahadb和LevelDB的消息持久化，另一方面支持消息统一的数据库和共享存储模式，消息的持久化是消息可靠性的最重要环节，如果系">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/06/17/【ActiveMQ】消息可靠性实践(六)/" title="【ActiveMQ】消息可靠性实践(六)" itemprop="url">【ActiveMQ】消息可靠性实践(六)</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2017-06-17T03:12:22.000Z" itemprop="datePublished"> 发表于 2017-06-17</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<h2 id="一-Broker"><a href="#一-Broker" class="headerlink" title="一. Broker"></a>一. Broker</h2><ol>
+<li><strong>HA架构</strong><br>ActiveMQ提供Master-Slaver模式的主从架构模式，简单Master-Slaver只能保证消息的可恢复，Master-Slaver-Slaver模式能保证系统的高可用，其中一台宕掉，仍能正常提供服务。</li>
+<li><strong>持久化</strong><br>Broker支持基于Kahadb和LevelDB的消息持久化，另一方面支持消息统一的数据库和共享存储模式，消息的持久化是消息可靠性的最重要环节，如果系统重启 ，宕机都能保证消息可恢复。</li>
+<li><strong>ACK</strong><br>网络环节上，ActiveMQ采用ACK保证消息正确到达，提供三种模式的ACK：<br><strong>AUTO_ACKNOWLEDGE</strong>：Producer每发一条Broker持久化到磁盘成功都会回复一条成功消息；Consumer每消费一条都会回复Broker一条的ACK消息，如果消费异常也会发一条携带异常的消息给Broker，Broker会将该消息放入DLQ队列。自动确认并不一定是每成功一次就往Broker发送一条ACK消息，当开启optimizeACK后，会在某个时间点批量发ACK确认消息！<br><strong>CLIENT_ACKNOWLEDGE</strong>：Producer每发一条消息，要等到Consumer成功消费，并发送ACK到Broker，Broker才会返回一条ACK给Producer。<code>message.acknowledge()</code>方法可以批量确认一批消息，也可以消费一条确认一条。<br><strong>DUPS_OK_ACKNOWLEDGE</strong>：消息批量确认，Broker不每次成功持久化一条消息都发一条ACK给Producer，Producer也不用等待上一条ACK回来才再发下一条消息，他们之间采用批量ACK的方式！Consumer则由于Prefetch的存在，Broker无需等待Consumer的每一个确认ACK，而是直接填充Prefetch缓冲区，但Consumer消费消息回复ACK是采用批量回复的方式。<br>Tip：还有<strong>SESSION_TRANSACTED</strong>事务类型消息确认和<strong>INDIVIDUAL_ACKNOWLEDGE</strong>单条消息确认机制，这里不详述了。(<a href="http://shift-alt-ctrl.iteye.com/category/304508)讲的比较清楚！" target="_blank" rel="noopener">http://shift-alt-ctrl.iteye.com/category/304508)讲的比较清楚！</a></li>
+<li><strong>Networke Monitor</strong><br>网络环节上，ActiveMQ为保证链路的通畅，会创建readCheck和writeCheck定时监测线程，实时的监测链路的可用性！</li>
+<li><strong>Failover</strong><br>网络环节上，我们可以配置failover模式（单机也可以配置），ActiveMQ为保证链路故障后的可自动恢复，会开启<code>ActiveMQ Task-x</code>的线程池，来连接和重连，保证连接断开后能再次连上。</li>
+</ol>
+<p>上面列出了我运维开发中理解较深刻的五类消息可靠性的策略，当然，ActiveMQ在保证消息可靠性上远不止这些，保证消息的可靠性是一个MQ最基本也是最重要的部分，而且整个中间件的设计都是在围绕可靠性基础上的。</p>
+<h2 id="二-Client"><a href="#二-Client" class="headerlink" title="二. Client"></a>二. Client</h2><p>核心部分，上面的是ActiveMQ提供的可靠性，在实际开发中，保证消息的可靠性，我们也有许多要做的，先问几个问题：</p>
+<ol>
+<li>系统重启或网络故障，consumer端如何保证消息不丢失？</li>
+<li>系统重启或网络故障，producer端如何保证消息不丢失？</li>
+<li>原生提供的消费策略是线程池单线程消费模式，当采用线程池多线程消费消息时，太多的消息会导致Reject策略，consumer端如何保证消息不丢失？</li>
+<li>当Broker短暂不可用，原生client策略是阻塞或异常抛弃，阻塞是调用线程的阻塞，这就会导致很多问题，那么如何保证期间producer发送的消息不会丢失？<br>带着以上几个问题，我这里给出我解决策略：<h3 id="Consumer"><a href="#Consumer" class="headerlink" title="Consumer"></a>Consumer</h3><code>activemq-client.jar</code>（后面用client替代）提供的消费策略是，开启一个线程池，每次拿一个线程去消费Broker push过来的消息，如果异常，则抛给Broker保存到DLQ队列中。<br>这种策略当系统重启或网络故障，未收到ACK的消息Broker会再次发送给其他的消费者。<br>当需要消费大量消息时，client策略肯定不行，理所当然使用多线程来解决，如果使用<code>SynchronousQueue</code>或指定长度的<code>LinkedBlockingQueue</code>太多消息过来会导致Reject，如果<code>LinkedBlockingQueue</code>设置太长，很容器导致OOM（亲身体会），不啰嗦了给出我的策略。</li>
+<li>设置线程池如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">service = new ThreadPoolExecutor(nThread, nThread, 0L, TimeUnit.SECONDS,</span><br><span class="line">                new LinkedBlockingQueue&lt;Runnable&gt;(queueSize),</span><br><span class="line">                new ThreadFactory() &#123;</span><br><span class="line">                    @Override</span><br><span class="line">                    public Thread newThread(Runnable r) &#123;</span><br><span class="line">                        logger.info(&quot;create thread,current thread:&#123;&#125;,poolNumber:&#123;&#125;&quot;, Thread.currentThread().getName(), poolNumber.get());</span><br><span class="line">                        return new Thread(r, &quot;MQConsumer-Thread-&quot; + poolNumber.incrementAndGet());</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;, new ThreadPoolExecutor.CallerRunsPolicy());</span><br><span class="line"></span><br><span class="line">registerShutdownHook();</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>线程个数和阻塞队列长度可根据情况设置，我这里是10个线程，1000的阻塞队列长度，再来消息，由<code>ActiveMQ Session</code>线程自己处理，这样有效控制了消费速度！<br>随之而来的问题，就是，保存1000条消息的阻塞队列，<code>ActiveMQ Session</code>线程将消息递给线程池就认为消费成功，当系统重启，这些消息都有可能丢失，所以这里采用钩子线程！<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">public void registerShutdownHook() &#123;</span><br><span class="line">        shutdownHook = new Thread(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    shutdownSemaphore.acquire();</span><br><span class="line">                    if (service.isTerminating() || service.isShutdown() || service.isTerminated()) &#123;</span><br><span class="line">                        return;</span><br><span class="line">                    &#125;</span><br><span class="line">                    logger.info(&quot;shutdown hook,&#123;&#125; task retain in the queue&quot;, service.getQueue().size());</span><br><span class="line">                    closeThreadPool();</span><br><span class="line">                    logger.info(&quot;close pool finish,isTerminated:&#123;&#125;&quot;, service.isTerminated());</span><br><span class="line">                &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                    logger.error(&quot;shutdown semaphore acquire exception.&quot;, e);</span><br><span class="line">                &#125; finally &#123;</span><br><span class="line">                    shutdownSemaphore.release();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, &quot;MessageProcessor-shutdown-hook-thread&quot;);</span><br><span class="line"></span><br><span class="line">        Runtime.getRuntime().addShutdownHook(shutdownHook);</span><br><span class="line">        shutdownSemaphore = new Semaphore(1);</span><br><span class="line">    &#125;</span><br><span class="line">private void closeThreadPool() &#123;</span><br><span class="line">        if (service != null &amp;&amp; !service.isShutdown()) &#123;</span><br><span class="line">            service.shutdown();</span><br><span class="line">            try &#123;</span><br><span class="line">                service.awaitTermination(1, TimeUnit.HOURS);</span><br><span class="line">            &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                logger.error(&quot;await pooled task execute finish error.&quot;, e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>如果，消费消息依赖Spring的bean，那么很可能，在hook线程执行时，Spring已经销毁了，所以在spring的销毁<code>ContextClosedEvent</code>事件上调用一个close方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">public void close() &#123;</span><br><span class="line">        if (isUsedThreadPool) &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                shutdownSemaphore.acquire();</span><br><span class="line">                if (service.isTerminating() || service.isShutdown() || service.isTerminated()) &#123;</span><br><span class="line">                    return;</span><br><span class="line">                &#125;</span><br><span class="line">                Runtime.getRuntime().removeShutdownHook(shutdownHook);</span><br><span class="line">                logger.info(&quot;close MessageProcessor,&#123;&#125; task retain in the queue&quot;, service.getQueue().size());</span><br><span class="line">                closeThreadPool();</span><br><span class="line">                logger.info(&quot;close MessageProcessor finish,isTerminated:&#123;&#125;&quot;, service.isTerminated());</span><br><span class="line">            &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                logger.error(&quot;shutdown semaphore acquire exception.&quot;, e);</span><br><span class="line">            &#125; finally &#123;</span><br><span class="line">                shutdownSemaphore.release();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>shutdownSemaphore</code>信号量保证，不管是hook还是close，只被调用一次，且保证了spring要等到线程池关闭后才能销毁（这里用锁也可以实现）！<br>经过实践和测试，上面保证了大量消息的及时快速消费，也保证了每次发布系统重启，消息的不丢失，具体代码可参见我的github！<br>Tip：如果使用线程池的其他reject策略，还需需要注意<code>isTerminating()=true</code>时，新任务到来的情景。</p>
+<h3 id="Producer"><a href="#Producer" class="headerlink" title="Producer"></a>Producer</h3><p>Producer的client端，系统重启或网络故障在Client文中有详细讲，这种情况下，client是不能保证消息不丢失的，或者说是不稳定的。<br>不啰嗦，很晚了- -，给出我的策略：<br>采用failover当连接断开时，阻塞在该条消息发送处，一直等待连接重新建立完成，设置一个缓冲区，将新来的消息缓存在其中！<br>代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">public void sendImportantMessage(final String message) &#123;</span><br><span class="line">        if (message == null || message.isEmpty()) &#123;</span><br><span class="line">            logger.error(&quot;parameter of send message is empty.&quot;);</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        sendMessagePool.execute(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    TextMessage textMessage = queueSession.createTextMessage(message);</span><br><span class="line">                    producer.send(textMessage);</span><br><span class="line">                &#125; catch (Exception e) &#123;</span><br><span class="line">                    logger.error(&quot;send message error.message:&#123;&#125;&quot;, message, e);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private static final AtomicInteger poolNumber = new AtomicInteger(0);</span><br><span class="line">    private static final int CACHE_MESSAGE_SIZE = 10000;</span><br><span class="line">    private ThreadPoolExecutor sendMessagePool;</span><br><span class="line"></span><br><span class="line">    public void initSendMessagePool() &#123;</span><br><span class="line">        //注意并发问题</span><br><span class="line">        if (sendMessagePool != null) &#123;</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        sendMessagePool = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.SECONDS,</span><br><span class="line">                new LinkedBlockingQueue&lt;Runnable&gt;(CACHE_MESSAGE_SIZE),</span><br><span class="line">                new ThreadFactory() &#123;</span><br><span class="line">                    @Override</span><br><span class="line">                    public Thread newThread(Runnable r) &#123;</span><br><span class="line">                        return new Thread(r, &quot;MQSendMessage-Thread-&quot; + poolNumber.incrementAndGet());</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;, new ThreadPoolExecutor.DiscardOldestPolicy());</span><br><span class="line"></span><br><span class="line">        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                closeSendMessagePool();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, &quot;Producer-shutdown-hook-thread&quot;));</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>每条消息过来，都直接交给线程池处理，线程池中LinkedBlockingQueue默认是10000，即可缓存1w条消息，当连接断开，会阻塞在<code>producer.send(textMessage);</code><br>但是仍可以接收外面传过来的消息，当连接恢复，这些消息再被push到broker。<br>同样，要设置一个hook，系统重启上，spring是否销毁不会影响后续发送：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">private synchronized void closeSendMessagePool() &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            if (sendMessagePool == null || sendMessagePool.isShutdown() || sendMessagePool.isTerminated()) &#123;</span><br><span class="line">                return;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            logger.info(&quot;Producer shutdown,queue size:&#123;&#125;&quot;, sendMessagePool.getQueue().size());</span><br><span class="line">            sendMessagePool.shutdown();</span><br><span class="line">            sendMessagePool.awaitTermination(1, TimeUnit.HOURS);</span><br><span class="line">            logger.info(&quot;Producer close pool finish,isTerminated:&#123;&#125;&quot;, sendMessagePool.isTerminated());</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            logger.error(&quot;close producer pool exception.&quot;, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>但是要保证在producer关闭前发送完这些消息，所以要下面的close：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">public void close() &#123;</span><br><span class="line">       if (sendMessagePool != null &amp;&amp; !sendMessagePool.isShutdown()) &#123;</span><br><span class="line">           closeSendMessagePool();</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       try &#123;</span><br><span class="line">           producer.close();</span><br><span class="line">       &#125; catch (JMSException e) &#123;</span><br><span class="line">           logger.error(&quot;close producer exception&quot;, e);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       try &#123;</span><br><span class="line">           queueSession.close();</span><br><span class="line">       &#125; catch (JMSException e) &#123;</span><br><span class="line">           logger.error(&quot;close queueSession exception&quot;, e);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       try &#123;</span><br><span class="line">           queueConnection.close();</span><br><span class="line">       &#125; catch (JMSException e) &#123;</span><br><span class="line">           logger.error(&quot;close queueConnection exception&quot;, e);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure></p>
+<p>当使用者在关闭应用时关闭连接，此时，hook和close，其中之一会执行剩余消息的发送逻辑，如果是hook发送，close会阻塞在 <code>closeSendMessagePool();</code>方法上，保证了连接在消费完消息后再关闭。<br>此时，可能会有个疑问，为什么不使用client提供的<code>producerWindowSize+useAsyncSend</code>方式提供的异步发送模式呢？<br>答：当然，这种方式是可以的，但是有几个问题，这种方式并没有一个线程来负责将消息放入<code>producerWindowSize</code>的<code>buffer</code>中，如果failover不加timeout，会阻塞调用线程，从而阻塞主逻辑。<br>当加timeout，同样阻塞主逻辑，等待timeout超时，主逻辑才能执行下一条。但是我的这个逻辑加上<code>producerWindowSize+useAsyncSend</code>这个逻辑也是可以，没问题的，但是得看场景吧。</p>
+<p>拓展阅读:<br>Kafka消息可靠性保证: <a href="http://blog.csdn.net/u013256816/article/details/71091774" target="_blank" rel="noopener">http://blog.csdn.net/u013256816/article/details/71091774</a></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/ActiveMQ/">ActiveMQ</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/ActiveMQ/">ActiveMQ</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2017/06/17/【ActiveMQ】消息可靠性实践(六)/" data-title="【ActiveMQ】消息可靠性实践(六) | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/06/18/【ActiveMQ】Client客户端的线程资源(七)/" title="【ActiveMQ】Client客户端的线程资源(七)">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【ActiveMQ】Client客户端的线程资源(七)</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/06/16/【ActiveMQ】生产者消费者流控制(五)/"  title="【ActiveMQ】生产者消费者流控制(五)">
+ <strong>下一篇：</strong><br/> 
+ <span>【ActiveMQ】生产者消费者流控制(五)
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

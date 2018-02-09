@@ -1,0 +1,645 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【ActiveMQ】PolicyEntry整理(三) | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="前言: 本篇是根据相关资料和MQ运维过程中编辑整理出来的，主要在broker端配置topic和queue的相关策略，二者有很多的相似之处。个人不建议在broker端配置topic和queue的分发策略，只有在特殊情况下或保护broker稳定运行前提下，进行配置，通常使用默认配置即可。 activemq是我见过的最烂的官">
+<meta name="keywords" content="ActiveMQ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【ActiveMQ】PolicyEntry整理(三)">
+<meta property="og:url" content="http://huzongzhe.cn/2017/06/15/【ActiveMQ】PolicyEntry整理(四)/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="前言: 本篇是根据相关资料和MQ运维过程中编辑整理出来的，主要在broker端配置topic和queue的相关策略，二者有很多的相似之处。个人不建议在broker端配置topic和queue的分发策略，只有在特殊情况下或保护broker稳定运行前提下，进行配置，通常使用默认配置即可。 activemq是我见过的最烂的官方文档有没有！ 一. 相关概念Message group，durable sub">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-02-09T06:42:24.738Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【ActiveMQ】PolicyEntry整理(三)">
+<meta name="twitter:description" content="前言: 本篇是根据相关资料和MQ运维过程中编辑整理出来的，主要在broker端配置topic和queue的相关策略，二者有很多的相似之处。个人不建议在broker端配置topic和queue的分发策略，只有在特殊情况下或保护broker稳定运行前提下，进行配置，通常使用默认配置即可。 activemq是我见过的最烂的官方文档有没有！ 一. 相关概念Message group，durable sub">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/06/15/【ActiveMQ】PolicyEntry整理(四)/" title="【ActiveMQ】PolicyEntry整理(三)" itemprop="url">【ActiveMQ】PolicyEntry整理(三)</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2017-06-15T03:12:22.000Z" itemprop="datePublished"> 发表于 2017-06-15</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<p><strong>前言: </strong>本篇是根据相关资料和MQ运维过程中编辑整理出来的，主要在broker端配置topic和queue的相关策略，二者有很多的相似之处。<br>个人不建议在broker端配置topic和queue的分发策略，只有在特殊情况下或保护broker稳定运行前提下，进行配置，通常使用默认配置即可。</p>
+<p><strong>activemq是我见过的最烂的官方文档有没有！</strong></p>
+<h1 id="一-相关概念"><a href="#一-相关概念" class="headerlink" title="一. 相关概念"></a>一. 相关概念</h1><h2 id="Message-group，durable-subscriber-no-durable-subscriber"><a href="#Message-group，durable-subscriber-no-durable-subscriber" class="headerlink" title="Message group，durable subscriber/no-durable subscriber"></a>Message group，durable subscriber/no-durable subscriber</h2><p>对应ActiveMq的Topic而言，有两点：1.Message group;2.durable subscriber/no-durable subscriber；</p>
+<ul>
+<li><p>Message Group是指在发送端对某类消息进行标识分组，消费者可以针对Group获取消息。<br>Tip：注意区别Kafka的Group，kafka Group是将消费者分组，实现消息的负责均衡或类似queue的功能，分到同一组的消费者共同消费所有消息，即一条消息只会发给Group中的一个消费者。</p>
+</li>
+<li><p>durable subscriber表示client消费者与broker断开后重连后能接收到，断开期间publisher的所有消息，但是第一次与broker建立连接告诉broker自己是durable subscriber时，broker并不会把之前的所有消息发给这个subscriber。相比no-durable subscriber只会收到建立连接后publisher发给broker的消息！<br>Tip：注意与持久化和非持久化消息的区别，持久化表示消息到达broker后是否保存到磁盘上！</p>
+</li>
+</ul>
+<h2 id="dispatch-queue，pending-cursor，message-store"><a href="#dispatch-queue，pending-cursor，message-store" class="headerlink" title="dispatch queue，pending cursor，message store"></a>dispatch queue，pending cursor，message store</h2><p>默认情况下，消息到来后，执行两个操作：保存到<code>message store</code>(磁盘)（仅针对persistence消息），放入<code>dispatch queue</code>(内存)中。<br>如果生产者生产消息的速度大于消费者消费的速度，那么broker在将消息放入<code>dispatch queue</code>操作时，<code>dispatch queue</code>中积压的消息会越来越多；<br>此时broker会启动Cursor游标策略，<code>dispatch queue</code>中积压的消息称作<code>pending Message</code>。游标策略其实就是开辟一块空间存储积压信息，解决生产者消费者速度不均衡时引入的一个缓冲区。而这个存储空间可以在内存中：<code>vmCursor</code>，也可以在磁盘中：<code>storeCursor</code>，也可以同时在内存和磁盘中：<code>fileCursor</code>。</p>
+<h1 id="二-配置"><a href="#二-配置" class="headerlink" title="二. 配置"></a>二. 配置</h1><h2 id="从一个示例出发"><a href="#从一个示例出发" class="headerlink" title="从一个示例出发"></a>从一个示例出发</h2><p>下面配置了destinationPolicy的相关规则：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">&lt;broker&gt;</span><br><span class="line">    &lt;destinationPolicy&gt;</span><br><span class="line">        &lt;policyMap&gt;</span><br><span class="line">            &lt;policyEntries&gt;</span><br><span class="line">                &lt;policyEntry topic=&quot;FOO.&gt;&quot;&gt;</span><br><span class="line">                    &lt;!-- 仅topic且no-durable，对于slow consumer的消息保留策略 --&gt;</span><br><span class="line">                    &lt;pendingMessageLimitStrategy&gt;</span><br><span class="line">                        &lt;constantPendingMessageLimitStrategy limit=&quot;1000&quot;/&gt;</span><br><span class="line">                    &lt;/pendingMessageLimitStrategy&gt;</span><br><span class="line">                    &lt;!-- 消息剔除策略 --&gt;</span><br><span class="line">                    &lt;messageEvictionStrategy&gt;</span><br><span class="line">                        &lt;oldestMessageWithLowestPriorityEvictionStrategy/&gt;</span><br><span class="line">                    &lt;/messageEvictionStrategy&gt;</span><br><span class="line">                    &lt;!--仅topic且no-durable，存在slow consumer时pending消息策略--&gt;</span><br><span class="line">                    &lt;pendingSubscriberPolicy&gt;</span><br><span class="line">                        &lt;vmCursor/&gt;</span><br><span class="line">                    &lt;/pendingSubscriberPolicy&gt;</span><br><span class="line">                    &lt;!--仅topic且durable，存在slow consumer时pending消息策略--&gt;</span><br><span class="line">                    &lt;pendingDurableSubscriberPolicy&gt;</span><br><span class="line">                        &lt;vmDurableCursor/&gt;</span><br><span class="line">                    &lt;/pendingDurableSubscriberPolicy&gt;</span><br><span class="line"></span><br><span class="line">                    &lt;!-- 仅topic消息分发策略 --&gt;</span><br><span class="line">                    &lt;dispatchPolicy&gt;</span><br><span class="line">                        &lt;RoundRobinDispatchPolicy/&gt;</span><br><span class="line">                    &lt;/dispatchPolicy&gt;</span><br><span class="line"></span><br><span class="line">                    &lt;!-- no-durable subscriber上线后可以追溯的消息策略 --&gt;</span><br><span class="line">                    &lt;subscriptionRecoveryPolicy&gt;</span><br><span class="line">                        &lt;!-- 1 minute --&gt;</span><br><span class="line">                        &lt;timedSubscriptionRecoveryPolicy recoverDuration=&quot;60000&quot;/&gt;</span><br><span class="line">                    &lt;/subscriptionRecoveryPolicy&gt;</span><br><span class="line">                &lt;/policyEntry&gt;</span><br><span class="line"></span><br><span class="line">                &lt;policyEntry queue=&quot;ORDERS.&gt;&quot;&gt;</span><br><span class="line">                    &lt;dispatchPolicy&gt;</span><br><span class="line">                        &lt;strictOrderDispatchPolicy/&gt;</span><br><span class="line">                    &lt;/dispatchPolicy&gt;</span><br><span class="line">                &lt;/policyEntry&gt;</span><br><span class="line">            &lt;/policyEntries&gt;</span><br><span class="line">        &lt;/policyMap&gt;</span><br><span class="line">    &lt;/destinationPolicy&gt;</span><br><span class="line">&lt;/broker&gt;</span><br></pre></td></tr></table></figure></p>
+<h2 id="policyEntry"><a href="#policyEntry" class="headerlink" title="policyEntry"></a>policyEntry</h2><p>一个policyEntry代表对一类队列的策略，这个我们也可以在client端配置，通常在broker中policyEntry上可以配置三个参数：</p>
+<ol>
+<li><p><code>producerFlowControl</code>，生产者流控制策略，触发条件是：当broker的RAM或磁盘到达设置的极限时，<code>ture</code>表示broker通过<code>延迟发送ACK</code>和<code>ResourceAllocationException返回异常</code>到生产者断的方法控制生产者的发生消息速度，false表示如果RAM满了则将消息存到磁盘，如果磁盘也满了则block住生产者直到磁盘有空间。</p>
+</li>
+<li><p><code>optimizedDispatch</code>，<strong>仅queue</strong>，默认false：对于每个queue不使用一个独立的线程来dispatch消息;true：每个queue分配一个线程专用于dispatch消息到consumer。</p>
+</li>
+<li><p><code>memoryLimit</code>，设置保存在内存中的数据量，默认没有限制，上限受限于<code>systemUsage</code>的设置，通常是用于cursor</p>
+</li>
+</ol>
+<p>eg：<br><code>&lt;policyEntry queue=&quot;&gt;&quot; producerFlowControl=&quot;true&quot; optimizedDispatch=&quot;true&quot;  memoryLimit=&quot;16mb&quot;&gt;</code><br>其中，<code>&gt;</code>是通配符，这里指所有queue队列，<code>optimizedDispatch</code>每个队列分配一个独立线程分发消息，<code>memoryLimit</code>每个队列的最大内存使用16M。</p>
+<p>Tip：这些也可以通过Client端配置，可以参考：<a href="http://activemq.apache.org/per-destination-policies.html" target="_blank" rel="noopener">http://activemq.apache.org/per-destination-policies.html</a> （详细说明了哪些是topic哪些是queue独有，共有的属性）</p>
+<h3 id="1-限制策略（pendingMessageLimitStrategy）"><a href="#1-限制策略（pendingMessageLimitStrategy）" class="headerlink" title="1. 限制策略（pendingMessageLimitStrategy）"></a>1. 限制策略（pendingMessageLimitStrategy）</h3><p><strong>针对存在Slow Consumer时，Topic，no-durable订阅者有效</strong>，当通道中有大量的消息积压时，broker可以pending在RAM中的消息量。</p>
+<ul>
+<li>为了防止Topic中有慢速消费者，导致整个通道消息积压，从而导致broker减缓producer的发送速度,从而影响正常的快速的消费者消费速度。</li>
+<li>对于Topic，一条消息只有所有的订阅者都消费才会被删除,当出现slow consumer时,超过pendingMessageLimitStrategy的消息会直接被删除，slow consumer将收不到这些消息。</li>
+<li>存在Slow Consumer时，会启用Cursor，超过limit的消息会采用<code>MessageEvictionStrategy</code>策略剔除Dispatch queue中积压的消息。</li>
+</ul>
+<p>可选参数：<br><code>&lt;constantPendingMessageLimitStrategy limit=&quot;1000&quot;/&gt;</code>: 内存保留1000条消息。<br><code>&lt;prefetchRatePendingMessageLimitStrategy multiplier=&quot;2.5&quot;/&gt;</code>: 如果prefetchSize为1000，则保留2.5 * 1000条消息</p>
+<p>参考：<a href="http://activemq.apache.org/slow-consumer-handling.html" target="_blank" rel="noopener">http://activemq.apache.org/slow-consumer-handling.html</a></p>
+<h3 id="2-消息剔除策略（MessageEvictionStrategy）"><a href="#2-消息剔除策略（MessageEvictionStrategy）" class="headerlink" title="2. 消息剔除策略（MessageEvictionStrategy）"></a>2. 消息剔除策略（MessageEvictionStrategy）</h3><p><strong>针对Slow Consumer，Topic，nondurable订阅者有效</strong>，PendingMessage的数量超过限制时，broker该如何剔除多余的消息。<br>当一条Topic消息达到broker后，两步操作：1.若是持久化消息，先保存到磁盘；2.放入Dispatch queue，此时<code>pendingMessageLimitStrategy</code>策略会检测pending Message是否到达limit，如果是则采用<code>MessageEvictionStrategy</code>策略将内存中（dispatch queue）的消息剔除，并检测是否存在slow consumer，若是则启用Cursor策略，分页的方式将Cursor中的消息放入Dispatch queue，这个cursor策略由<code>pendingSubscriberPolicy</code>和<code>pendingDurableSubscriberPolicy</code>控制。</p>
+<p>问：这个剔除的消息，Slow Consumer还会收到吗？<br>答:<strong>不会</strong>,通过一个简单的测试可以验证,验证测试逻辑如下:<br>首先,1.开启2个线程往A_TEST.TOPIC里publishe消息;2.开启多线程subscribe消息,模拟快速消费者;3.开启一个线程subscribe消息并每消费一条消息sleep 0.5s,模拟成慢速消费者;<br>然后,先开启2,3两个订阅者,再开启1;观察管理页面的<code>Active Subscribers for A_TEST.TOPIC</code>,可以观察到:一个Inflight为0或1且基本满足<code>Enqueued = Dequeued</code>,表示能及时消费所有的消息,另一个的Inflight为1~32767的数,其中<code>Inflight&lt;=Prefetch</code>,说明当前存在一个快速消费者和一个slow consumer!<br>最后,统计两个subscriber消费的消息<br>结果: 一个subscriber消费了所有消息，另一个subscriber只消费了一部分消息。</p>
+<p><strong>结论:MessageEvictionStrategy的<code>discard old messages</code>是将Dispatch queue中的old Message删除,这些剔除的消息不再发给slow consumer。</strong>。这些被剔除的消息默认被放入<code>ActiveMQ.DLQ</code>队列中。</p>
+<p>可选参数：<br><code>&lt;oldestMessageEvictionStrategy/&gt;</code>: 移除旧消息，默认策略。<br><code>&lt;oldestMessageWithLowestPriorityEvictionStrategy/&gt;</code>: 旧数据中权重较低的消息，将会被移除。权重在生产者端设置（<code>producer.setPriority(0~9)</code>，默认4）<br><code>&lt;uniquePropertyMessageEvictionStrategy propertyName=&quot;test&quot; /&gt;</code>: 移除具有指定property的旧消息。此属性值在生产者端设置，并移除较旧的。</p>
+<h3 id="3-Topic游标策略-pendingSubscriberPolicy和pendingDurableSubscriberPolicy"><a href="#3-Topic游标策略-pendingSubscriberPolicy和pendingDurableSubscriberPolicy" class="headerlink" title="3. Topic游标策略 pendingSubscriberPolicy和pendingDurableSubscriberPolicy"></a>3. Topic游标策略 pendingSubscriberPolicy和pendingDurableSubscriberPolicy</h3><p>ActiveMQ 5.0之前所有non-persistent messaging保存在内存中,persistent messaging直接启用storeCursor,缺点是non-persistent所有消息都保存在内存中,当出现slow consumer会导致RAM到达上限,从而block或减缓producer;对于persistent,如果消费者足够快,那么消息持久化到磁盘后,消息发送是从storCursor到Dispatch queue,这样性能不是最好的!<br>ActiveMQ 5.0之后,non-persistent消息直接放入Dispatch queue,当slow consumer出现时启用Cursor策略,而不是block或减缓producer;persistent消息持久化到磁盘后直接将消息放入Dispatch queue,当出现slow consumer后,才启用Cursor策略.</p>
+<ul>
+<li><strong>pendingSubscriberPolicy</strong>：是针对nondurable subscriber，三种策略：<code>storeCursor</code>, <code>vmCursor</code>和<code>fileCursor</code>。</li>
+<li><strong>pendingDurableSubscriberPolicy</strong>：是针对durable subscriber，三种策略：<code>storeDurableSubscriberCursor</code>, <code>vmDurableCursor</code>和 <code>fileDurableSubscriberCursor</code>。<br>都默认是store，一般都使用默认，每个具体含义参见：<code>http://activemq.apache.org/message-cursors.html</code></li>
+</ul>
+<h3 id="4-Queue游标策略-pendingQueuePolicy"><a href="#4-Queue游标策略-pendingQueuePolicy" class="headerlink" title="4. Queue游标策略 pendingQueuePolicy"></a>4. Queue游标策略 pendingQueuePolicy</h3><p>同上，也有三种策略：<code>fileQueueCursor</code> ， <code>storeCursor</code> 和 <code>vmQueueCursor</code></p>
+<p>eg：对持久化和非持久化进行个性化配置：<br>持久化和非持久化采用vmQueueCursor：<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;pendingQueuePolicy&gt;</span><br><span class="line">&lt;vmQueueCursor/&gt;</span><br><span class="line">&lt;/pendingQueuePolicy&gt;</span><br></pre></td></tr></table></figure></p>
+<p>非持久化采用fileQueueCursor：<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;pendingQueuePolicy&gt;</span><br><span class="line">&lt;storeCursor&gt;</span><br><span class="line">&lt;nonPersistent&gt;</span><br><span class="line">&lt;fileQueueCursor/&gt;</span><br><span class="line">&lt;/nonPersistent&gt;</span><br><span class="line">&lt;/storeCursor&gt;</span><br><span class="line">&lt;/pendingQueuePolicy&gt;</span><br></pre></td></tr></table></figure></p>
+<p><strong>Tip: 无论是pendingQueuePolicy还是pendingSubscriberPolicy和pendingDurableSubscriberPolicy，都是解决由于消费者速度相对慢情景下，RAM的Dispatch queue无法保存所有积压的消息引入的中间层，解决速度不均衡导致的消息积压问题的方案。且与消息是否是persistent无关。</strong></p>
+<h3 id="5-转发策略dispatchPolicy"><a href="#5-转发策略dispatchPolicy" class="headerlink" title="5. 转发策略dispatchPolicy"></a>5. 转发策略dispatchPolicy</h3><p><strong>仅针对Topic有效</strong>，消息发送给多个subscriber的顺序问题。</p>
+<p>可选参数：<br><code>&lt;RoundRobinDispatchPolicy/&gt;</code>: 轮询，消息将依次发送给每个订阅者<br><code>&lt;strictOrderDispatchPolicy/&gt;</code>: 严格有序，消息依次发送给每个订阅者，按照订阅的时间先后。<br><code>&lt;PriorityDispatchPolicy/&gt;</code>: 基于<code>property</code>，subscriber初始化时可以指定priority，默认每个consumer的priority相同。<br><code>&lt;SimpleDispatchPolicy/&gt;</code>: 默认值<br><code>&lt;NoSubscriptionRecoveryPolicy/&gt;</code>: 关闭恢复机制。默认值，即不发送订阅开始之前的消息。<br>strictOrderDispatchPolicy的解释参考：<code>http://activemq.apache.org/total-ordering.html</code></p>
+<h3 id="6-消息恢复策略-subscriptionRecoveryPolicy"><a href="#6-消息恢复策略-subscriptionRecoveryPolicy" class="headerlink" title="6. 消息恢复策略 subscriptionRecoveryPolicy"></a>6. 消息恢复策略 subscriptionRecoveryPolicy</h3><p><strong>针对Topic，no-durable订阅者有效</strong>，表示no-durable上线后broker将其上线前的消息发送给subscriber的策略：<br>默认情况下，subscriber只能获取建立连接完成之后的消息，如果<code>Retroactive=true</code>（在publisher端设置），那么订阅者就可以获取其创建之前的消息列表。<br>subscriptionRecoveryPolicy就是用来控制“retroactive”的消息量的，也即broker保留多少已经消费了的消息。</p>
+<p>可选参数：<br><code>&lt;timedSubscriptionRecoveryPolicy recoverDuration=&quot;60000&quot;/&gt;</code>：保留1分钟内的消息。<br><code>&lt;fixedSizedSubscriptionRecoveryPolicy maximumSize=&quot;1024&quot;/&gt;</code>：保留1Kb消息。<br><code>&lt;fixedCountSubscriptionRecoveryPolicy maximumSize=&quot;100&quot;/&gt;</code>：保留100条。<br><code>&lt;LastImageSubscriptionRecoveryPolicy/&gt;</code>: 只保留最新的一条数据</p>
+<h3 id="7-慢速消费者策略"><a href="#7-慢速消费者策略" class="headerlink" title="7. 慢速消费者策略"></a>7. 慢速消费者策略</h3><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;slowConsumerStrategy&gt;</span><br><span class="line">      &lt;abortSlowConsumerStrategy abortConnection=&quot;false&quot; maxTimeSinceLastAck=&quot;30000&quot;/&gt;</span><br><span class="line">&lt;/slowConsumerStrategy&gt;</span><br></pre></td></tr></table></figure>
+</code></pre><p>Broker将如何处理慢消费者。Broker将会启动一个后台线程用来检测所有的慢速消费者，并定期关闭关闭它们。<br><code>abortConnection</code>表示是否关闭连接，但不关闭底层链接。<code>maxTimeSinceLastAck</code>表示最后一个ACK距离现在的时间间隔阀值。</p>
+<h3 id="8-“死信”策略-DLQ策略"><a href="#8-“死信”策略-DLQ策略" class="headerlink" title="8. “死信”策略 DLQ策略"></a>8. “死信”策略 DLQ策略</h3><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;deadLetterStrategy&gt;</span><br><span class="line">    &lt;individualDeadLetterStrategy  queuePrefix=&quot;DLQ.&quot; useQueueForQueueMessages=&quot;true&quot;/&gt;</span><br><span class="line">    &lt;sharedDeadLetterStrategy deadLetterQueue=&quot;DLQ-QUEUE&quot;/&gt; </span><br><span class="line">&lt;/deadLetterStrategy&gt;</span><br></pre></td></tr></table></figure>
+</code></pre><p><code>IndividualDeadLetterStrategy</code>: 把DeadLetter放入各自的死信通道中,queuePrefix自定义死信前缀，useQueueForQueueMessages使用队列保存死信，还有一个属性为“useQueueForTopicMessages”，此值表示是否将Topic的DeadLetter保存在Queue中，默认为true。<br><code>SharedDeadLetterStrategy</code>: 将所有的DeadLetter保存在一个共享的队列中，这是ActiveMQ broker端默认的策略。共享队列默认为<code>ActiveMQ.DLQ</code>，可以通过deadLetterQueue属性来设定。还有2个很重要的可选参数，“processExpired”表示是否将过期消息放入死信队列，默认为true；<code>processNonPersistent</code>表示是否将“非持久化”消息放入死信队列，默认为false。<br><code>DiscardingDeadLetterStrategy</code>: broker将直接抛弃DeadLeatter。如果开发者不需要关心DeadLetter，可以使用此策略。<br>AcitveMQ提供了一个便捷的插件：DiscardingDLQBrokerPlugin，来抛弃DeadLetter：<br>指定队列的所有消息，全部，正则匹配：<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;discardingDLQBrokerPlugin dropOnly=&quot;MY.EXAMPLE.TOPIC.29 MY.EXAMPLE.QUEUE.87&quot; reportInterval=&quot;1000&quot; /&gt;</span><br><span class="line">&lt;discardingDLQBrokerPlugin dropAll=&quot;true&quot; dropTemporaryTopics=&quot;true&quot; dropTemporaryQueues=&quot;true&quot; /&gt;</span><br><span class="line">&lt;discardingDLQBrokerPlugin dropOnly=&quot;MY.EXAMPLE.TOPIC.[0-9]&#123;3&#125; MY.EXAMPLE.QUEUE.[0-9]&#123;3&#125;&quot;reportInterval=&quot;3000&quot; /&gt;</span><br></pre></td></tr></table></figure></p>
+<p>Tip： 默认所有死信消息都会放入<code>ActiveMQ.DLQ</code>队列</p>
+<h1 id="三-policyEntry相关问题及配置"><a href="#三-policyEntry相关问题及配置" class="headerlink" title="三. policyEntry相关问题及配置"></a>三. policyEntry相关问题及配置</h1><h2 id="持久订阅者Durable-Subscriberspending太多消息在broker的问题"><a href="#持久订阅者Durable-Subscriberspending太多消息在broker的问题" class="headerlink" title="持久订阅者Durable Subscriberspending太多消息在broker的问题"></a>持久订阅者<code>Durable Subscribers</code>pending太多消息在broker的问题</h2><p>如果持久订阅者下线了很长一段时间，或者持久订阅者不再订阅某topic，默认情况下，由于broker要将没有被持久订阅者消费的所有消息保存起来，以便在其上线后发给它；<br>然而，如果这些消息大量积压在broker，会导致broker的磁盘内存等资源耗尽，且policyEntry没有相关配置，另外，虽然我们可以通过管理页面进行处理，但不一定能及时处理，官方提供两种办法对这种情况进行处理：</p>
+<h3 id="1-过期消息"><a href="#1-过期消息" class="headerlink" title="1. 过期消息"></a>1. 过期消息</h3><p>我们可以在client端将指定destination的消息设置一个过期属性（<code>setTimeToLive(timeToLive)</code>）；<br>然后在指定队列中配置<code>&lt;policyEntry topic=&quot;&gt;&quot; expireMessagesPeriod=&quot;300000&quot;/&gt;</code>，这里在broker配置对所有topic类型消息，每5分钟检查一次，将过期的消息从broker删除！</p>
+<h3 id="2-移除不活动的持久订阅者"><a href="#2-移除不活动的持久订阅者" class="headerlink" title="2. 移除不活动的持久订阅者"></a>2. 移除不活动的持久订阅者</h3><p>ActiveMq提供两个参数，来配置移除策略：<br><code>offlineDurableSubscriberTimeout</code>，默认<code>-1</code>不移除，单位毫秒，表示<code>Durable Subscriber</code>不活动多久后，就移除这个Subscriber。<br><code>offlineDurableSubscriberTaskSchedule</code>，默认<code>300000</code>，单位毫秒，即默认5分钟检查一次，表示broker每间隔多久去检查一次。<br>eg：<br><code>&lt;broker name=&quot;localhost&quot; offlineDurableSubscriberTimeout=&quot;86400000&quot; offlineDurableSubscriberTaskSchedule=&quot;3600000&quot;&gt;</code><br>表示每隔1小时去检测一次，将下线1天的持久订阅者删除掉！</p>
+<p>参考：<a href="http://activemq.apache.org/manage-durable-subscribers.html" target="_blank" rel="noopener">http://activemq.apache.org/manage-durable-subscribers.html</a></p>
+<p>Tip：具体配置方法查看官方文档，每个参数可以在<a href="http://activemq.apache.org/xml-reference.html中找到。" target="_blank" rel="noopener">http://activemq.apache.org/xml-reference.html中找到。</a></p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li><a href="http://activemq.apache.org/per-destination-policies.html" target="_blank" rel="noopener">http://activemq.apache.org/per-destination-policies.html</a></li>
+<li><a href="http://activemq.apache.org/dispatch-policies.html" target="_blank" rel="noopener">http://activemq.apache.org/dispatch-policies.html</a></li>
+<li><a href="https://my.oschina.net/coderedrain/blog/724943?utm_source=tuicool&amp;utm_medium=referral" target="_blank" rel="noopener">https://my.oschina.net/coderedrain/blog/724943?utm_source=tuicool&amp;utm_medium=referral</a></li>
+<li><a href="http://shift-alt-ctrl.iteye.com/blog/2061859" target="_blank" rel="noopener">http://shift-alt-ctrl.iteye.com/blog/2061859</a></li>
+<li><strong><a href="http://activemq.apache.org/xml-reference.html" target="_blank" rel="noopener">http://activemq.apache.org/xml-reference.html</a></strong></li>
+<li><a href="http://activemq.apache.org/xml-configuration.html" target="_blank" rel="noopener">http://activemq.apache.org/xml-configuration.html</a></li>
+<li><a href="http://activemq.apache.org/slow-consumer-handling.html" target="_blank" rel="noopener">http://activemq.apache.org/slow-consumer-handling.html</a></li>
+</ol>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/ActiveMQ/">ActiveMQ</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/ActiveMQ/">ActiveMQ</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2017/06/15/【ActiveMQ】PolicyEntry整理(四)/" data-title="【ActiveMQ】PolicyEntry整理(三) | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/06/16/【ActiveMQ】生产者消费者流控制(五)/" title="【ActiveMQ】生产者消费者流控制(五)">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【ActiveMQ】生产者消费者流控制(五)</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/06/14/【ActiveMQ】集群搭建(三)/"  title="【ActiveMQ】集群搭建(三)">
+ <strong>下一篇：</strong><br/> 
+ <span>【ActiveMQ】集群搭建(三)
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

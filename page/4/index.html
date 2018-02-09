@@ -79,12 +79,59 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/08/13/【Guava】几个常用的方法整理/" title="【Guava】几个常用的方法整理" itemprop="url">
+    <a href="/2016/11/12/【Mysql】主从复制原理整理/" title="【Mysql】主从复制原理整理" itemprop="url">
   
-    <h1 itemprop="name">【Guava】几个常用的方法整理</h1>
+    <h1 itemprop="name">【Mysql】主从复制原理整理</h1>
     
      
-           <p itemprop="description" >Predicate和Predicates——集合过滤与转换Predicate断言的最基本应用就是过滤集合。所有Guava过滤方法都返回”视图”,即并非用一个新的集合表示过滤，而只是基于原集合的视图。Predicates提供多个断言：and，or，notList的过滤视图被省略了，</p>
+           <p itemprop="description" >1. 介绍当前用的比较多的mysql高可用架构一般是HA或MMM,Master-Slaver之间通过binlog实现主从数据一致性,有必要理解一下主从复制的基本原理。首先从理解数据的日志类型入手，数据库提供了以下几种日志： 错误日志、binlog日志(二进制日志)、查询日志、慢查</p>
+        
+    
+    <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2016/11/12/Linux文本操作/" title="Linux文本操作命令" itemprop="url">
+  
+    <h1 itemprop="name">Linux文本操作命令</h1>
+    
+     
+           <p itemprop="description" >1. tr 按列替换
+echo &amp;quot;{123}&amp;quot; | tr -d &amp;#39;{}&amp;#39; 删除输入中的 “{“ 和 “}”
+cat testfile |tr a-z A-Z  将文件testfile中的小写字母全部转换成大写字母
+
+2. cut : cut [</p>
+        
+    
+    <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2016/08/13/【Guava】AbstractScheduleService从源码到使用/" title="【Guava】AbstractScheduleService从源码到使用" itemprop="url">
+  
+    <h1 itemprop="name">【Guava】AbstractScheduleService从源码到使用</h1>
+    
+     
+           <p itemprop="description" >前言： AbstractScheduledService是guava提供的一个定时任务的实现，提供更简便的使用，并提供任务生命周期的监听。
+AbstractScheduledService和Listener的生命周期
+AbstractScheduledService概述
+Abst</p>
         
     
     <time datetime="2016-08-13T11:22:11.000Z" itemprop="datePublished">2016-08-13</time>
@@ -99,13 +146,12 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/08/13/shell,bash操作快捷键/" title="shell,bash操作快捷键" itemprop="url">
+    <a href="/2016/08/13/【Guava】几个常用的方法整理/" title="【Guava】几个常用的方法整理" itemprop="url">
   
-    <h1 itemprop="name">shell,bash操作快捷键</h1>
+    <h1 itemprop="name">【Guava】几个常用的方法整理</h1>
     
      
-           <p itemprop="description" >前言： 在命令行(CLI)或者bash中编辑命令的时候，了解一些基本的快捷键，和编辑技巧，会让你效率更高，节约更多的时间 - -。下面是我的总结：
-1. 编辑命令Ctrl + xx：在命令行首和光标之间移动,比较特殊！Ctrl + a ：移到命令行首Ctrl + e ：移到命令行</p>
+           <p itemprop="description" >Predicate和Predicates——集合过滤与转换Predicate断言的最基本应用就是过滤集合。所有Guava过滤方法都返回”视图”,即并非用一个新的集合表示过滤，而只是基于原集合的视图。Predicates提供多个断言：and，or，notList的过滤视图被省略了，</p>
         
     
     <time datetime="2016-08-13T11:22:11.000Z" itemprop="datePublished">2016-08-13</time>
@@ -168,62 +214,16 @@ locate a.txt 搜索文件,其中 updatedb 强制更新locate数据库，默认�
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/08/13/【Guava】AbstractScheduleService从源码到使用/" title="【Guava】AbstractScheduleService从源码到使用" itemprop="url">
+    <a href="/2016/08/13/shell,bash操作快捷键/" title="shell,bash操作快捷键" itemprop="url">
   
-    <h1 itemprop="name">【Guava】AbstractScheduleService从源码到使用</h1>
+    <h1 itemprop="name">shell,bash操作快捷键</h1>
     
      
-           <p itemprop="description" >前言： AbstractScheduledService是guava提供的一个定时任务的实现，提供更简便的使用，并提供任务生命周期的监听。
-AbstractScheduledService和Listener的生命周期
-AbstractScheduledService概述
-Abst</p>
+           <p itemprop="description" >前言： 在命令行(CLI)或者bash中编辑命令的时候，了解一些基本的快捷键，和编辑技巧，会让你效率更高，节约更多的时间 - -。下面是我的总结：
+1. 编辑命令Ctrl + xx：在命令行首和光标之间移动,比较特殊！Ctrl + a ：移到命令行首Ctrl + e ：移到命令行</p>
         
     
     <time datetime="2016-08-13T11:22:11.000Z" itemprop="datePublished">2016-08-13</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2016/08/03/【扒一扒】synchronized/" title="【扒一扒】synchronized" itemprop="url">
-  
-    <h1 itemprop="name">【扒一扒】synchronized</h1>
-    
-     
-           <p itemprop="description" >前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。
-synchronized1. Lock和Synchronized区别
-Synchronized同步代码块，不能保证等待线程进入同步块的顺序。
-Syn</p>
-        
-    
-    <time datetime="2016-08-03T03:12:22.000Z" itemprop="datePublished">2016-08-03</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2016/08/03/【扒一扒】volatile/" title="【扒一扒】volatile" itemprop="url">
-  
-    <h1 itemprop="name">【扒一扒】volatile</h1>
-    
-     
-           <p itemprop="description" >前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。
-基础介绍Java 关键字volatile可以让变量的修改在多个线程之间可见，即cpu核心1对volatile修饰的变量进行修改会立即刷新该变量在RA</p>
-        
-    
-    <time datetime="2016-08-03T03:12:22.000Z" itemprop="datePublished">2016-08-03</time>
   </a>
 </section>
 
@@ -409,11 +409,11 @@ Syn</p>
 			
 		
 			
-				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
 			
 		
 			
