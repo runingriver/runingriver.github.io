@@ -79,18 +79,35 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】消息唯一性的保证(十)/" title="【ActiveMQ】消息唯一性的保证(十)" itemprop="url">
+    <a href="/2017/06/12/【ActiveMQ】集群搭建(二)/" title="【ActiveMQ】集群搭建(二)" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】消息唯一性的保证(十)</h1>
+    <h1 itemprop="name">【ActiveMQ】集群搭建(二)</h1>
     
      
-           <p itemprop="description" >前言：一次broker的failover，导致DLQ队列中多出了很多消息，这些消息都是由client端报duplicate message异常提交到DLQ队列中的。由此必须得深入client端的源码了解一下其机制。
-
-消息是如何保证不被重复消费？
-上述现象在client端是如何产</p>
+           <p itemprop="description" ></p>
         
     
     <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2017/05/12/【ZooKeeper】集群配置（三）/" title="【ZooKeeper】集群配置（三）" itemprop="url">
+  
+    <h1 itemprop="name">【ZooKeeper】集群配置（三）</h1>
+    
+     
+           <p itemprop="description" >配置本节是在【ZooKeeper】集群搭建（二）的基础之上，记录zk集群搭建的常用配置。配置具体意义和更详细内容请看，配置与Google的结果有部分出入，可以根据需求进行配置。Tip：所有配置文件都在./conf目录下! 该节配置与一些博客写法有部分出入,通过阅读启动脚本,根据脚</p>
+        
+    
+    <time datetime="2017-05-12T03:12:22.000Z" itemprop="datePublished">2017-05-12</time>
   </a>
 </section>
 
@@ -129,26 +146,6 @@
     
      
            <p itemprop="description" >前言：在实际搭建zk集群过程中遇到不少困难,简单配置可以google到,但是想深入一点,对zk的配置做更为深入自定义配置,就有点力不从心了,而且很多的配置都没有做深入的研究.记录此博客,一方面整理记录一下zk常用操作,将网上人云亦云的杂乱中整理成可用的部分,另一方面,根据zk启动</p>
-        
-    
-    <time datetime="2017-05-12T03:12:22.000Z" itemprop="datePublished">2017-05-12</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2017/05/12/【ZooKeeper】集群配置（三）/" title="【ZooKeeper】集群配置（三）" itemprop="url">
-  
-    <h1 itemprop="name">【ZooKeeper】集群配置（三）</h1>
-    
-     
-           <p itemprop="description" >配置本节是在【ZooKeeper】集群搭建（二）的基础之上，记录zk集群搭建的常用配置。配置具体意义和更详细内容请看，配置与Google的结果有部分出入，可以根据需求进行配置。Tip：所有配置文件都在./conf目录下! 该节配置与一些博客写法有部分出入,通过阅读启动脚本,根据脚</p>
         
     
     <time datetime="2017-05-12T03:12:22.000Z" itemprop="datePublished">2017-05-12</time>
@@ -207,15 +204,13 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/03/08/Java排查利器之BTrace，Greys/" title="Java排查利器之BTrace，Greys" itemprop="url">
+    <a href="/2017/03/08/JVM实用参数整理/" title="JVM实用参数整理" itemprop="url">
   
-    <h1 itemprop="name">Java排查利器之BTrace，Greys</h1>
+    <h1 itemprop="name">JVM实用参数整理</h1>
     
      
-           <p itemprop="description" >前言： 关于btrace和greys的使用方法，网上不计其数。这里根据我的使用整理了个精简版，零复制纯手打，高度概括，适用快速入门。萝卜青菜各有所爱，greys好用太多有木有！
-一. Greys安装安装非常简单
-
-直接安装：mkdir greys;cd greys，curl -s</p>
+           <p itemprop="description" >前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看《深入理解Java虚拟机》这本书，正好配合日常所需好好地整理下。
+一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不</p>
         
     
     <time datetime="2017-03-08T03:12:22.000Z" itemprop="datePublished">2017-03-08</time>
@@ -230,13 +225,15 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/03/08/JVM实用参数整理/" title="JVM实用参数整理" itemprop="url">
+    <a href="/2017/03/08/Java排查利器之BTrace，Greys/" title="Java排查利器之BTrace，Greys" itemprop="url">
   
-    <h1 itemprop="name">JVM实用参数整理</h1>
+    <h1 itemprop="name">Java排查利器之BTrace，Greys</h1>
     
      
-           <p itemprop="description" >前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看《深入理解Java虚拟机》这本书，正好配合日常所需好好地整理下。
-一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不</p>
+           <p itemprop="description" >前言： 关于btrace和greys的使用方法，网上不计其数。这里根据我的使用整理了个精简版，零复制纯手打，高度概括，适用快速入门。萝卜青菜各有所爱，greys好用太多有木有！
+一. Greys安装安装非常简单
+
+直接安装：mkdir greys;cd greys，curl -s</p>
         
     
     <time datetime="2017-03-08T03:12:22.000Z" itemprop="datePublished">2017-03-08</time>
@@ -402,7 +399,7 @@ crontab调度的任务是不会加载任何环境变量的,这就</p>
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
@@ -426,7 +423,7 @@ crontab调度的任务是不会加载任何环境变量的,这就</p>
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 			

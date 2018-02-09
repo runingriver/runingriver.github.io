@@ -103,12 +103,54 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】集群搭建(三)/" title="【ActiveMQ】集群搭建(三)" itemprop="url">
+    <a href="/2017/06/12/【ActiveMQ】PolicyEntry整理(四)/" title="【ActiveMQ】PolicyEntry整理(三)" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】集群搭建(三)</h1>
+    <h1 itemprop="name">【ActiveMQ】PolicyEntry整理(三)</h1>
     
      
-           <p itemprop="description" ></p>
+           <p itemprop="description" >前言: 本篇是根据相关资料和MQ运维过程中编辑整理出来的，主要在broker端配置topic和queue的相关策略，二者有很多的相似之处。个人不建议在broker端配置topic和queue的分发策略，只有在特殊情况下或保护broker稳定运行前提下，进行配置，通常使用默认配置即</p>
+        
+    
+    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2017/06/12/【ActiveMQ】Client客户端的线程资源(七)/" title="【ActiveMQ】Client客户端的线程资源(七)" itemprop="url">
+  
+    <h1 itemprop="name">【ActiveMQ】Client客户端的线程资源(七)</h1>
+    
+     
+           <p itemprop="description" >前言: 基于activemq-client 5.14版的开发，如果简单需求，可以参照网上的教程。但是面对较复杂或者想弄清楚发送和接收的过程，阅读源码的基础上再开发，十分有必要，这里提供了一份对activemq-client进行二次封装的实现，详见githubactivemq-si</p>
+        
+    
+    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2017/06/12/【ActiveMQ】Client开发遇到的问题(九)/" title="【ActiveMQ】Client开发遇到的问题(九)" itemprop="url">
+  
+    <h1 itemprop="name">【ActiveMQ】Client开发遇到的问题(九)</h1>
+    
+     
+           <p itemprop="description" >1. 开发的一次OOM
+OOM程序逻辑程序注册MessageListener进行消息的消费，采用一个newFixedThreadPool(10)的线程池处理消息。
+Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化是LevelDB，通过注册中心Z</p>
         
     
     <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
@@ -129,26 +171,6 @@
     
      
            <p itemprop="description" >一. Client运行流程1. Client Consumer的工作流程消息到达socket，触发TCPTransport.run() –  TCPTransport.doRun() – … – 调用ActiveMQConnection.onCommand(obj)– Activ</p>
-        
-    
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2017/06/12/【ActiveMQ】PolicyEntry整理(四)/" title="【ActiveMQ】PolicyEntry整理(三)" itemprop="url">
-  
-    <h1 itemprop="name">【ActiveMQ】PolicyEntry整理(三)</h1>
-    
-     
-           <p itemprop="description" >前言: 本篇是根据相关资料和MQ运维过程中编辑整理出来的，主要在broker端配置topic和queue的相关策略，二者有很多的相似之处。个人不建议在broker端配置topic和queue的分发策略，只有在特殊情况下或保护broker稳定运行前提下，进行配置，通常使用默认配置即</p>
         
     
     <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
@@ -185,14 +207,15 @@ HA架构ActiveMQ提供Master-Slaver模式的主从架构模式，简单Master-Sl
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】Client开发遇到的问题(九)/" title="【ActiveMQ】Client开发遇到的问题(九)" itemprop="url">
+    <a href="/2017/06/12/【ActiveMQ】消息唯一性的保证(十)/" title="【ActiveMQ】消息唯一性的保证(十)" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】Client开发遇到的问题(九)</h1>
+    <h1 itemprop="name">【ActiveMQ】消息唯一性的保证(十)</h1>
     
      
-           <p itemprop="description" >1. 开发的一次OOM
-OOM程序逻辑程序注册MessageListener进行消息的消费，采用一个newFixedThreadPool(10)的线程池处理消息。
-Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化是LevelDB，通过注册中心Z</p>
+           <p itemprop="description" >前言：一次broker的failover，导致DLQ队列中多出了很多消息，这些消息都是由client端报duplicate message异常提交到DLQ队列中的。由此必须得深入client端的源码了解一下其机制。
+
+消息是如何保证不被重复消费？
+上述现象在client端是如何产</p>
         
     
     <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
@@ -248,29 +271,9 @@ Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】Client客户端的线程资源(七)/" title="【ActiveMQ】Client客户端的线程资源(七)" itemprop="url">
+    <a href="/2017/06/12/【ActiveMQ】集群搭建(三)/" title="【ActiveMQ】集群搭建(三)" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】Client客户端的线程资源(七)</h1>
-    
-     
-           <p itemprop="description" >前言: 基于activemq-client 5.14版的开发，如果简单需求，可以参照网上的教程。但是面对较复杂或者想弄清楚发送和接收的过程，阅读源码的基础上再开发，十分有必要，这里提供了一份对activemq-client进行二次封装的实现，详见githubactivemq-si</p>
-        
-    
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2017/06/12/【ActiveMQ】集群搭建(二)/" title="【ActiveMQ】集群搭建(二)" itemprop="url">
-  
-    <h1 itemprop="name">【ActiveMQ】集群搭建(二)</h1>
+    <h1 itemprop="name">【ActiveMQ】集群搭建(三)</h1>
     
      
            <p itemprop="description" ></p>
@@ -396,7 +399,7 @@ Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
@@ -420,7 +423,7 @@ Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 			

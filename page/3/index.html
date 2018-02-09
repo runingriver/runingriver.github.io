@@ -100,27 +100,6 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/11/12/记一次蛋疼的mongo to hive导数过程/" title="记一次蛋疼的mongo to hive导数过程" itemprop="url">
-  
-    <h1 itemprop="name">记一次蛋疼的mongo to hive导数过程</h1>
-    
-     
-           <p itemprop="description" >1. 起因一次hive查数过程中，发现hive中缺省了10天的近3000w的数据，自问自答：怎么办，当然是要补数啊！从哪里补，mongo啊（还好mongo中有一份）！mongo中数据是bson保存，而且数据列与hive不一样！
-2. 解决方案方案1：mongoexport思路：由</p>
-        
-    
-    <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
     <a href="/2016/11/12/【HBase】一些有必要知道的知识点1/" title="【HBase】一些有必要知道的知识点（一）" itemprop="url">
   
     <h1 itemprop="name">【HBase】一些有必要知道的知识点（一）</h1>
@@ -129,30 +108,6 @@
            <p itemprop="description" >1. Region的rowkey范围是开区间还是闭区间？答：region的rowkey是前闭后开([start,end))，从下面这张图可以看出来：
 
 Tip：Name列都是以Start Key开始，但不是以End Key结尾，而是一串很长的数字，可以想象，应该是无限接近End </p>
-        
-    
-    <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2016/11/12/Linux文本操作/" title="Linux文本操作命令" itemprop="url">
-  
-    <h1 itemprop="name">Linux文本操作命令</h1>
-    
-     
-           <p itemprop="description" >1. tr 按列替换
-echo &amp;quot;{123}&amp;quot; | tr -d &amp;#39;{}&amp;#39; 删除输入中的 “{“ 和 “}”
-cat testfile |tr a-z A-Z  将文件testfile中的小写字母全部转换成大写字母
-
-2. cut : cut [</p>
         
     
     <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
@@ -211,6 +166,49 @@ HConnection是client和HBase集群交互的封装,它知道怎么找到HBase的m
   
 <section class="post" itemscope itemprop="blogitem">
   
+    <a href="/2016/11/12/【HBase】基础整理/" title="【HBase】基础整理" itemprop="url">
+  
+    <h1 itemprop="name">【HBase】基础整理</h1>
+    
+     
+           <p itemprop="description" >前言： copy整理的一些东西，部分参考HBase实战和HBase权威指南。
+HBase基础知识整理
+Hbase是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，Zookeeper + Master+Region Server + HLog保证高可靠，面向列的存储提供了高性</p>
+        
+    
+    <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2016/11/12/【HBase】开发的一些总结/" title="【HBase】开发的一些总结" itemprop="url">
+  
+    <h1 itemprop="name">【HBase】开发的一些总结</h1>
+    
+     
+           <p itemprop="description" >一. shell查询
+基于列的精确查找列中value=861304mQc8851记录: scan &amp;#39;hbase_db:hbase_table&amp;#39;, FILTER=&amp;gt;&amp;quot;ValueFilter(=,&amp;#39;binary:861304mQc8851&amp;#3</p>
+        
+    
+    <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
     <a href="/2016/11/12/【Mysql】主从复制原理整理/" title="【Mysql】主从复制原理整理" itemprop="url">
   
     <h1 itemprop="name">【Mysql】主从复制原理整理</h1>
@@ -252,14 +250,13 @@ HConnection是client和HBase集群交互的封装,它知道怎么找到HBase的m
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/11/12/【HBase】基础整理/" title="【HBase】基础整理" itemprop="url">
+    <a href="/2016/11/12/记一次蛋疼的mongo to hive导数过程/" title="记一次蛋疼的mongo to hive导数过程" itemprop="url">
   
-    <h1 itemprop="name">【HBase】基础整理</h1>
+    <h1 itemprop="name">记一次蛋疼的mongo to hive导数过程</h1>
     
      
-           <p itemprop="description" >前言： copy整理的一些东西，部分参考HBase实战和HBase权威指南。
-HBase基础知识整理
-Hbase是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，Zookeeper + Master+Region Server + HLog保证高可靠，面向列的存储提供了高性</p>
+           <p itemprop="description" >1. 起因一次hive查数过程中，发现hive中缺省了10天的近3000w的数据，自问自答：怎么办，当然是要补数啊！从哪里补，mongo啊（还好mongo中有一份）！mongo中数据是bson保存，而且数据列与hive不一样！
+2. 解决方案方案1：mongoexport思路：由</p>
         
     
     <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
@@ -274,13 +271,16 @@ Hbase是一个高可靠性、高性能、面向列、可伸缩的分布式存储
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/11/12/【HBase】开发的一些总结/" title="【HBase】开发的一些总结" itemprop="url">
+    <a href="/2016/11/12/Linux文本操作/" title="Linux文本操作命令" itemprop="url">
   
-    <h1 itemprop="name">【HBase】开发的一些总结</h1>
+    <h1 itemprop="name">Linux文本操作命令</h1>
     
      
-           <p itemprop="description" >一. shell查询
-基于列的精确查找列中value=861304mQc8851记录: scan &amp;#39;hbase_db:hbase_table&amp;#39;, FILTER=&amp;gt;&amp;quot;ValueFilter(=,&amp;#39;binary:861304mQc8851&amp;#3</p>
+           <p itemprop="description" >1. tr 按列替换
+echo &amp;quot;{123}&amp;quot; | tr -d &amp;#39;{}&amp;#39; 删除输入中的 “{“ 和 “}”
+cat testfile |tr a-z A-Z  将文件testfile中的小写字母全部转换成大写字母
+
+2. cut : cut [</p>
         
     
     <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
@@ -403,7 +403,7 @@ Hbase是一个高可靠性、高性能、面向列、可伸缩的分布式存储
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
@@ -427,7 +427,7 @@ Hbase是一个高可靠性、高性能、面向列、可伸缩的分布式存储
 			
 		
 			
-				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 			
