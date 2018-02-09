@@ -79,13 +79,13 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/11/12/记一次22亿大数据分析处理踩坑经历/" title="记一次22亿大数据分析处理踩坑经历" itemprop="url">
+    <a href="/2016/11/12/记一次蛋疼的mongo to hive导数过程/" title="记一次蛋疼的mongo to hive导数过程" itemprop="url">
   
-    <h1 itemprop="name">记一次22亿大数据分析处理踩坑经历</h1>
+    <h1 itemprop="name">记一次蛋疼的mongo to hive导数过程</h1>
     
      
-           <p itemprop="description" >前言：用最简单最少的语言，分享我的坑，理不理解需求不重要，问题都在shell代码中，看shell极度枯燥，希望能有帮助！也可以看看,shell中hive,mysql等是如何处理较大数据的- -!
-一. 起因需求，分析hive表中两年内用户XX的所有数据，按照每天早，中，晚三个时间</p>
+           <p itemprop="description" >1. 起因一次hive查数过程中，发现hive中缺省了10天的近3000w的数据，自问自答：怎么办，当然是要补数啊！从哪里补，mongo啊（还好mongo中有一份）！mongo中数据是bson保存，而且数据列与hive不一样！
+2. 解决方案方案1：mongoexport思路：由</p>
         
     
     <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
@@ -250,13 +250,13 @@ Hbase是一个高可靠性、高性能、面向列、可伸缩的分布式存储
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/11/12/记一次蛋疼的mongo to hive导数过程/" title="记一次蛋疼的mongo to hive导数过程" itemprop="url">
+    <a href="/2016/11/12/记一次22亿大数据分析处理踩坑经历/" title="记一次22亿大数据分析处理踩坑经历" itemprop="url">
   
-    <h1 itemprop="name">记一次蛋疼的mongo to hive导数过程</h1>
+    <h1 itemprop="name">记一次22亿大数据分析处理踩坑经历</h1>
     
      
-           <p itemprop="description" >1. 起因一次hive查数过程中，发现hive中缺省了10天的近3000w的数据，自问自答：怎么办，当然是要补数啊！从哪里补，mongo啊（还好mongo中有一份）！mongo中数据是bson保存，而且数据列与hive不一样！
-2. 解决方案方案1：mongoexport思路：由</p>
+           <p itemprop="description" >前言：用最简单最少的语言，分享我的坑，理不理解需求不重要，问题都在shell代码中，看shell极度枯燥，希望能有帮助！也可以看看,shell中hive,mysql等是如何处理较大数据的- -!
+一. 起因需求，分析hive表中两年内用户XX的所有数据，按照每天早，中，晚三个时间</p>
         
     
     <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
