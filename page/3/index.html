@@ -274,15 +274,12 @@ Syn</p>
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/11/12/cron，at，batch(任务调度)/" title="cron，at，batch(任务调度)" itemprop="url">
+    <a href="/2016/11/12/【Mysql】主从复制原理整理/" title="【Mysql】主从复制原理整理" itemprop="url">
   
-    <h1 itemprop="name">cron，at，batch(任务调度)</h1>
+    <h1 itemprop="name">【Mysql】主从复制原理整理</h1>
     
      
-           <p itemprop="description" >一，基础知识
-corntab周期执行任务,anacron调度每日、每周或每月执行的作业,at调度只运行一次的作业.
-batch 命令被用来在系统平均负载达到 0.8% 以下时执行一次性的任务，通俗的所就是系统空闲时执行任务。
-crontab调度的任务是不会加载任何环境变量的,这就</p>
+           <p itemprop="description" >1. 介绍当前用的比较多的mysql高可用架构一般是HA或MMM,Master-Slaver之间通过binlog实现主从数据一致性,有必要理解一下主从复制的基本原理。首先从理解数据的日志类型入手，数据库提供了以下几种日志： 错误日志、binlog日志(二进制日志)、查询日志、慢查</p>
         
     
     <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
@@ -429,11 +426,11 @@ crontab调度的任务是不会加载任何环境变量的,这就</p>
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 			
