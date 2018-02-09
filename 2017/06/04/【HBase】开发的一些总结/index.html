@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="running river">
 <meta property="og:description" content="一. shell查询 基于列的精确查找列中value=861304mQc8851记录: scan &amp;#39;hbase_db:hbase_table&amp;#39;, FILTER=&amp;gt;&amp;quot;ValueFilter(=,&amp;#39;binary:861304mQc8851&amp;#39;)&amp;quot; 基于列的模糊查找列中value rlike 135的记录:  scan &amp;#39;hbase_db:">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-02-09T06:45:28.034Z">
+<meta property="og:updated_time" content="2018-02-09T07:09:05.522Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【HBase】开发的一些总结">
 <meta name="twitter:description" content="一. shell查询 基于列的精确查找列中value=861304mQc8851记录: scan &amp;#39;hbase_db:hbase_table&amp;#39;, FILTER=&amp;gt;&amp;quot;ValueFilter(=,&amp;#39;binary:861304mQc8851&amp;#39;)&amp;quot; 基于列的模糊查找列中value rlike 135的记录:  scan &amp;#39;hbase_db:">
@@ -98,24 +98,43 @@
 		<h2 id="一-shell查询"><a href="#一-shell查询" class="headerlink" title="一. shell查询"></a>一. shell查询</h2><ol>
 <li>基于列的精确查找<br>列中<code>value=861304mQc8851</code>记录: <code>scan &#39;hbase_db:hbase_table&#39;, FILTER=&gt;&quot;ValueFilter(=,&#39;binary:861304mQc8851&#39;)&quot;</code></li>
 <li>基于列的模糊查找<br>列中<code>value rlike 135</code>的记录:  <code>scan &#39;hbase_db:hbase_table&#39;, FILTER=&gt;&quot;ValueFilter(=,&#39;substring:135&#39;)&quot;</code></li>
-<li>指定列的模糊查找<br><code>mobile rlike 135</code>的记录 : <code>scan &#39;hbase_db:hbase_table&#39;, FILTER=&gt;&quot;ColumnPrefixFilter(&#39;mobile&#39;) AND ValueFilter(=,&#39;substring:135&#39;)&quot;</code><br>Tip:多个列用:<code>MultipleColumnPrefixFilter (‘Col1’, ‘Col2’)</code></li>
-<li>多条件查询<br><code>scan &#39;hbase_db:hbase_table&#39;, FILTER=&gt;&quot;ColumnPrefixFilter(&#39;mobile&#39;) AND ( ValueFilter(=,&#39;substring:135&#39;) OR ValueFilter(=,&#39;substring:159&#39;) )&quot;</code></li>
-<li>QualifierFilter基于列的查询:Qualifier表示列<br><code>scan &#39;hbase_db:hbase_table&#39;, FILTER =&gt; &quot;PrefixFilter (&#39;20170713&#39;) AND (QualifierFilter (=, &#39;binary:mobile&#39;))&quot;</code></li>
+<li>指定列的模糊查找<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mobile rlike 135`的记录 : `scan &apos;hbase_db:hbase_table&apos;, FILTER=&gt;&quot;ColumnPrefixFilter(&apos;mobile&apos;) AND ValueFilter(=,&apos;substring:135&apos;)&quot;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>Tip:多个列用:<code>MultipleColumnPrefixFilter (‘Col1’, ‘Col2’)</code></p>
+<ol>
+<li><p>多条件查询</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scan &apos;hbase_db:hbase_table&apos;, FILTER=&gt;&quot;ColumnPrefixFilter(&apos;mobile&apos;) AND ( ValueFilter(=,&apos;substring:135&apos;) OR ValueFilter(=,&apos;substring:159&apos;) )&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>QualifierFilter基于列的查询:Qualifier表示列</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scan &apos;hbase_db:hbase_table&apos;, FILTER =&gt; &quot;PrefixFilter (&apos;20170713&apos;) AND (QualifierFilter (=, &apos;binary:mobile&apos;))&quot;</span><br></pre></td></tr></table></figure>
+</li>
 </ol>
 <hr>
 <ol>
 <li><strong>rowkey前缀范围查询</strong><br><code>scan &#39;hbase_db:hbase_table&#39;, FILTER =&gt; &quot;PrefixFilter (&#39;20170714&#39;)&quot;</code><br><code>scan &#39;hbase_db:hbase_table&#39;, {COLUMNS =&gt; [&#39;cf&#39;], LIMIT =&gt; 10, STARTROW =&gt; &#39;2017072986159tIkc0922&#39;}</code><br>注: 范围查询表示从该点开始的row,往后面查,往往会有很多结果,所以一定要加limit!</li>
 <li><code>start Rowkey~StopRowkey</code>查询,值的设置很有讲究,否则查询不到记录:<br><code>scan &#39;hbase_db:hbase_table&#39;, {STARTROW=&gt;&#39;20170713&#39;, STOPROW=&gt;&#39;2017071386189k7TT269&#39;}</code></li>
-<li><p>以rowkey前缀开始,前缀中包含xx的记录:<br><code>scan &#39;hbase_db:hbase_table&#39;, {STARTROW=&gt;&#39;20170713&#39;, FILTER =&gt; &quot;PrefixFilter (&#39;2017071386188Cyac3878&#39;)&quot;}</code></p>
+<li><p>以rowkey前缀开始,前缀中包含xx的记录:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scan &apos;hbase_db:hbase_table&apos;, &#123;STARTROW=&gt;&apos;20170713&apos;, FILTER =&gt; &quot;PrefixFilter (&apos;2017071386188Cyac3878&apos;)&quot;&#125;</span><br></pre></td></tr></table></figure>
 </li>
-<li><p>rowkey模糊查询<br><code>scan &#39;hbase_db:hbase_table&#39;, {FILTER =&gt; org.apache.hadoop.hbase.filter.RowFilter.new(org.apache.hadoop.hbase.filter.CompareFilter::CompareOp.valueOf(&#39;EQUAL&#39;), org.apache.hadoop.hbase.filter.SubstringComparator.new(&#39;861879Lff1782&#39;))}</code></p>
+<li><p>rowkey模糊查询</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scan &apos;hbase_db:hbase_table&apos;, &#123;FILTER =&gt; org.apache.hadoop.hbase.filter.RowFilter.new(org.apache.hadoop.hbase.filter.CompareFilter::CompareOp.valueOf(&apos;EQUAL&apos;), org.apache.hadoop.hbase.filter.SubstringComparator.new(&apos;861879Lff1782&apos;))&#125;</span><br></pre></td></tr></table></figure>
 </li>
-<li>rowkey正则查询:<br><code>scan &#39;hbase_db:hbase_table&#39;, {FILTER =&gt; org.apache.hadoop.hbase.filter.RowFilter.new(org.apache.hadoop.hbase.filter.CompareFilter::CompareOp.valueOf(&#39;EQUAL&#39;),org.apache.hadoop.hbase.filter.RegexStringComparator.new(&#39;^20170713&#39;))}</code></li>
+<li><p>rowkey正则查询:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scan &apos;hbase_db:hbase_table&apos;, &#123;FILTER =&gt; org.apache.hadoop.hbase.filter.RowFilter.new(org.apache.hadoop.hbase.filter.CompareFilter::CompareOp.valueOf(&apos;EQUAL&apos;),org.apache.hadoop.hbase.filter.RegexStringComparator.new(&apos;^20170713&apos;))&#125;</span><br></pre></td></tr></table></figure>
+</li>
 </ol>
 <hr>
 <ol>
-<li>基于<strong>行</strong>的过滤器<br>两行记录: <code>PageFilter (2)</code><br><code>scan &#39;hbase_db:hbase_table&#39;, FILTER =&gt; &quot;PrefixFilter (&#39;20170713&#39;) AND PageFilter (2)&quot;</code><br>等价于:  <code>scan &#39;hbase_db:hbase_table&#39;, FILTER =&gt; &quot;PrefixFilter (&#39;20170713&#39;)&quot;,LIMIT =&gt; 2</code></li>
-<li>基于<strong>列</strong>的过滤器<br>显示4列数据: <code>limit 4:ColumnCountGetFilter (4)</code><br><code>scan &#39;hbase_db:hbase_table&#39;, FILTER =&gt; &quot;PrefixFilter (&#39;20170713&#39;) AND ColumnCountGetFilter (4)&quot;</code><br>显示每行中从第1<strong>列</strong>开始的2<strong>列</strong>数据: <code>limit 1,2:ColumnPaginationFilter (2, 1)</code><br><code>scan &#39;hbase_db:hbase_table&#39;, FILTER =&gt; &quot;PrefixFilter (&#39;2017071386189k7TT2690&#39;) AND ColumnPaginationFilter (2,1)&quot;</code><br>注：如果结果集是N行M列，那么就是N<em>M个数据，<code>ColumnPaginationFilter(2,1)</code>表示从NxM个数据中的第一个数据开始取2个数据！<code>PageFilter(2)</code>，表示取2行数据，即2</em>M个数据，<code>ColumnCountGetFilter(2)</code>，表示从N*M个数据数据中取2个数据。</li>
+<li><p>基于<strong>行</strong>的过滤器<br>两行记录: <code>PageFilter (2)</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scan &apos;hbase_db:hbase_table&apos;, FILTER =&gt; &quot;PrefixFilter (&apos;20170713&apos;) AND PageFilter (2)&quot;`</span><br><span class="line">等价于:  `scan &apos;hbase_db:hbase_table&apos;, FILTER =&gt; &quot;PrefixFilter (&apos;20170713&apos;)&quot;,LIMIT =&gt; 2</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>基于<strong>列</strong>的过滤器<br>显示4列数据: <code>limit 4:ColumnCountGetFilter (4)</code><br><code>scan &#39;hbase_db:hbase_table&#39;, FILTER =&gt; &quot;PrefixFilter (&#39;20170713&#39;) AND ColumnCountGetFilter (4)&quot;</code><br>显示每行中从第1<strong>列</strong>开始的2<strong>列</strong>数据: <code>limit 1,2:ColumnPaginationFilter (2, 1)</code></p>
+</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scan &apos;hbase_db:hbase_table&apos;, FILTER =&gt; &quot;PrefixFilter (&apos;2017071386189k7TT2690&apos;) AND ColumnPaginationFilter (2,1)&quot;</span><br></pre></td></tr></table></figure>
+<p>注：如果结果集是N行M列，那么就是N<em>M个数据，<code>ColumnPaginationFilter(2,1)</code>表示从NxM个数据中的第一个数据开始取2个数据！<code>PageFilter(2)</code>，表示取2行数据，即2</em>M个数据，<code>ColumnCountGetFilter(2)</code>，表示从N*M个数据数据中取2个数据。</p>
+<ol>
 <li><code>get &lt;namespace:table&gt; &lt;rowkey&gt;</code> 或 <code>t.get &lt;rowkey&gt;</code></li>
 </ol>
 <h2 id="二-Hbase开发一些点"><a href="#二-Hbase开发一些点" class="headerlink" title="二. Hbase开发一些点"></a>二. Hbase开发一些点</h2><ol>
@@ -307,7 +326,7 @@
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
 			
 		
 			
@@ -315,7 +334,7 @@
 			
 		
 			
-				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 			

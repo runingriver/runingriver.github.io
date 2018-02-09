@@ -1,0 +1,616 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【Guava】几个常用的方法整理 | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="Predicate和Predicates——集合过滤与转换Predicate断言的最基本应用就是过滤集合。所有Guava过滤方法都返回”视图”,即并非用一个新的集合表示过滤，而只是基于原集合的视图。Predicates提供多个断言：and，or，notList的过滤视图被省略了，因为不能有效地支持类似get(int)的">
+<meta name="keywords" content="Guava">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【Guava】几个常用的方法整理">
+<meta property="og:url" content="http://huzongzhe.cn/2016/08/14/【Guava】几个常用的方法整理/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="Predicate和Predicates——集合过滤与转换Predicate断言的最基本应用就是过滤集合。所有Guava过滤方法都返回”视图”,即并非用一个新的集合表示过滤，而只是基于原集合的视图。Predicates提供多个断言：and，or，notList的过滤视图被省略了，因为不能有效地支持类似get(int)的操作。改用Lists.newArrayList(Collections2.fil">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-02-09T07:04:52.642Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【Guava】几个常用的方法整理">
+<meta name="twitter:description" content="Predicate和Predicates——集合过滤与转换Predicate断言的最基本应用就是过滤集合。所有Guava过滤方法都返回”视图”,即并非用一个新的集合表示过滤，而只是基于原集合的视图。Predicates提供多个断言：and，or，notList的过滤视图被省略了，因为不能有效地支持类似get(int)的操作。改用Lists.newArrayList(Collections2.fil">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/08/14/【Guava】几个常用的方法整理/" title="【Guava】几个常用的方法整理" itemprop="url">【Guava】几个常用的方法整理</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2016-08-14T11:22:11.000Z" itemprop="datePublished"> 发表于 2016-08-14</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+		<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Predicate和Predicates——集合过滤与转换"><span class="toc-text">Predicate和Predicates——集合过滤与转换</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Predicate"><span class="toc-text">Predicate</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Function和Functions——对象转换"><span class="toc-text">Function和Functions——对象转换</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#设计精髓："><span class="toc-text">设计精髓：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Convertor-amp-Supplier"><span class="toc-text">Convertor&Supplier</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Convertor"><span class="toc-text">Convertor</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Supplier-amp-Suppliers"><span class="toc-text">Supplier&Suppliers</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Suppliers的使用"><span class="toc-text">Suppliers的使用</span></a></li></ol></li></ol></li></ol>
+		
+		</div>
+		
+		<h1 id="Predicate和Predicates——集合过滤与转换"><a href="#Predicate和Predicates——集合过滤与转换" class="headerlink" title="Predicate和Predicates——集合过滤与转换"></a>Predicate和Predicates——集合过滤与转换</h1><h2 id="Predicate"><a href="#Predicate" class="headerlink" title="Predicate"></a>Predicate</h2><p>断言的最基本应用就是过滤集合。所有Guava过滤方法都返回”视图”,即并非用一个新的集合表示过滤，而只是基于原集合的视图。<br>Predicates提供多个断言：<code>and，or，not</code><br>List的过滤视图被省略了，因为不能有效地支持类似<code>get(int)</code>的操作。改用<code>Lists.newArrayList(Collections2.filter(list, predicate))</code>做拷贝过滤。<br>对Set的转换操作被省略了，因为不能有效支持<code>contains(Object)</code>操作懒视图实际上不会全部计算转换后的Set元素，因此不能高效地支持<code>contains(Object)</code>。改用<code>Sets.newHashSet(Collections2.transform(set, function))</code>进行拷贝转换。<br>过滤方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Iterables.filter(Iterable, Predicate)FluentIterable.filter(Predicate)</span><br><span class="line">Iterators.filter(Iterator, Predicate)</span><br><span class="line">Collections2.filter(Collection, Predicate)</span><br><span class="line">Sets.filter(Set, Predicate)</span><br><span class="line">Sets.filter(SortedSet, Predicate)</span><br><span class="line">Maps.filterKeys(Map, Predicate)Maps.filterValues(Map, Predicate)Maps.filterEntries(Map, Predicate)</span><br><span class="line">Maps.filterKeys(SortedMap, Predicate)Maps.filterValues(SortedMap, Predicate)Maps.filterEntries(SortedMap, Predicate)</span><br><span class="line">Multimaps.filterEntries(Multimap, Predicate)</span><br></pre></td></tr></table></figure></p>
+<p>用Predicate过滤Iterable的工具：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">//是否所有元素满足断言？懒实现：如果发现有元素不满足，不会继续迭代</span><br><span class="line">Iterators.all(Iterator, Predicate)FluentIterable.allMatch(Predicate) </span><br><span class="line">//是否有任意元素满足元素满足断言？懒实现：只会迭代到发现满足的元素	</span><br><span class="line">Iterators.any(Iterator, Predicate)FluentIterable.anyMatch(Predicate) </span><br><span class="line">Iterators.find(Iterator, Predicate)</span><br><span class="line">Iterables.find(Iterable, Predicate, T default)</span><br><span class="line">//循环并返回一个满足元素满足断言的元素，如果没有则抛出NoSuchElementException</span><br><span class="line">Iterators.find(Iterator, Predicate, T default) </span><br><span class="line">//返回第一个满足元素满足断言的元素索引值，若没有返回-1</span><br><span class="line">Iterators.indexOf(Iterator, Predicate) </span><br><span class="line">//移除所有满足元素满足断言的元素，实际调用Iterator.remove()方法</span><br><span class="line">Iterators.removeIf(Iterator, Predicate)</span><br></pre></td></tr></table></figure></p>
+<p>tip：另一种：<code>Optional&lt;T&gt; tryFind(Iterable, Predicate)</code> 的返回一个满足元素满足断言的元素，若没有则返回<code>Optional.absent()</code></p>
+<p><strong>集合转换：</strong><br>到目前为止，函数编程最常见的用途为转换集合。同样，所有的Guava转换方法也返回原集合的视图。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Iterables.transform(Iterable, Function)FluentIterable.transform(Function)</span><br><span class="line">Iterators.transform(Iterator, Function)</span><br><span class="line">Collections2.transform(Collection, Function)</span><br><span class="line">Lists.transform(List, Function)</span><br><span class="line">Maps.transformValues(Map, Function)Maps.transformEntries(Map, EntryTransformer)</span><br><span class="line">Maps.transformValues(SortedMap, Function)Maps.transformEntries(SortedMap, EntryTransformer)</span><br><span class="line">Multimaps.transformValues(Multimap, Function)Multimaps.transformEntries(Multimap, EntryTransformer)</span><br><span class="line">Multimaps.transformValues(ListMultimap, Function)Multimaps.transformEntries(ListMultimap, EntryTransformer)</span><br><span class="line">Tables.transformValues(Table, Function)</span><br></pre></td></tr></table></figure></p>
+<p><strong>组合Function使用：</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Iterables.transform(Iterable, Function)FluentIterable.transform(Function)</span><br><span class="line">Iterators.transform(Iterator, Function)</span><br><span class="line">Collections2.transform(Collection, Function)</span><br><span class="line">Lists.transform(List, Function)</span><br><span class="line">Maps.transformValues(Map, Function)Maps.transformEntries(Map, EntryTransformer)</span><br><span class="line">Maps.transformValues(SortedMap, Function)Maps.transformEntries(SortedMap, EntryTransformer)</span><br><span class="line">Multimaps.transformValues(Multimap, Function)Multimaps.transformEntries(Multimap, EntryTransformer)</span><br><span class="line">Multimaps.transformValues(ListMultimap, Function)Multimaps.transformEntries(ListMultimap, EntryTransformer)</span><br><span class="line">Tables.transformValues(Table, Function)</span><br></pre></td></tr></table></figure></p>
+<p>tip：<code>Predicates.compose</code> 将Predicate和Function进行组合。将Function的结果作为Predicate的输入，然后进行判断过滤操作。</p>
+<h1 id="Function和Functions——对象转换"><a href="#Function和Functions——对象转换" class="headerlink" title="Function和Functions——对象转换"></a>Function和Functions——对象转换</h1><ul>
+<li><code>Functions.compose(FunctionA,FunctionB)</code> 用途：可以对不同的函数进行组合,将FunctionB的输出作为FunctionA的输入进行再处理。可以实现嵌套的数据处理操作。</li>
+<li><code>Predicates.compose()</code> 将Predicate和Function进行组合。将Function的结果作为Predicate的输入，然后进行判断过滤操作。</li>
+<li><strong>forMap：</strong><br>使用map作为<code>Function&lt;A,B&gt;</code>也就是用map的value，返回一个以map的key为参数，value为输出的function; 用于对map进行转化，有两个实现方法，在值不存在的情况下，<code>get(key)</code>返回null的时候，可以中断或返回null。</li>
+<li><code>forPredicate</code>：使用Predicate作为boolean</li>
+<li><code>toStringFunction</code>将对象集合转成String类型的。<br>测试实例：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">//List对象转换</span><br><span class="line">public static void listTransfor() &#123;</span><br><span class="line">    List&lt;String&gt; lowerCast = Splitter.onPattern(&quot; &quot;).splitToList(&quot;a age c d&quot;);</span><br><span class="line">    List&lt;String&gt; transformUpcast = Lists.transform(lowerCast, new Function&lt;String, String&gt;() &#123;</span><br><span class="line">        @Nullable</span><br><span class="line">        public String apply(@Nullable String input) &#123;</span><br><span class="line">            return input.toUpperCase();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    System.out.println(transformUpcast.toString());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="设计精髓："><a href="#设计精髓：" class="headerlink" title="设计精髓："></a>设计精髓：</h2><p>使用单例模式，解决<code>toStringFunction</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"> public static Function&lt;Object, String&gt; toStringFunction() &#123;</span><br><span class="line">  return ToStringFunction.INSTANCE;</span><br><span class="line">&#125;</span><br><span class="line">// enum singleton pattern</span><br><span class="line">private enum ToStringFunction implements Function&lt;Object, String&gt; &#123;</span><br><span class="line">  INSTANCE;</span><br><span class="line">  @Override</span><br><span class="line">  public String apply(Object o) &#123;</span><br><span class="line">    checkNotNull(o);  // eager for GWT.</span><br><span class="line">    return o.toString();</span><br><span class="line">  &#125;</span><br><span class="line">  @Override public String toString() &#123;</span><br><span class="line">    return &quot;toString&quot;;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="Convertor-amp-Supplier"><a href="#Convertor-amp-Supplier" class="headerlink" title="Convertor&amp;Supplier"></a>Convertor&amp;Supplier</h1><h2 id="Convertor"><a href="#Convertor" class="headerlink" title="Convertor"></a>Convertor</h2><p>它是一个转换器：非常简单，只需要知道它的使用方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Double val = Doubles.stringConverter().convert(&quot;1.0&quot;);</span><br><span class="line">assertEquals(new Double(1), val);</span><br><span class="line">String valAsString = Doubles.stringConverter().reverse().convert(new Double(1)); </span><br><span class="line">assertEquals(&quot;1.0&quot;, valAsString);</span><br></pre></td></tr></table></figure></p>
+<p>相应的基本类型的转换器有：<code>Floats，Longs，shorts，Ints</code>和<code>Maps</code><br>Maps使用案例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">BiMap&lt;String, String&gt; stateCapitals = HashBiMap.create();</span><br><span class="line">   </span><br><span class="line">stateCapitals.put(&quot;Wisconsin&quot;, &quot;Madison&quot;);</span><br><span class="line">stateCapitals.put(&quot;Iowa&quot;, &quot;Des Moines&quot;);</span><br><span class="line">stateCapitals.put(&quot;Minnesota&quot;, &quot;Saint Paul&quot;);</span><br><span class="line">stateCapitals.put(&quot;Illinois&quot;, &quot;Springfield&quot;);</span><br><span class="line">stateCapitals.put(&quot;Michigan&quot;, &quot;Lansing&quot;);</span><br><span class="line">Converter&lt;String, String&gt; converter = Maps.asConverter(stateCapitals);</span><br><span class="line">String state = converter.reverse().convert(&quot;Madison&quot;);</span><br><span class="line">assertEquals(&quot;Wisconsin&quot;, state);</span><br></pre></td></tr></table></figure></p>
+<h2 id="Supplier-amp-Suppliers"><a href="#Supplier-amp-Suppliers" class="headerlink" title="Supplier&amp;Suppliers"></a>Supplier&amp;Suppliers</h2><p>Supplier接口：这个接口可以提供一个对象通过给定的类型。我们也可以看到通过各种各样的方式来创建对象。<br>Suppliers类：这个类是Suppliers接口的默认实现类。</p>
+<p>接口方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public interface Supplier&lt;T&gt; &#123;</span><br><span class="line">　　T get();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Supplier接口可以帮助我们实现几个典型的创建模式。当get方法被调用，我们可以返回相同的实例或者每次调用都返回新的实例。Supplier也可以让你灵活选择是否当get方法调用的时候才创建实例。<br>Supplier接口的强大之处在于它抽象的复杂性和对象如何需要创建的细节，让开发人员自由地在他觉得任何方式创建一个对象时最好的方法。<br>接口使用案例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"> public class ComposedPredicateSupplier implements Supplier&lt;Predicate&lt;String&gt;&gt; &#123;</span><br><span class="line">　　@Override</span><br><span class="line">　　public Predicate&lt;String&gt; get() &#123;</span><br><span class="line">　　　　City city = new City(&quot;Austin,TX&quot;,&quot;12345&quot;,250000, Climate.SUB_ TROPICAL, 45.3);</span><br><span class="line">　　　　State state = new State(&quot;Texas&quot;,&quot;TX&quot;, Sets.newHashSet(city), Region.SOUTHWEST);</span><br><span class="line">　　　　City city1 = new City(&quot;New York,NY&quot;,&quot;12345&quot;,2000000,Climate.TEMPERATE, 48.7);</span><br><span class="line">　　　　State state1 = new State(&quot;New York&quot;,&quot;NY&quot;,Sets.newHashSet(city1), Region.NORTHEAST);</span><br><span class="line">　　　　Map&lt;String,State&gt; stateMap = Maps.newHashMap();</span><br><span class="line">　　　　stateMap.put(state.getCode(),state);</span><br><span class="line">　　　　stateMap.put(state1.getCode(),state1);</span><br><span class="line">      //个Function实例可以通过State的缩写来查找State</span><br><span class="line">　　　　Function&lt;String,State&gt; mf = Functions.forMap(stateMap);</span><br><span class="line">       //使用Predicate实例来评估在那些地方是否有这个State</span><br><span class="line">　　　　return Predicates.compose(new RegionPredicate(), mf);</span><br><span class="line">　　&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="Suppliers的使用"><a href="#Suppliers的使用" class="headerlink" title="Suppliers的使用"></a>Suppliers的使用</h3><p><code>Suppliers.memoize</code>方法返回一个包装了委托实现的Supplier实例。当第一调用get方法，会被调用真实的Supplier实例的get方法。memoize方法返回被包装后的Supplier实例。包装后的Supplier实例会缓存调用返回的结果。后面的调用get方法会返回缓存的实例。<br><code>Suppliers.memoizeWithExpiration</code>方法与<code>memoize</code>方法工作相同，只不过缓存的对象超过了时间就会返回真实Supplier实例get方法返回的值，在给定的时间当中缓存并且返回Supplier包装对象。注意这个实例的缓存不是物理缓存，包装后的Supplier对象当中有真实Supplier对象的值。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Guava/">Guava</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Guava/">Guava</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2016/08/14/【Guava】几个常用的方法整理/" data-title="【Guava】几个常用的方法整理 | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/11/12/Linux文本操作/" title="Linux文本操作命令">
+  <strong>上一篇：</strong><br/>
+  <span>
+  Linux文本操作命令</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/08/13/【Guava】AbstractScheduleService从源码到使用/"  title="【Guava】AbstractScheduleService从源码到使用">
+ <strong>下一篇：</strong><br/> 
+ <span>【Guava】AbstractScheduleService从源码到使用
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Predicate和Predicates——集合过滤与转换"><span class="toc-text">Predicate和Predicates——集合过滤与转换</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Predicate"><span class="toc-text">Predicate</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Function和Functions——对象转换"><span class="toc-text">Function和Functions——对象转换</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#设计精髓："><span class="toc-text">设计精髓：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Convertor-amp-Supplier"><span class="toc-text">Convertor&Supplier</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Convertor"><span class="toc-text">Convertor</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Supplier-amp-Suppliers"><span class="toc-text">Supplier&Suppliers</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Suppliers的使用"><span class="toc-text">Suppliers的使用</span></a></li></ol></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

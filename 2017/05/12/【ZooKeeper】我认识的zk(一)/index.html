@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="running river">
 <meta property="og:description" content="一. zk使用场景 服务发现： 对集群中节点机器的变化，做出对应的对策！如，dubbo中消费者访问某个服务可以通过zk知道哪些机器在提供服务，从而实现负载均衡策略。 配置管理：集中管理配置文件，配置实时更新。 分布式锁：集群中存在独占资源时，利用zk的顺序节点或节点version特性实现公平锁和乐观锁。 leader选举：master-slave架构中常用zk来实现故障转移，master选举。二.">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-01-11T02:10:59.275Z">
+<meta property="og:updated_time" content="2018-02-09T07:06:02.186Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【ZooKeeper】我认识的zk(一)">
 <meta name="twitter:description" content="一. zk使用场景 服务发现： 对集群中节点机器的变化，做出对应的对策！如，dubbo中消费者访问某个服务可以通过zk知道哪些机器在提供服务，从而实现负载均衡策略。 配置管理：集中管理配置文件，配置实时更新。 分布式锁：集群中存在独占资源时，利用zk的顺序节点或节点version特性实现公平锁和乐观锁。 leader选举：master-slave架构中常用zk来实现故障转移，master选举。二.">
@@ -131,8 +131,11 @@
 <ol>
 <li><p><code>digest</code>：Client端由用户名和密码验证，譬如<code>user:password</code>，digest的密码生成方式是Sha1摘要的base64形式</p>
 <ul>
-<li><code>java -cp ./zookeeper-3.4.9.jar:./lib/log4j-1.2.16.jar:./lib/slf4j-log4j12-1.6.1.jar:./lib/slf4j-api-1.6.1.jar org.apache.zookeeper.server.auth.DigestAuthenticationProvider test:test</code>  获取加密后的密码</li>
-<li><code>setAcl /test1 digest:test:V28q/NynI4JI3Rk54h0r8O5kMug=:crwda</code>  设置节点<code>/test1</code>为digest访问权限</li>
+<li><p>获取加密后的密码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -cp ./zookeeper-3.4.9.jar:./lib/log4j-1.2.16.jar:./lib/slf4j-log4j12-1.6.1.jar:./lib/slf4j-api-1.6.1.jar org.apache.zookeeper.server.auth.DigestAuthenticationProvider test:test</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>setAcl /test1 digest:test:V28q/NynI4JI3Rk54h0r8O5kMug=:crwda</code>  设置节点<code>/test1</code>为digest访问权限</p>
+</li>
 <li><code>addauth digest test:test</code>  认证digest权限,这样就可以访问<code>/test1</code>节点了.</li>
 </ul>
 </li>
@@ -331,7 +334,7 @@
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
 			
 		
 			
@@ -339,7 +342,7 @@
 			
 		
 			
-				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 			

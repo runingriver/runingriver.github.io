@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="running river">
 <meta property="og:description" content="前言：下面总结使用Linux类系统的一些总结。 知识点 locate a.txt 搜索文件,其中 updatedb 强制更新locate数据库，默认一天更新一次 命令前面添加time 可以监控命令运行时间,eg:sudo time lsof -i:9090  常用命令 查看cpu核心数：grep &amp;#39;model name&amp;#39; /proc/cpuinfo | wc -l 查看所有用户：c">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-01-03T09:59:56.171Z">
+<meta property="og:updated_time" content="2018-02-09T07:03:53.114Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux大杂烩">
 <meta name="twitter:description" content="前言：下面总结使用Linux类系统的一些总结。 知识点 locate a.txt 搜索文件,其中 updatedb 强制更新locate数据库，默认一天更新一次 命令前面添加time 可以监控命令运行时间,eg:sudo time lsof -i:9090  常用命令 查看cpu核心数：grep &amp;#39;model name&amp;#39; /proc/cpuinfo | wc -l 查看所有用户：c">
@@ -94,13 +94,6 @@
   </p>
 </header>
 	<div class="article-content">
-		
-		<div id="toc" class="toc-article">
-			<strong class="toc-title">文章目录</strong>
-		
-		<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#知识点"><span class="toc-text">知识点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#常用命令"><span class="toc-text">常用命令</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#查看文件夹大小"><span class="toc-text">查看文件夹大小</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#删除swap空间内容"><span class="toc-text">删除swap空间内容</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#根据access-计算QPS"><span class="toc-text">根据access 计算QPS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#根据access-计算PV"><span class="toc-text">根据access 计算PV</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#atnodes，fornodes，tonodes多服务器操作"><span class="toc-text">atnodes，fornodes，tonodes多服务器操作</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#文件查看，编辑"><span class="toc-text">文件查看，编辑</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-linux中查看文件的命令如下："><span class="toc-text">1. linux中查看文件的命令如下：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-more的动作指令："><span class="toc-text">2. more的动作指令：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-less动作指令：less比more更强大，命令类似于vi"><span class="toc-text">3. less动作指令：less比more更强大，命令类似于vi</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#vim"><span class="toc-text">vim</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-模式切换"><span class="toc-text">1. 模式切换</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-普通模式"><span class="toc-text">(1) 普通模式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#光标的移动"><span class="toc-text">光标的移动</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-编辑模式"><span class="toc-text">(2) 编辑模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-可视模式"><span class="toc-text">(3) 可视模式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-输入命令："><span class="toc-text">2. 输入命令：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#常用操作"><span class="toc-text">常用操作</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-安装"><span class="toc-text">3. 安装</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#AWK"><span class="toc-text">AWK</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#语法："><span class="toc-text">语法：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#基本语法"><span class="toc-text">基本语法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#awk脚本"><span class="toc-text">awk脚本</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#用法："><span class="toc-text">用法：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-基本使用："><span class="toc-text">1. 基本使用：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-指定分隔符"><span class="toc-text">2. 指定分隔符:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-设置变量"><span class="toc-text">3. 设置变量:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-过滤"><span class="toc-text">4. 过滤:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-正则："><span class="toc-text">5. 正则：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#脚本"><span class="toc-text">脚本</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#find-grep"><span class="toc-text">find,grep</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-find-最常见和最强大的查找命令，你可以用它找到任何你想找的文件"><span class="toc-text">1. find 最常见和最强大的查找命令，你可以用它找到任何你想找的文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-grep"><span class="toc-text">2. grep</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#find与grep，sed组合，查询文件中的内容"><span class="toc-text">find与grep，sed组合，查询文件中的内容</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#wget-scp-nc"><span class="toc-text">wget,scp,nc,</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-wget"><span class="toc-text">1. wget</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#wget下载整个目录"><span class="toc-text">wget下载整个目录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#wget-下载指定格式的文件"><span class="toc-text">wget 下载指定格式的文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#wget镜像网站"><span class="toc-text">wget镜像网站</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#wget使用代理下载"><span class="toc-text">wget使用代理下载</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-scp"><span class="toc-text">2. scp</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-nc"><span class="toc-text">3. nc</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#nc基本参数"><span class="toc-text">nc基本参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#文件传输"><span class="toc-text">文件传输</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其他作用"><span class="toc-text">其他作用</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Top-pmap-iostat-dstat-sar-pidstat-vmstat"><span class="toc-text">Top,pmap,iostat,dstat,sar,pidstat,vmstat</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-top系统监控"><span class="toc-text">1. top系统监控</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-pmap-查看进程空间"><span class="toc-text">2. pmap 查看进程空间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-iostat-磁盘IO和CPU监控统计"><span class="toc-text">3. iostat 磁盘IO和CPU监控统计</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#vmstat系统监控"><span class="toc-text">vmstat系统监控</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-dstat系统监控"><span class="toc-text">4. dstat系统监控</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-pidstat-（用于监控全部或指定进程占用系统资源的情况）"><span class="toc-text">5. pidstat （用于监控全部或指定进程占用系统资源的情况）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-sar-系统历史情况统计"><span class="toc-text">6. sar 系统历史情况统计</span></a></li></ol></li></ol></li></ol>
-		
-		</div>
 		
 		<p>前言：下面总结使用Linux类系统的一些总结。</p>
 <h1 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h1><ul>
@@ -368,18 +361,18 @@
 <nav class="article-nav clearfix">
  
  <div class="prev" >
- <a href="/2016/08/13/shell,bash操作快捷键/" title="shell,bash操作快捷键">
+ <a href="/2016/08/13/Ubuntu分区删除后恢复/" title="Ubuntu分区删除后恢复">
   <strong>上一篇：</strong><br/>
   <span>
-  shell,bash操作快捷键</span>
+  Ubuntu分区删除后恢复</span>
 </a>
 </div>
 
 
 <div class="next">
-<a href="/2016/08/13/Ubuntu分区删除后恢复/"  title="Ubuntu分区删除后恢复">
+<a href="/2016/06/23/使用hexo和jacman搭建博客简记/"  title="使用hexo和jacman搭建博客简记">
  <strong>下一篇：</strong><br/> 
- <span>Ubuntu分区删除后恢复
+ <span>使用hexo和jacman搭建博客简记
 </span>
 </a>
 </div>
@@ -392,13 +385,6 @@
 
 </div>  
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
-
-  <div id="toc" class="toc-aside">
-  <strong class="toc-title">文章目录</strong>
- 
- <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#知识点"><span class="toc-text">知识点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#常用命令"><span class="toc-text">常用命令</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#查看文件夹大小"><span class="toc-text">查看文件夹大小</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#删除swap空间内容"><span class="toc-text">删除swap空间内容</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#根据access-计算QPS"><span class="toc-text">根据access 计算QPS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#根据access-计算PV"><span class="toc-text">根据access 计算PV</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#atnodes，fornodes，tonodes多服务器操作"><span class="toc-text">atnodes，fornodes，tonodes多服务器操作</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#文件查看，编辑"><span class="toc-text">文件查看，编辑</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-linux中查看文件的命令如下："><span class="toc-text">1. linux中查看文件的命令如下：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-more的动作指令："><span class="toc-text">2. more的动作指令：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-less动作指令：less比more更强大，命令类似于vi"><span class="toc-text">3. less动作指令：less比more更强大，命令类似于vi</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#vim"><span class="toc-text">vim</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-模式切换"><span class="toc-text">1. 模式切换</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-普通模式"><span class="toc-text">(1) 普通模式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#光标的移动"><span class="toc-text">光标的移动</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-编辑模式"><span class="toc-text">(2) 编辑模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-可视模式"><span class="toc-text">(3) 可视模式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-输入命令："><span class="toc-text">2. 输入命令：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#常用操作"><span class="toc-text">常用操作</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-安装"><span class="toc-text">3. 安装</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#AWK"><span class="toc-text">AWK</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#语法："><span class="toc-text">语法：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#基本语法"><span class="toc-text">基本语法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#awk脚本"><span class="toc-text">awk脚本</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#用法："><span class="toc-text">用法：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-基本使用："><span class="toc-text">1. 基本使用：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-指定分隔符"><span class="toc-text">2. 指定分隔符:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-设置变量"><span class="toc-text">3. 设置变量:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-过滤"><span class="toc-text">4. 过滤:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-正则："><span class="toc-text">5. 正则：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#脚本"><span class="toc-text">脚本</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#find-grep"><span class="toc-text">find,grep</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-find-最常见和最强大的查找命令，你可以用它找到任何你想找的文件"><span class="toc-text">1. find 最常见和最强大的查找命令，你可以用它找到任何你想找的文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-grep"><span class="toc-text">2. grep</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#find与grep，sed组合，查询文件中的内容"><span class="toc-text">find与grep，sed组合，查询文件中的内容</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#wget-scp-nc"><span class="toc-text">wget,scp,nc,</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-wget"><span class="toc-text">1. wget</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#wget下载整个目录"><span class="toc-text">wget下载整个目录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#wget-下载指定格式的文件"><span class="toc-text">wget 下载指定格式的文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#wget镜像网站"><span class="toc-text">wget镜像网站</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#wget使用代理下载"><span class="toc-text">wget使用代理下载</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-scp"><span class="toc-text">2. scp</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-nc"><span class="toc-text">3. nc</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#nc基本参数"><span class="toc-text">nc基本参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#文件传输"><span class="toc-text">文件传输</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其他作用"><span class="toc-text">其他作用</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Top-pmap-iostat-dstat-sar-pidstat-vmstat"><span class="toc-text">Top,pmap,iostat,dstat,sar,pidstat,vmstat</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-top系统监控"><span class="toc-text">1. top系统监控</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-pmap-查看进程空间"><span class="toc-text">2. pmap 查看进程空间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-iostat-磁盘IO和CPU监控统计"><span class="toc-text">3. iostat 磁盘IO和CPU监控统计</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#vmstat系统监控"><span class="toc-text">vmstat系统监控</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-dstat系统监控"><span class="toc-text">4. dstat系统监控</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-pidstat-（用于监控全部或指定进程占用系统资源的情况）"><span class="toc-text">5. pidstat （用于监控全部或指定进程占用系统资源的情况）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-sar-系统历史情况统计"><span class="toc-text">6. sar 系统历史情况统计</span></a></li></ol></li></ol></li></ol>
- 
-  </div>
 
 <div id="asidepart">
 <div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
@@ -523,7 +509,7 @@
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
 			
 		
 			
@@ -531,7 +517,7 @@
 			
 		
 			
-				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 			
@@ -677,8 +663,6 @@ $(document).ready(function(){
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
-      
-      $('#toc.toc-aside').css('display', 'none');
         
     }
   });
