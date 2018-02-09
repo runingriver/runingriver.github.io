@@ -1,0 +1,595 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【ActiveMQ】Client开发遇到的问题(九) | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="1. 开发的一次OOM OOM程序逻辑程序注册MessageListener进行消息的消费，采用一个newFixedThreadPool(10)的线程池处理消息。 Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化是LevelDB，通过注册中心Zookeeper，实现Master选举。">
+<meta name="keywords" content="ActiveMQ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【ActiveMQ】Client开发遇到的问题(九)">
+<meta property="og:url" content="http://huzongzhe.cn/2017/06/12/【ActiveMQ】Client开发遇到的问题(九)/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="1. 开发的一次OOM OOM程序逻辑程序注册MessageListener进行消息的消费，采用一个newFixedThreadPool(10)的线程池处理消息。 Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化是LevelDB，通过注册中心Zookeeper，实现Master选举。 问题首先，运行一段时间，发现线程池的线程名在变化，加上一个计数，变化到6000">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-02-09T05:54:02.082Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【ActiveMQ】Client开发遇到的问题(九)">
+<meta name="twitter:description" content="1. 开发的一次OOM OOM程序逻辑程序注册MessageListener进行消息的消费，采用一个newFixedThreadPool(10)的线程池处理消息。 Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化是LevelDB，通过注册中心Zookeeper，实现Master选举。 问题首先，运行一段时间，发现线程池的线程名在变化，加上一个计数，变化到6000">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/06/12/【ActiveMQ】Client开发遇到的问题(九)/" title="【ActiveMQ】Client开发遇到的问题(九)" itemprop="url">【ActiveMQ】Client开发遇到的问题(九)</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished"> 发表于 2017-06-12</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<h2 id="1-开发的一次OOM"><a href="#1-开发的一次OOM" class="headerlink" title="1. 开发的一次OOM"></a>1. 开发的一次OOM</h2><ol>
+<li>OOM程序逻辑<br>程序注册<code>MessageListener</code>进行消息的消费，采用一个<code>newFixedThreadPool(10)</code>的线程池处理消息。</li>
+<li>Broker的架构<br>AMQ采用HA架构，一台Master，两条Slaver，消息持久化是LevelDB，通过注册中心Zookeeper，实现Master选举。</li>
+<li>问题<br>首先，运行一段时间，发现线程池的线程名在变化，加上一个计数，变化到6000多，也就是说新建和销毁6000多次线程！然后，运行一段时间后程序OOM！<h3 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h3></li>
+<li>OOM第一时间dump内存，保留现场！</li>
+<li>分析程序逻辑：程序默认Consumer默认有一个缓存区保存1000条消息，这些消息丢给线程池执行，而消息较多时线程池会先将消息放入到<code>LinkedBlockingQueue</code>阻塞队列。<br>表象上看，消息消费非常快，实则是保存在了线程池的队列中！</li>
+<li>果不其然，MAT分析，<code>LinkedBlockingQueue</code>占了所有可用的内存，GC日志发现程序不停的Full GC。<br>Full GC会导致数据库连接失败，HBase连接失败，Zookeeper连接等一系列的网络IO超时失败！<br>对于Activemq连接超时后，会执行重连，一段时间后会自己关闭连接（<code>ThreadPoolUtils.awaitTermination</code>）将线程池关闭！<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">INFO o.a.activemq.util.ThreadPoolUtils.doShutdown:152]-Shutdown of ExecutorService: java.util.concurrent.ThreadPoolExecutor@4bb34ae[Shutting down, pool size = 2, active threads = 2, queued tasks = 0, completed tasks = 7] is shutdown: true and terminated: false took: 10 minutes.</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>而查看Broker端会有一个Inactive Monitor线程，检测到当前连接不可用会关闭当前连接。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">2017-07-29 21:23:11,755 | WARN  | Transport Connection to: tcp://xx.xxx.106.24:48737 failed: org.apache.activemq.transport.InactivityIOException: Channel was inactive for too (&gt;30000) long: tcp://xx.xx.106.24:48737 | org.apache.activemq.broker.TransportConnection.Transport | ActiveMQ InactivityMonitor Worker</span><br><span class="line">2017-07-29 21:28:51,837 | WARN  | Ignoring ack received before dispatch; result of failover with an outstanding ack. Acked messages will be replayed if present on this broker. Ignored ack: MessageAck &#123;commandId = 2653540, responseRequired = false, ackType = 2, consumerId = ID:xxx-xx.xxx.xxx-59892-1501294728224-3:1:1:1, firstMessageId = ID:l-xxx.xxx.xx-58793-1501158447806-3:1:1:1:975174, lastMessageId = ID:l-XX.XX.XX-58793-1501158447806-3:1:1:1:975174, destination = queue://xxxxx, transactionId = null, messageCount = 1, poisonCause = null&#125; | org.apache.activemq.broker.region.PrefetchSubscription | ActiveMQ Transport: tcp:///xx.xx.106.23:43678@56161</span><br></pre></td></tr></table></figure></p>
+<h2 id="2-采用线程池消费消息，线程池频繁的创建线程"><a href="#2-采用线程池消费消息，线程池频繁的创建线程" class="headerlink" title="2. 采用线程池消费消息，线程池频繁的创建线程"></a>2. 采用线程池消费消息，线程池频繁的创建线程</h2><p>现象：程序运行一段时间后，发现日志中消费消息的线程名，变的很大，也就是说线程在不停的创建和销毁。<br>首先看下面测试：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">private static final AtomicInteger poolNumber = new AtomicInteger(1);</span><br><span class="line">@Test</span><br><span class="line">public void testThreadCreate() throws InterruptedException &#123;</span><br><span class="line">    final ExecutorService service1 = Executors.newSingleThreadExecutor(new ThreadFactory() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public Thread newThread(Runnable r) &#123;</span><br><span class="line">            logger.info(&quot;create thread,current thread:&#123;&#125;,poolNumber:&#123;&#125;&quot;, Thread.currentThread().getName(), poolNumber.get());</span><br><span class="line">            return new Thread(r, &quot;MQConsumer-Thread-&quot; + poolNumber.getAndIncrement());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    for (int i = 0; i &lt; 2; i++) &#123;</span><br><span class="line">        service1.execute(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                logger.info(&quot;enter service1 runnable.&quot;);</span><br><span class="line">                throw new RuntimeException(&quot;exception&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    TimeUnit.SECONDS.sleep(100);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Tip：如果采用线程池的时候不捕捉异常，会导致异常被抛到栈顶，JVM会干掉这个线程，看日志输出：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[08-04 10:17:11.143 [main] INFO com.qunar.sms.mq.MessageProcessorTest.newThread:291]-create thread,current thread:main,poolNumber:1</span><br><span class="line">[08-04 10:17:11.156 [MQConsumer-Thread-1] INFO com.xxx.MessageProcessorTest.run:300]-enter service1 runnable.</span><br><span class="line">[08-04 10:17:11.156 [MQConsumer-Thread-1] INFO com.xxx.MessageProcessorTest.newThread:291]-create thread,current thread:MQConsumer-Thread-1,poolNumber:2</span><br><span class="line">[08-04 10:17:11.157 [MQConsumer-Thread-2] INFO com.xxx.MessageProcessorTest.run:300]-enter service1 runnable.</span><br><span class="line">[08-04 10:17:11.157 [MQConsumer-Thread-2] INFO com.xxx.MessageProcessorTest.newThread:291]-create thread,current thread:MQConsumer-Thread-2,poolNumber:3</span><br><span class="line">Exception in thread &quot;MQConsumer-Thread-1&quot; java.lang.RuntimeException: exception</span><br><span class="line">	at com.qunar.sms.mq.MessageProcessorTest$7.run(MessageProcessorTest.java:301)</span><br><span class="line">	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)</span><br><span class="line">	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)</span><br><span class="line">	at java.lang.Thread.run(Thread.java:745)</span><br><span class="line">Exception in thread &quot;MQConsumer-Thread-2&quot; java.lang.RuntimeException: exception</span><br><span class="line">	at com.qunar.sms.mq.MessageProcessorTest$7.run(MessageProcessorTest.java:301)</span><br><span class="line">	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)</span><br><span class="line">	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)</span><br><span class="line">	at java.lang.Thread.run(Thread.java:745)</span><br></pre></td></tr></table></figure></p>
+<p>有意思的是，第一次main线程new了一个<code>MQConsumer-Thread-1</code>线程，执行中异常，抛到到栈顶，<code>MQConsumer-Thread-1</code>销毁，销毁之前创建了线程<code>MQConsumer-Thread-2</code>。<br>那么，想想如果线程池是<code>newScheduledThreadPool()</code>，定时执行一次任务异常后，下一次定时任务会执行吗？</p>
+<p>结果是，肯定会执行，偶然的机会解决了我一直放在心中，并且没有想通的问题，有一次开启一个定时任务，其中一次发送了OOM，第二天查看日志，发现这个线程池还在正常的工作！<br>当时，没想通，为什么线程挂了，后面的任务还能继续执行呢？现在看来原因就是这么简单！<br>另外，在测试<code>newFixedThreadPool(5)</code>，线程池中包含多个线程池的情况下，一个异常抛到线程栈顶，该线程会先创建一个线程（而不是调用线程去创建，调用线程只会创建初始的5个线程），然后再被销毁！</p>
+<p>下面是模拟，线上线程频繁创建的原因的代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">@Test</span><br><span class="line">public void testExceptionMessage() throws InterruptedException, JMSException &#123;</span><br><span class="line">    //首先生产N条消息</span><br><span class="line">    pendingMessageToBroker(&quot;test.process.test4&quot;, PENDING_NUMBER);</span><br><span class="line">    //确保所有消息已经推送到broker</span><br><span class="line">    TimeUnit.SECONDS.sleep(1);</span><br><span class="line"></span><br><span class="line">    //建立消费者</span><br><span class="line">    Consumer consumer = Consumer.createDefault(&quot;test.process.test4&quot;, DEV_BETA_URL);</span><br><span class="line">    final CountDownLatch latch = new CountDownLatch(1);</span><br><span class="line">    consumer.receiveMessage(new MessageProcessor(false) &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void processMessage(Message message) &#123;</span><br><span class="line">            if (message instanceof TextMessage) &#123;</span><br><span class="line">                String text = getStringFromTextMessage(message);</span><br><span class="line">                if (StringUtils.equals(&quot;shutdown&quot;, text)) &#123;</span><br><span class="line">                    latch.countDown();</span><br><span class="line">                &#125; else &#123;</span><br><span class="line">                    //模拟消费异常</span><br><span class="line">                    throw new RuntimeException(&quot;mock unchecked exception.&quot;);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    latch.await();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>由于在消费消息过程中，由于某些原因导致异常，没有catch住，线程被销毁，然后重新创建了线程！<br>如果不采用线程池，消费消息会由名为<code>ActiveMQ Seesion Task-x</code>的线程池来执行，它会catch住unchecked异常，并将异常信息和未能正确消费的消息返还给broker处理，<br>一般broker会redeliver到其他消费者，也可能直接丢弃到<code>ActiveMQ.DLQ</code>队列中，这个过程非常缓慢，会拖慢消费者，导致大量消息pending在broker！ </p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/ActiveMQ/">ActiveMQ</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/ActiveMQ/">ActiveMQ</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2017/06/12/【ActiveMQ】Client开发遇到的问题(九)/" data-title="【ActiveMQ】Client开发遇到的问题(九) | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/06/12/【ActiveMQ】消息可靠性实践(六)/" title="【ActiveMQ】消息可靠性实践(六">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【ActiveMQ】消息可靠性实践(六</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/06/12/【ActiveMQ】生产者消费者流控制(五)/"  title="【ActiveMQ】生产者消费者流控制(五)">
+ <strong>下一篇：</strong><br/> 
+ <span>【ActiveMQ】生产者消费者流控制(五)
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

@@ -1,0 +1,619 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【ZooKeeper】基于Curator的开发(四) | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="Curator开发介绍当前基于zookeeper的client开发有zookeeper提供的原生jar包，也有第三方ZKClient jar包，但是更多的是使用Curator的jar包。 封装Curator通常简单使用Zookeeper的场景,直接使用Curator即可,无需进行更多的封装。但是，在较复杂的场景下，对C">
+<meta name="keywords" content="zookeeper">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【ZooKeeper】基于Curator的开发(四)">
+<meta property="og:url" content="http://huzongzhe.cn/2017/05/12/【ZooKeeper】基于Curator的开发(四)/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="Curator开发介绍当前基于zookeeper的client开发有zookeeper提供的原生jar包，也有第三方ZKClient jar包，但是更多的是使用Curator的jar包。 封装Curator通常简单使用Zookeeper的场景,直接使用Curator即可,无需进行更多的封装。但是，在较复杂的场景下，对Curator进行进一步封装显得很有必要。一方面，不同环境使用不同的zk集群，或者">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-01-11T02:11:08.843Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【ZooKeeper】基于Curator的开发(四)">
+<meta name="twitter:description" content="Curator开发介绍当前基于zookeeper的client开发有zookeeper提供的原生jar包，也有第三方ZKClient jar包，但是更多的是使用Curator的jar包。 封装Curator通常简单使用Zookeeper的场景,直接使用Curator即可,无需进行更多的封装。但是，在较复杂的场景下，对Curator进行进一步封装显得很有必要。一方面，不同环境使用不同的zk集群，或者">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/05/12/【ZooKeeper】基于Curator的开发(四)/" title="【ZooKeeper】基于Curator的开发(四)" itemprop="url">【ZooKeeper】基于Curator的开发(四)</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2017-05-12T03:12:22.000Z" itemprop="datePublished"> 发表于 2017-05-12</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<h1 id="Curator开发介绍"><a href="#Curator开发介绍" class="headerlink" title="Curator开发介绍"></a>Curator开发介绍</h1><p>当前基于zookeeper的client开发有zookeeper提供的原生jar包，也有第三方ZKClient jar包，但是更多的是使用Curator的jar包。</p>
+<h1 id="封装Curator"><a href="#封装Curator" class="headerlink" title="封装Curator"></a>封装Curator</h1><p>通常简单使用Zookeeper的场景,直接使用Curator即可,无需进行更多的封装。但是，在较复杂的场景下，对Curator进行进一步封装显得很有必要。<br>一方面，不同环境使用不同的zk集群，或者spring下使用，针对业务需要的封装以方便使用；另一方面，将业务逻辑和zookeeper的执行逻辑分开！<br>下面主要描述如何结合spring封装Curator，封装类为<code>ZkHelper</code>。</p>
+<h2 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h2><ol>
+<li><p>引入下面两个jar包：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.zookeeper&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;zookeeper&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;3.4.9&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.curator&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;curator-recipes&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;4.0.0&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>引入配置，配合spring根据不同环境，使用不同的zookeeper的连接地址：<br>可以通过下面两种方式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">//1. 属性注入</span><br><span class="line">@Value(&quot;$&#123;zookeeper.address&#125;&quot;)</span><br><span class="line">String connectionUrl;</span><br><span class="line">//2. 后构造函数中初始化</span><br><span class="line">@PostConstruct</span><br><span class="line">public void init() &#123;</span><br><span class="line">    connectionString = FileProperty.getPropertyValues(&quot;zookeeper.address&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="ZkHelper封装示例"><a href="#ZkHelper封装示例" class="headerlink" title="ZkHelper封装示例"></a>ZkHelper封装示例</h2><p>请勿用于实际环境，为缩减篇幅，忽略了日志和异常处理等情况，删除了一些封装方法：</p>
+<hr>
+<p>代码较长，置于文尾….</p>
+<hr>
+<p>上面封装仅做参考，目的：</p>
+<ol>
+<li>统一管理zk对象；</li>
+<li>统一开启关闭zk；</li>
+<li>封装PathChild和NodeCache的逻辑。</li>
+<li>进一步封装Curator操作zk数据树的方法。<br>所有的<strong>目的</strong>就是做到对业务代码无侵入，与业务逻辑分开。</li>
+</ol>
+<h2 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h2><p>以设置某个路径下的所有节点变化的监听为例：</p>
+<ol>
+<li>获取实例： <code>ZkHelper.ZKClient zkClient = zkHelper.getDefaultZKClient();</code></li>
+<li>设置监听：<code>zkClient.setPathChildListener(“zk_path…”, nodeListener());</code><br>实现具体业务逻辑<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">private PathChildrenCacheListener nodeListener() &#123;</span><br><span class="line">    return new PathChildrenCacheListener() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void childEvent(CuratorFramework client, PathChildrenCacheEvent event) throws Exception &#123;</span><br><span class="line">            if (event == null || event.getData() == null || event.getData().getPath() == null) &#123;</span><br><span class="line">                /*do something*/</span><br><span class="line">                return;</span><br><span class="line">            &#125;</span><br><span class="line">            switch (event.getType()) &#123;</span><br><span class="line">                case CHILD_ADDED: /*do something*/ break;</span><br><span class="line">                case CHILD_REMOVED: /*do something*/ break;</span><br><span class="line">                case CONNECTION_RECONNECTED: /*do something*/ break;</span><br><span class="line">                case CONNECTION_LOST: /*do something*/ break;</span><br><span class="line">                default:break;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>ok，所有操作完成，但是如果你还想动态监听：可以关闭<code>zkClient.closePathChildrenCache(“zk_listener_path...”);</code>，然后重新设置！</p>
+<p>这里，也许在设置<code>NodeCacheListener</code>时，需要区别不同的listener，可以采用下面方法进一步封装：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public static abstract class NodeDataListener implements NodeCacheListener &#123;</span><br><span class="line">    private String nodePath;</span><br><span class="line">    public NodeDataListener(String nodePath) &#123;</span><br><span class="line">        this.nodePath = nodePath;</span><br><span class="line">    &#125;</span><br><span class="line">    public String getNodePath() &#123;</span><br><span class="line">        return nodePath;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意的点：</p>
+<ol>
+<li>curator实现了重复监听，但是系统启动的时候会默认触发一下监听的事件！</li>
+<li>临时节点删除的通知的时间间隔,依赖于client和zk server配置的session timeout和connection timeout时间!</li>
+</ol>
+<h1 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br></pre></td><td class="code"><pre><span class="line">@Component</span><br><span class="line">public class ZkHelper &#123;</span><br><span class="line">    //用于同时多个zk集群的使用和操作</span><br><span class="line">    private volatile Map&lt;String, ZKClient&gt; clientMap = Maps.newConcurrentMap();</span><br><span class="line">    @Value(&quot;$&#123;zookeeper.address&#125;&quot;)</span><br><span class="line">    String connectionUrl;</span><br><span class="line">    @PreDestroy</span><br><span class="line">    public void closeZkClient() &#123;</span><br><span class="line">        for (ZKClient zkClient : clientMap.values()) &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                zkClient.close();</span><br><span class="line">            &#125; catch (Exception e) &#123;</span><br><span class="line">                //...</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    /**</span><br><span class="line">     * 获取默认连接的zk对象</span><br><span class="line">     */</span><br><span class="line">    public ZKClient getDefaultZKClient() &#123;</span><br><span class="line">        ZKClient zkClient = getZKClient(connectionUrl);</span><br><span class="line">        return zkClient;</span><br><span class="line">    &#125;</span><br><span class="line">    /**</span><br><span class="line">     * 根据连接地址来实例化并使用zk</span><br><span class="line">     */</span><br><span class="line">    public ZKClient getZKClient(String address) &#123;</span><br><span class="line">        Preconditions.checkArgument(StringUtils.isNotBlank(address), &quot;address is illegal.&quot;);</span><br><span class="line">        if (clientMap.containsKey(address)) &#123;</span><br><span class="line">            return clientMap.get(address);</span><br><span class="line">        &#125;</span><br><span class="line">        synchronized (this) &#123;</span><br><span class="line">            if (clientMap.containsKey(address)) &#123;</span><br><span class="line">                return clientMap.get(address);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                ZKClient zkClient = new ZKClient(address);</span><br><span class="line">                clientMap.put(address, zkClient);</span><br><span class="line">                return zkClient;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    /**</span><br><span class="line">     * 具体对业务逻辑的封装</span><br><span class="line">     */</span><br><span class="line">    public static class ZKClient &#123;</span><br><span class="line">        private String connectString;</span><br><span class="line">        private CuratorFramework client;</span><br><span class="line">        private static final int TIMEOUT = 5000;</span><br><span class="line">        //注册,仅用作关闭!</span><br><span class="line">        private Map&lt;String, NodeCache&gt; nodeCacheMap = Maps.newConcurrentMap();</span><br><span class="line">        private Map&lt;String, PathChildrenCache&gt; pathChildrenCacheMap = Maps.newConcurrentMap();</span><br><span class="line">        public ZKClient(String address) &#123;</span><br><span class="line">            this.connectString = address;</span><br><span class="line">            client = CuratorFrameworkFactory.newClient(address, TIMEOUT, TIMEOUT, new ExponentialBackoffRetry(TIMEOUT, 3));</span><br><span class="line">            client.start();</span><br><span class="line">            this.setConnWatcher(new ConnectionStateListener() &#123;</span><br><span class="line">                @Override</span><br><span class="line">                public void stateChanged(CuratorFramework client, ConnectionState newState) &#123;</span><br><span class="line">                    //...</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">        public CuratorFramework getZkCuratorClient() &#123;</span><br><span class="line">            return client;</span><br><span class="line">        &#125;</span><br><span class="line">        public boolean createNode(String path, CreateMode mode, byte[] data) &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                ZKPaths.mkdirs(client.getZookeeperClient().getZooKeeper(), path, false);</span><br><span class="line">                client.create().creatingParentsIfNeeded().withMode(mode).forPath(path, data);</span><br><span class="line">                return true;</span><br><span class="line">            &#125; catch (Exception e) &#123;</span><br><span class="line">                //...</span><br><span class="line">            &#125;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">        public boolean createNode(String path, CreateMode mode) &#123;</span><br><span class="line">            //...</span><br><span class="line">        &#125;</span><br><span class="line">        public String getData(String path) &#123;</span><br><span class="line">            //...</span><br><span class="line">        &#125;</span><br><span class="line">        public boolean setData(String path, byte[] data) &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                if (!checkNodeExisted(path)) &#123;</span><br><span class="line">                    ZKPaths.mkdirs(client.getZookeeperClient().getZooKeeper(), path, true);</span><br><span class="line">                &#125;</span><br><span class="line">                client.setData().forPath(path, data);</span><br><span class="line">            &#125; catch (Exception e) &#123;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line">        /**</span><br><span class="line">         * 给指定路径节点设置一个监控,监控zk节点的变化,只监控一次</span><br><span class="line">         */</span><br><span class="line">        public void setNodeWatcher(String path, CuratorWatcher curatorWatcher) &#123;</span><br><span class="line">            Preconditions.checkArgument(checkNodeExisted(path), &quot;the node does not exist.&quot;);</span><br><span class="line">            try &#123;</span><br><span class="line">                client.getData().usingWatcher(curatorWatcher).forPath(path);</span><br><span class="line">            &#125; catch (Exception e) &#123;</span><br><span class="line">                //...</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        public boolean deleteNode(String path) &#123;</span><br><span class="line">            if (!checkNodeExisted(path)) &#123;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">            try &#123;</span><br><span class="line">                client.delete().forPath(path);</span><br><span class="line">            &#125; catch (Exception e) &#123;</span><br><span class="line">                //...</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line">        /**</span><br><span class="line">         * 给指定路径节点的所有子节点设置一个监控,只监控一次</span><br><span class="line">         */</span><br><span class="line">        public void setChildrenWatcher(String path, CuratorWatcher curatorWatcher) &#123;</span><br><span class="line">            Preconditions.checkArgument(checkNodeExisted(path), &quot;the node does not exist.&quot;);</span><br><span class="line">            try &#123;</span><br><span class="line">                client.getChildren().usingWatcher(curatorWatcher).forPath(path);</span><br><span class="line">            &#125; catch (Exception e) &#123;</span><br><span class="line">                //...</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        public boolean checkNodeExisted(String path) &#123;</span><br><span class="line">            if (StringUtils.isBlank(path)) &#123;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">            Stat stat = null;</span><br><span class="line">            try &#123;</span><br><span class="line">                stat = client.checkExists().forPath(path);</span><br><span class="line">            &#125; catch (Exception e) &#123;</span><br><span class="line">                //...</span><br><span class="line">            &#125;</span><br><span class="line">            return stat == null ? false : true;</span><br><span class="line">        &#125;</span><br><span class="line">        public boolean checkAndCreatePath(String path) &#123;</span><br><span class="line">            if (checkNodeExisted(path)) &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line">            try &#123;</span><br><span class="line">                ZKPaths.mkdirs(client.getZookeeperClient().getZooKeeper(), path, true);</span><br><span class="line">            &#125; catch (Exception e) &#123;</span><br><span class="line">                //...</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line">        /**</span><br><span class="line">         * 给该连接设置一个监控,连接每发生一次变化,都会回调,重复监听</span><br><span class="line">         * Curator具有连接中断重连机制!</span><br><span class="line">         */</span><br><span class="line">        public void setConnWatcher(ConnectionStateListener connWatcher) &#123;</span><br><span class="line">            client.getConnectionStateListenable().addListener(connWatcher);</span><br><span class="line">        &#125;</span><br><span class="line">        /**</span><br><span class="line">         * 监听Node节点中数据改变事件,自动重复监听</span><br><span class="line">         */</span><br><span class="line">        public boolean setNodeCacheListener(String path, NodeCacheListener listener) &#123;</span><br><span class="line">            if (!checkNodeExisted(path)) &#123;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">            NodeCache nodeCache = new NodeCache(client, path);</span><br><span class="line">            nodeCacheMap.put(path, nodeCache);</span><br><span class="line">            try &#123;</span><br><span class="line">                nodeCache.start();</span><br><span class="line">                nodeCache.getListenable().addListener(listener);</span><br><span class="line">            &#125; catch (Exception e) &#123;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line">        /**</span><br><span class="line">         * 关闭指定path的NodeCache</span><br><span class="line">         */</span><br><span class="line">        public void closeNodeCache(String path) &#123;</span><br><span class="line">            if (nodeCacheMap.containsKey(path)) &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    nodeCacheMap.get(path).close();</span><br><span class="line">                &#125; catch (IOException e) &#123;</span><br><span class="line">                    //...</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        public void closePathChildrenCache(String path) &#123;</span><br><span class="line">            if (pathChildrenCacheMap.containsKey(path)) &#123;</span><br><span class="line">                PathChildrenCache childrenCache = pathChildrenCacheMap.get(path);</span><br><span class="line">                closePathChildrenCache(childrenCache);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        private void closePathChildrenCache(PathChildrenCache childrenCache) &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                childrenCache.close();</span><br><span class="line">                //清空缓存值</span><br><span class="line">                childrenCache.clear();</span><br><span class="line">                //清除map中的listener对象</span><br><span class="line">                childrenCache.getListenable().clear();</span><br><span class="line">            &#125; catch (IOException e) &#123;</span><br><span class="line">                //...</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        /**</span><br><span class="line">         * 关闭ZKClient对象</span><br><span class="line">         */</span><br><span class="line">        public void close() &#123;</span><br><span class="line">            for (NodeCache nodeCache : nodeCacheMap.values()) &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    nodeCache.close();</span><br><span class="line">                &#125; catch (IOException e) &#123;</span><br><span class="line">                    //...</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            for (PathChildrenCache childrenCache : pathChildrenCacheMap.values()) &#123;</span><br><span class="line">                closePathChildrenCache(childrenCache);</span><br><span class="line">            &#125;</span><br><span class="line">            try &#123;</span><br><span class="line">                client.close();</span><br><span class="line">            &#125; catch (Exception e) &#123;</span><br><span class="line">                //...</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        public boolean setPathChildListener(String path, PathChildrenCacheListener listener) &#123;</span><br><span class="line">            if (!checkNodeExisted(path)) &#123;</span><br><span class="line">                //...</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">            PathChildrenCache childrenCache = new PathChildrenCache(this.getZkCuratorClient(), path, false);</span><br><span class="line">            pathChildrenCacheMap.put(path, childrenCache);</span><br><span class="line">            try &#123;</span><br><span class="line">                childrenCache.start();</span><br><span class="line">                childrenCache.getListenable().addListener(listener);</span><br><span class="line">            &#125; catch (Exception e) &#123;</span><br><span class="line">                //...</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a href="https://zookeeper.apache.org/doc/trunk/zookeeperAdmin.html" target="_blank" rel="noopener">https://zookeeper.apache.org/doc/trunk/zookeeperAdmin.html</a></li>
+<li><a href="http://www.cnblogs.com/LiZhiW/tag/ZooKeeper/" target="_blank" rel="noopener">http://www.cnblogs.com/LiZhiW/tag/ZooKeeper/</a></li>
+</ol>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/zookeeper/">zookeeper</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/zookeeper/">zookeeper</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2017/05/12/【ZooKeeper】基于Curator的开发(四)/" data-title="【ZooKeeper】基于Curator的开发(四) | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/06/12/【ActiveMQ】消息唯一性的保证(十)/" title="【ActiveMQ】消息唯一性的保证(十)">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【ActiveMQ】消息唯一性的保证(十)</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/05/12/【ZooKeeper】集群搭建(二)/"  title="【ZooKeeper】集群搭建(二)">
+ <strong>下一篇：</strong><br/> 
+ <span>【ZooKeeper】集群搭建(二)
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

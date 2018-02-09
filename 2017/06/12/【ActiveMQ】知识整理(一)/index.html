@@ -1,0 +1,722 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【ActiveMQ】知识整理(一) | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="前言：这不是关于ActiveMq的一个全面介绍，这里整体记录使用ActiveMq过程中的一些知识点，总结起来。 1. 基本使用知识点默认端口管理页面端口：8161LevelDB主从复制端口：62626client连接broker端口：openwire：61616；amqp：5672；stomp：61613；mqtt：1">
+<meta name="keywords" content="ActiveMQ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【ActiveMQ】知识整理(一)">
+<meta property="og:url" content="http://huzongzhe.cn/2017/06/12/【ActiveMQ】知识整理(一)/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="前言：这不是关于ActiveMq的一个全面介绍，这里整体记录使用ActiveMq过程中的一些知识点，总结起来。 1. 基本使用知识点默认端口管理页面端口：8161LevelDB主从复制端口：62626client连接broker端口：openwire：61616；amqp：5672；stomp：61613；mqtt：1883；ws：61614zk的sever与client：2181; master">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-01-11T02:13:50.019Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【ActiveMQ】知识整理(一)">
+<meta name="twitter:description" content="前言：这不是关于ActiveMq的一个全面介绍，这里整体记录使用ActiveMq过程中的一些知识点，总结起来。 1. 基本使用知识点默认端口管理页面端口：8161LevelDB主从复制端口：62626client连接broker端口：openwire：61616；amqp：5672；stomp：61613；mqtt：1883；ws：61614zk的sever与client：2181; master">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/06/12/【ActiveMQ】知识整理(一)/" title="【ActiveMQ】知识整理(一)" itemprop="url">【ActiveMQ】知识整理(一)</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished"> 发表于 2017-06-12</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<p>前言：这不是关于ActiveMq的一个全面介绍，这里整体记录使用ActiveMq过程中的一些知识点，总结起来。</p>
+<h3 id="1-基本使用知识点"><a href="#1-基本使用知识点" class="headerlink" title="1. 基本使用知识点"></a>1. 基本使用知识点</h3><h3 id="默认端口"><a href="#默认端口" class="headerlink" title="默认端口"></a>默认端口</h3><p>管理页面端口：8161<br>LevelDB主从复制端口：62626<br>client连接broker端口：<code>openwire：61616</code>；<code>amqp：5672</code>；<code>stomp：61613</code>；<code>mqtt：1883</code>；<code>ws：61614</code><br>zk的sever与client：2181; master选举端口:3888; master-slave通信:2888;</p>
+<h3 id="activemq相关jar包介绍"><a href="#activemq相关jar包介绍" class="headerlink" title="activemq相关jar包介绍"></a>activemq相关jar包介绍</h3><ol>
+<li><code>activemq-all</code>所有activemq相关jar的集合,不建议在工程中直接引入, 处出现很多冲突!</li>
+<li><code>activemq-core</code>是<code>activemq-broker</code>和<code>activemq-client</code>的结合. 等于将两个包柔和成一个包.</li>
+<li><code>activemq-broker</code>是中间代理的实现,即部署在服务器的逻辑实现. 当需要管理某个broker时(比如:BrokerService生命周期),可以引入此jar包.</li>
+<li><code>activemq-client</code>是客户端的实现,实现工程项目和服务器部署的broker的通信, 通常我们工程中需要引入的jar包.</li>
+<li><code>activemq-pool</code>客户端和服务器之间的连接是一个耗时的过程,我们可以把客户端和服务器的连接管理交给pool,每次从pool中获取连接.可以说是对<code>activemq-jms-pool</code>的一个封装.</li>
+<li><code>activemq-jms-pool</code>具体的连接池的实现,也是依赖<code>commons-pool</code>的实现.</li>
+</ol>
+<p>tip: 一般我们项目只要引入<code>activemq-client</code>即可, 若消息比较多需要连接池可引入<code>activemq-pool</code>,如果想结合spring等,还需要<code>spring-jms</code>等.<br>注: 很多说工程项目中需要引入<code>activemq-core</code>和<code>activemq-pool</code>, 其实是没有问题的,看源码对比<code>activemq-client</code>实现,基本都是一样的实现.</p>
+<h3 id="conf目录中文件的作用"><a href="#conf目录中文件的作用" class="headerlink" title="conf目录中文件的作用"></a>conf目录中文件的作用</h3><ol>
+<li><code>activemq.xml</code> broker的最主要的配置文件！配置权限，协议，队列，broker架构等等。</li>
+<li><code>credentials.properties</code>配置，可简单理解为<strong>client连接broker队列时的权限</strong>，配合<code>simpleAuthenticationPlugin</code>使用，<code>simpleAuthenticationPlugin</code>无法将权限控制到具体的queue或topic，<code>credentials-enc.properties</code>作用同<code>credentials.properties</code>，但是密码是加密后的密码，具体参见：<code>http://activemq.apache.org/encrypted-passwords.html</code></li>
+<li><code>groups.properties</code>和<code>users.properties</code>定义<strong>topic和queue的权限管理</strong>，是JAAS鉴权方法，可以精确到某个destination，<code>groups.properties</code>里面定义组，<code>users.properties</code>定义用户名密码。与<code>login.config</code>配合使用！</li>
+<li><code>login.config</code>配置JAAS，参见：<code>http://activemq.apache.org/security.html</code></li>
+<li><code>jetty-realm.properties</code>用于设置86161端口的web管理界面的登录权限。</li>
+<li><code>jmx.access</code>和<code>jmx.password</code>是启用了jmx后的权限管理。</li>
+<li><code>log4j.properties</code>和<code>logging.properties</code>日志配置，<code>logging.properties</code>少用，<code>log4j.properties</code>用于配置broker的运行日志，和audit的登录日志。</li>
+</ol>
+<h3 id="bin目录中文件的作用"><a href="#bin目录中文件的作用" class="headerlink" title="bin目录中文件的作用"></a>bin目录中文件的作用</h3><ol>
+<li><code>activemq</code> broker启动停止，统计等一系列操作。<code>sudo ./activemq --help</code>查看使用方法。</li>
+<li><code>activemq-diag</code>系统诊断<code>sudo ./activemq-diag --help</code>查看使用方法！</li>
+<li><code>env</code>启动配置参数，使用前推荐阅读一遍<code>env</code>脚本！</li>
+</ol>
+<hr>
+<h2 id="2-开发和配置MQ相关知识点"><a href="#2-开发和配置MQ相关知识点" class="headerlink" title="2. 开发和配置MQ相关知识点"></a>2. 开发和配置MQ相关知识点</h2><ol>
+<li><code>SimpleMessageListenerContainer</code> 默认情况下批量拿到了1000条消息，但是会平均分配给各个Session。</li>
+<li><code>DefaultMessageListenerContainer</code> 则支持更多的特性，例如事务。</li>
+<li><code>ActiveMQ Jolokia REST API</code> 用于通过http来操作队列！<br>比如：<code>curl -u admin:admin -d &quot;body=message&quot; http://localhost:8161/api/message/TEST?type=queue</code> 给队列发送一个消息。<blockquote>
+<p>JMX是一个J2EE监控/管理协议，采用MBean进行网络传输，但是其他非java平台无法理解，Jolokia则是解决这个问题的一个方法，它可以把JMX的MBean Restful JSON 化。</p>
+</blockquote>
+</li>
+<li>连接broker的URI中不允许有空格.</li>
+<li><code>client</code>的配置可以通过<code>链接URL</code>和<code>ActiveMQConnectionFactory</code>对象进行配置。（<a href="http://activemq.apache.org/connection-configuration-uri.html）" target="_blank" rel="noopener">http://activemq.apache.org/connection-configuration-uri.html）</a><br>如配置消息的异步发送：<br><code>cf = new ActiveMQConnectionFactory(&quot;tcp://locahost:61616?jms.useAsyncSend=true&quot;);</code><br><code>((ActiveMQConnectionFactory)connectionFactory).setUseAsyncSend(true);</code><br>二者等价。</li>
+<li>默认情况下AMQ采用异步发送模式, 如果是<code>非事务的持久化消息</code>则默认采用的是同步发送(不允许消息丢失), 如果能够容忍少量消息丢失,则可以在这种模式下启动异步发送!</li>
+<li>URL中的<code>randomize=false</code>表示master/slave模式下, clients的连接不随机连接到slave上! 也即,slave仅仅只同步master消息!</li>
+<li><code>connectionFactory.setOptimizeAcknowledge(true)</code> 设置批量确认, 以提高效率和吞吐量!</li>
+<li>broker添加gc log日志.<br>文件<code>bin/env</code><br>字段 <code>ACTIVEMQ_OPTS_MEMORY</code><br>内容 <code>-Xms4G -Xmx8G -verbose:gc -XX:+PrintGCDateStamps -XX:+PrintGCDetails -Xloggc:$ACTIVEMQ_DATA/gc.log</code></li>
+<li><p>queue和Topic消息的顺序,只能在activemq.xml中设置<code>strictOrderDispatch</code>.<br>Queue:<br><code>&lt;policyEntry queue=&quot;&gt;&quot; strictOrderDispatch=&quot;false&quot; /&gt;</code><br>默认不设置的情况下,单消费者时,消息按照顺序发送, 当Topic:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;destinationPolicy&gt;</span><br><span class="line"> &lt;policyMap&gt;</span><br><span class="line">   &lt;policyEntries&gt;</span><br><span class="line">     &lt;policyEntry topic=&quot;&gt;&quot;&gt;</span><br><span class="line">       &lt;dispatchPolicy&gt;</span><br><span class="line">         &lt;strictOrderDispatchPolicy/&gt;</span><br><span class="line">       &lt;/dispatchPolicy&gt;</span><br><span class="line">     &lt;/policyEntry&gt;</span><br><span class="line">   &lt;/policyEntries&gt;</span><br><span class="line"> &lt;/policyMap&gt;</span><br><span class="line">&lt;/destinationPolicy&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>让mq支持热配置</p>
+</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;broker xmlns=&quot;http://activemq.apache.org/schema/core&quot; start=&quot;false&quot; ... &gt;</span><br><span class="line">   &lt;plugins&gt;</span><br><span class="line">     &lt;runtimeConfigurationPlugin checkPeriod=&quot;30000&quot; /&gt;</span><br><span class="line">     ...</span><br><span class="line">   &lt;/plugins&gt;</span><br><span class="line">   ...</span><br><span class="line">&lt;/broker&gt;</span><br></pre></td></tr></table></figure>
+<p>注：不要漏掉<code>start=&quot;false&quot;</code>，<code>checkPeriod=&quot;30000&quot;</code>是检查xml配置修改间隔(这里配置的是30s)，默认0，即不检查xml配置修改！</p>
+<p>可以热配置的节点：</p>
+<ol>
+<li><code>&lt;networkConnectors&gt;</code></li>
+<li><code>&lt;destinationPolicy&gt;&lt;policyMap&gt;&lt;policyEntries&gt;</code></li>
+<li><code>&lt;plugins&gt;&lt;authorizationPlugin&gt;&lt;map&gt;&lt;authorizationMap&gt;&lt;authorizationEntries&gt;</code></li>
+<li><code>&lt;destinationInterceptors&gt;&lt;virtualDestinationInterceptor&gt;&lt;virtualDestinations&gt;</code></li>
+<li>事务的理解：表示多条消息发送到broker过程中,如果没有问题,则producer commit确认ok, 这多条消息才发送到consumer消费.<br>当发送多条消息后发现异常(比如,数据错误),这时producer rollback确认事务失败, 则这写消息都不会发送到消费者!</li>
+</ol>
+<hr>
+<h2 id="3-概念"><a href="#3-概念" class="headerlink" title="3. 概念"></a>3. 概念</h2><h3 id="1-基本原理"><a href="#1-基本原理" class="headerlink" title="1. 基本原理"></a>1. 基本原理</h3><ol>
+<li>5.6之前的版本,mq为每一个消息队列分配一个线程处理消息的分发!5.6之后, 默认采用线程池来处理所有队列的消息分发!</li>
+<li>P2P（point to point）中，没有得到确认的消息会被转发到其他的消费者。</li>
+<li>producer默认使用同步方式发送消息（持久化消息的Producer send一个消息后block，直到broker将消息持久化到磁盘并发送acknowledgement。）</li>
+</ol>
+<h3 id="2-消息预取限制"><a href="#2-消息预取限制" class="headerlink" title="2. 消息预取限制"></a>2. 消息预取限制</h3><ol>
+<li><p>设置预取消息的意义:<br><strong>borker将消息push(推)到consumer的一个缓冲中, 由于push的速度肯定大于consumer消费消息的速度, 数据量大的情况, consumer的缓冲会满.所以要设置broker push消息到consumer的数量.  queue也是如此</strong>, queue默认是1000, topic默认100, 通常在消费端初始化时设置.</p>
+<ul>
+<li><code>tcp://localhost:61616?jms.prefetchPolicy.all=50</code></li>
+<li><code>tcp://localhost:61616?jms.prefetchPolicy.queuePrefetch=1</code></li>
+<li>代码控制.<br> <code>queue = new ActiveMQQueue(&quot;TEST.QUEUE?consumer.prefetchSize=10&quot;);</code><br> <code>consumer = session.createConsumer(queue);</code></li>
+</ul>
+</li>
+<li><p><strong>消息消费与预取相关过程</strong>:</p>
+</li>
+<li>broker第一次push最大限制的消息到consumer.</li>
+<li><p>直到consumer回复的acknowledge）达到50%的预取消息后,broker才再发送50%总预取限制数的消息到consumer,从而将consumer的缓冲填满.</p>
+</li>
+<li><p>消费者速度控制<br>如果消息量较大的时候推荐设置较大的预取值；消息数量小,但是消费处理时间长的情况,建议设置预取值为1,确保消费者一次只处理一条消息.<br>如果预取值设为0,表示consumer自己通过轮询的方式去broker中拉取消息，每次调用receive(timeout)方法时去拉取，这种方式效率较低，会明显增加每个消息的消费延迟！<br><strong>Slow Consumer</strong>定义: 有他设置的预取值两倍的消息出去等待push状态!</p>
+</li>
+<li><p>当pool consumer时，prefetch可能会出现的问题<br>push到prefetch缓冲区中的消息，如果没有消费，broker会一直认为该消息在消费中，所以只有consumer关闭的时候，prefetch的Unconsumer消息，才会被返回给broker！<br>所以当pool consumer后，consumer不会被销毁（close），所以那些Unconsumer消息，会等到这个consumer重用的时候才会被消费！<br>Tip：Spring的<code>CachingConnectionFactory</code>对象会缓存consumer，所以，要么关闭consumer缓存，要么设置<code>prefetch=0</code>。</p>
+<blockquote>
+<p>参见：<a href="http://activemq.apache.org/what-is-the-prefetch-limit-for.html" target="_blank" rel="noopener">http://activemq.apache.org/what-is-the-prefetch-limit-for.html</a></p>
+</blockquote>
+</li>
+</ol>
+<h3 id="3-消息丢弃-discard-策略ConstantPendingMessageLimitStrategy"><a href="#3-消息丢弃-discard-策略ConstantPendingMessageLimitStrategy" class="headerlink" title="3. 消息丢弃(discard)策略ConstantPendingMessageLimitStrategy"></a>3. 消息丢弃(discard)策略<code>ConstantPendingMessageLimitStrategy</code></h3><p>由于非持久化消息都会被保存在内存中，所以当消费者非常缓慢或者down掉,会导致RAM被填满,从而影响其他正常的消息。所以，将当一条新的消息到来且<code>prefetch buffer</code>被填满时，队列中旧的消息就会被丢弃。<br><code>ConstantPendingMessageLimitStrategy</code> 表示保存在内存中的消息最大数量值（一般应该大于prefetchSize）。<code>-1</code>表示不丢弃消息，<code>0</code>表示在RAM中只保留prefetchSize大小的消息！<br><code>&lt;prefetchRatePendingMessageLimitStrategy multiplier=&quot;2.5&quot;/&gt;</code> 另一种计算方法，<code>2.5</code>表示保留在内存中的消息数量值为prefetchSize的2.5倍。<br>参见：<code>http://activemq.apache.org/slow-consumer-handling.html</code></p>
+<h3 id="4-InactivityMonitor"><a href="#4-InactivityMonitor" class="headerlink" title="4. InactivityMonitor"></a>4. InactivityMonitor</h3><p>连接监控(InactivityMonitor, 翻译: 不正常连接监控),参考<code>AbstractInactivityMonitor readCheck()和writeCheck()</code>源码<br><code>writeCheck()</code>: 监测是否有正常的消息写入, 如果没有就用该连接发送一个<code>KeepAliveInfo</code>消息.<br><code>readCheck()</code> : 如果有接收者在工作,则不监测, 否则监测消息是否在maxInactivityDuration内送达, 未送达抛<code>InactivityIOException</code>异常,给<code>TransportListener</code>!<br>不正常连接监视进程, 会检查每个连接是否是正常可用的,简言之就是如果一个连接在maxInactivityDuration时间内消息没有被接收(read),则会判定为不正常,且关闭这个连接.</p>
+<p>连接监控的相关URI配置参数：</p>
+<ol>
+<li><code>wireFormat.maxInactivityDuration</code>    默认:30000毫秒, 消息被read能够容忍的最大时长. 可以理解成,一条消息write和read能够容忍的最长时长!</li>
+<li><code>wireFormat.maxInactivityDurationInitalDelay</code> 默认:10000毫秒 , 旨在解决当broker压力较大时创建一个连接需要较长时间.连接建立后,多长时间后开启<code>InactivityMonitor</code>任务.</li>
+<li><code>transport.useInactivityMonitor</code>  默认:true. 是否启动InactivityMonitor,监测不活动连接.</li>
+<li><code>transport.useKeepAlive</code>  默认: true. 当连接处于空闲状态时, 发送一条keep alive消息,用于InactivityMonitor线程检测是否在maxInactivityDuration时间内被read. 只有在没有正常消息发送时,才会发送一条keep alive来检测连接的正常性.有正常消息交互时InactivityMonitor会根据正常的消息的处理情况,检测连接的正常性.</li>
+</ol>
+<p>InactivityMonitor连接监控理解：<br>InactivityMonitor采用两个daemon线程,<code>READ_CHECK_TIMER</code>读 ,<code>WRITE_CHECK_TIMER</code>写<br>注意与TCP连接url中的<code>keepAlive=true</code>的区别: 简言之<code>保证tcp层面的连接不被关闭!</code>. socket一段时间没有交互,系统会回收socket. 所以<code>keepAlive=true</code>定时发送一条0字节的消息,避免系统回收网络IO.<br>Tip: 网络IO资源回收两种方式: 1. 系统监测socket很长时间没有交互,则认为该连接dead,回收该IO. 2. 应用程序可以指定关闭IO资源, InactivityMonitor作用就是监测连接出现异常并关闭IO.<br>Tip:不使用InactivityMonitor两种方式: <code>transport.useInactivityMonitor=false</code> 和 <code>Configuring wireFormat.maxInactivityDuration=0</code> 。都是在URI中配置。</p>
+<h3 id="5-可能用到的配置"><a href="#5-可能用到的配置" class="headerlink" title="5. 可能用到的配置"></a>5. 可能用到的配置</h3><ul>
+<li><code>&lt;policyEntry queue=&quot;&gt;&quot; strictOrderDispatch=&quot;false&quot; /&gt;</code> 配置queue是否严格按照顺序分派.</li>
+<li>消费者优先级配置<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">queue = new ActiveMQQueue(&quot;TEST.QUEUE?consumer.priority=10&quot;);    consumer = session.createConsumer(queue);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>优先级<code>0-127</code>,默认为<code>0</code>, 优先级最高为<code>127</code>, broker发送消息根据优先级高低, 首先发送消息到优先级最高的consumer,当这个consumer的 <code>prefetch buffer</code>满后, broker再给下一个优先级的consumer发送消息.</p>
+<h3 id="5-Advisory-消息"><a href="#5-Advisory-消息" class="headerlink" title="5. Advisory 消息"></a>5. Advisory 消息</h3><p>Advisory 消息是broker监听生产者和消费者的Topic类型消息,主要作用有:</p>
+<ol>
+<li>监听消费者生产者连接的建立和销毁.</li>
+<li>监听临时节点的创建和销毁.</li>
+<li>对于Topic和Queue的设置超时消息,发送通知.</li>
+<li>监听所有连接的建立和销毁.</li>
+<li>监听是否将消息发送到没有消费者的队列.<br>没建立一个Destination都会随之建立一个Advisory的Destination监听该Destination.</li>
+</ol>
+<h2 id="2-禁用Advisory-消息"><a href="#2-禁用Advisory-消息" class="headerlink" title="2. 禁用Advisory 消息"></a>2. 禁用Advisory 消息</h2><p>系统默认开启Advisory 消息,下面介绍如何禁用:</p>
+<ol>
+<li>关闭所有Advisory类型消息: broker的<code>activemq.xml</code>中配置 <code>&lt;broker advisorySupport=&quot;false&quot;&gt;</code></li>
+<li>通过连接配置禁用: <code>tcp://localhost:61616?jms.watchTopicAdvisories=false</code></li>
+<li>建立连接的时候配置:<br><code>ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory();</code><br><code>factory.setWatchTopicAdvisories(false);</code><br>使用示例: <code>http://activemq.apache.org/nms/activemq-enumerate-destination-using-advisory-messages.html</code></li>
+</ol>
+<hr>
+<h2 id="4-协议"><a href="#4-协议" class="headerlink" title="4. 协议"></a>4. 协议</h2><p>broker与client之间数据传输的协议大致有：openwire（默认），amqp，stomp，mqtt，amqp等。<br>producer和broker以及consumer和broker之间的传输协议可以不同，可以针对业务场景分别指定。</p>
+<ol>
+<li>openwire（配置：<a href="http://activemq.apache.org/configuring-wire-formats.html）" target="_blank" rel="noopener">http://activemq.apache.org/configuring-wire-formats.html）</a><br>OpenWire是一种非常快的二进制协议，旨在实现最大化的性能和功能。ActiveMQ默认协议。<br>AMQP与OpenWire非常相似，因为他们都是被设计来通过二进制格式（比文本要高效），支持高性能的消息传递。</li>
+</ol>
+<p><code>activemq.xml</code>中配置:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;transportConnector name=&quot;openwire&quot; uri=&quot;tcp://0.0.0.0:61616?maximumConnections=1000&amp;amp;wireFormat.maxFrameSize=104857600&quot;/&gt;</span><br></pre></td></tr></table></figure></p>
+<p>其中<code>maxFrameSize</code>表示每条消息的最大大小。<br>client链接配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">failover:(tcp://localhost:61616?wireFormat.maxInactivityDuration=0,tcp://10.100.8.5:61616?wireFormat.maxInactivityDuration=0)?randomize=false&amp;amp;jms.useAsyncSend=true</span><br></pre></td></tr></table></figure></p>
+<p>注意：maxInactivityDuration=0表示不关闭inactive连接，使用failover时，jms.*类型的参数应写在括号外面<br><code>randomize=false</code> 表示,只有当当前连接的broker不可用,才连接到第二个broker上! 默认<code>randomize=true</code>,即随机选择一个可用broker连接,以提供负载均衡!其实,在HA架构下设不设置都可以,因为只有一个broker提供服务!<br>默认failover中第一个URI会被优先选择,如果想多个同时是优先选择的可以这样设置:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">failover:(tcp://local1:61616,tcp://local2:61616,tcp://remote:61616)?randomize=false&amp;priorityBackup=true&amp;priorityURIs=tcp://local1:61616,tcp://local2:61616</span><br></pre></td></tr></table></figure></p>
+<p>即, local1和local2有相同的优先级,优先选择其中之一.</p>
+<ol>
+<li><p>Stomp<br>Stomp,是一种简单方便的基于文本的协议，作为基于文本的格式，STOMP的实现非常简单，性能也比较低。</p>
+</li>
+<li><p>AMQP<br>AMQP：ActiveMQ 5.8新增加的传输连接。用于支持AMQP（高级消息队列协议）。<br>因为AMQP是消息队列的标准协议，而且已经越来越被广泛使用，所以ActiveMQ也支持了此协议。<br>AMQP协议可以搭配NIO或SSL协议使用，amqp+nio用于提升系统的延展性和性能。amqp+ssl可以创建安全连接。<br><strong>amqp配置：</strong><code>&lt;transportConnector name=&quot;amqp&quot; uri=&quot;amqp://localhost:5672&quot;/&gt;</code><br><strong>amqp+nio配置：</strong><code>&lt;transportConnector name=&quot;amqp+nio&quot; uri=&quot;amqp+nio://localhost:5672&quot;/&gt;</code><br><strong>amqp+ssl配置：</strong><code>&lt;transportConnector name=&quot;amqp+ssl&quot; uri=&quot;amqp+ssl://localhost:5672&quot;/&gt;</code></p>
+</li>
+</ol>
+<ol>
+<li>MQTT<br>MQTT：ActiveMQ 5.8新增加的传输连接。是一个轻量级的消息订阅/发布协议。和AMQP一样，同样支持搭配NIO或SSL使用。<br><strong>mqtt配置：</strong><code>&lt;transportConnector name=&quot;mqtt&quot; uri=&quot;mqtt://localhost:1883&quot;/&gt;</code><br><strong>mqtt+nio配置： </strong><code>&lt;transportConnector name=&quot;mqtt+nio&quot; uri=&quot;mqtt+nio://localhost:1883&quot;/&gt;</code><br><strong>mqtt+ssl配置： </strong><code>&lt;transportConnector name=&quot;mqtt+ssl&quot; uri=&quot;mqtt+ssl://localhost:1883&quot;/&gt;</code></li>
+<li>http，udp，ssl，tcp，nio</li>
+</ol>
+<ul>
+<li>http协议配置：<code>&lt;transportConnector name=&quot;http&quot; uri=&quot;http://localhost:8080&quot;/&gt;</code></li>
+<li>https协议配置：<code>&lt;transportConnector name=&quot;https&quot; uri=&quot;https://localhost:8080&quot;/&gt;</code></li>
+<li>udp协议配置：<code>&lt;transportConnector name=&quot;udp&quot; uri=&quot;udp://localhost:8123&quot;/&gt;</code></li>
+<li>ssl协议配置：<code>&lt;transportConnector name=&quot;ssl&quot; uri=&quot;ssl://localhost:8123&quot;/&gt;</code><br>SSL：需要一个安全连接的时候可以考虑使用SSL，适用于client和broker在公网的情况，如使用aws云平台等。</li>
+</ul>
+<ol>
+<li><p>tcp配置： <code>&lt;transportConnector name=&quot;tcp&quot; uri=&quot;tcp://localhost:61616&quot;/&gt;</code><br><strong>TCP：ActiveMQ默认的传输连接，也是最常用的使用方式。长连接，每个客户端实例都会与服务器维持一个连接。每个连接一个线程。</strong><br>TCP的优点是：<br>性能高：<strong>ActiveMQ使用默认协议OpenWire序列化和反序列化消息。OpenWire是一个性能很高的序列化协议。</strong><br>可用性高：TCP是使用最广泛的技术，几乎所有的开发语言都支持TCP协议。<br>可靠性高：TCP协议确保消息不会在网络传说的过程中丢失。</p>
+</li>
+<li><p>NIO配置：<code>&lt;transportConnector name=&quot;nio&quot; uri=&quot;nio://localhost:61616&quot;/&gt;</code><br>NIO：使用Java的NIO方式对连接进行改进，因为NIO使用线程池，可以复用线程，所以可以用更少的线程维持更多的连接。<br>如果有大量的客户端，或者性能瓶颈在网络传输上，可以考虑使用NIO的连接方式。也可以根据不同的场景选择不用的传输连接.<br>比如：Producer有很多，但是Consumer很少，可以Producer用NIO协议，Consumer用TCP协议。</p>
+</li>
+</ol>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/ActiveMQ/">ActiveMQ</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/ActiveMQ/">ActiveMQ</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2017/06/12/【ActiveMQ】知识整理(一)/" data-title="【ActiveMQ】知识整理(一) | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/06/12/【ActiveMQ】生产者消费者流控制(五)/" title="【ActiveMQ】生产者消费者流控制(五)">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【ActiveMQ】生产者消费者流控制(五)</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/06/12/【ActiveMQ】Client客户端的线程资源(七)/"  title="【ActiveMQ】Client客户端的线程资源(七)">
+ <strong>下一篇：</strong><br/> 
+ <span>【ActiveMQ】Client客户端的线程资源(七)
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

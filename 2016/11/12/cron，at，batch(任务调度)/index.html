@@ -1,0 +1,638 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>cron，at，batch(任务调度) | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="一，基础知识 corntab周期执行任务,anacron调度每日、每周或每月执行的作业,at调度只运行一次的作业. batch 命令被用来在系统平均负载达到 0.8% 以下时执行一次性的任务，通俗的所就是系统空闲时执行任务。 crontab调度的任务是不会加载任何环境变量的,这就是为什么shell中可以执行,cron中">
+<meta name="keywords" content="Linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cron，at，batch(任务调度)">
+<meta property="og:url" content="http://huzongzhe.cn/2016/11/12/cron，at，batch(任务调度)/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="一，基础知识 corntab周期执行任务,anacron调度每日、每周或每月执行的作业,at调度只运行一次的作业. batch 命令被用来在系统平均负载达到 0.8% 以下时执行一次性的任务，通俗的所就是系统空闲时执行任务。 crontab调度的任务是不会加载任何环境变量的,这就是为什么shell中可以执行,cron中不行的原因. crond守护进程每分钟唤醒一次，并检查 crontab 判断需要">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-01-03T12:04:36.918Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="cron，at，batch(任务调度)">
+<meta name="twitter:description" content="一，基础知识 corntab周期执行任务,anacron调度每日、每周或每月执行的作业,at调度只运行一次的作业. batch 命令被用来在系统平均负载达到 0.8% 以下时执行一次性的任务，通俗的所就是系统空闲时执行任务。 crontab调度的任务是不会加载任何环境变量的,这就是为什么shell中可以执行,cron中不行的原因. crond守护进程每分钟唤醒一次，并检查 crontab 判断需要">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/11/12/cron，at，batch(任务调度)/" title="cron，at，batch(任务调度)" itemprop="url">cron，at，batch(任务调度)</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished"> 发表于 2016-11-12</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#一，基础知识"><span class="toc-text">一，基础知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#二，命令"><span class="toc-text">二，命令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-常用crontab命令"><span class="toc-text">1. 常用crontab命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-ubuntu下启动、停止与重启cron"><span class="toc-text">2. ubuntu下启动、停止与重启cron:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-表达式"><span class="toc-text">3. 表达式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-知识点"><span class="toc-text">4. 知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-示例"><span class="toc-text">5. 示例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#指定用户执行"><span class="toc-text">指定用户执行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#注意"><span class="toc-text">注意</span></a></li></ol></li></ol></li></ol>
+		
+		</div>
+		
+		<h2 id="一，基础知识"><a href="#一，基础知识" class="headerlink" title="一，基础知识"></a>一，基础知识</h2><ol>
+<li><strong>corntab</strong>周期执行任务,<strong>anacron</strong>调度每日、每周或每月执行的作业,<strong>at</strong>调度只运行一次的作业.</li>
+<li>batch 命令被用来在系统平均负载达到 0.8% 以下时执行一次性的任务，通俗的所就是系统空闲时执行任务。</li>
+<li>crontab调度的任务是不会加载任何环境变量的,这就是为什么shell中可以执行,cron中不行的原因.</li>
+<li>crond守护进程每分钟唤醒一次，并检查 crontab 判断需要执行什么任务.<br> crond守护进程是在系统启动时由 init 进程启动的(重启不影响任务的运行)。</li>
+</ol>
+<h2 id="二，命令"><a href="#二，命令" class="headerlink" title="二，命令"></a>二，命令</h2><h3 id="1-常用crontab命令"><a href="#1-常用crontab命令" class="headerlink" title="1. 常用crontab命令"></a>1. 常用crontab命令</h3><p>-u: 只有root 才能执行这个任务，也即帮其他用户新建/删除 crontab 工作调度: <code>sudo crontab -e -u zongzhe.hu</code><br>-e: 编辑crontab 的工作内容<br>-l : 查阅crontab的工作内容<br>-r: 删除所有的crontab的工作内容，若仅要删除一项，请用 -e 去编辑</p>
+<h3 id="2-ubuntu下启动、停止与重启cron"><a href="#2-ubuntu下启动、停止与重启cron" class="headerlink" title="2. ubuntu下启动、停止与重启cron:"></a>2. ubuntu下启动、停止与重启cron:</h3><p><code>$sudo /etc/init.d/cron start</code><br><code>$sudo /etc/init.d/cron stop</code><br><code>$sudo /etc/init.d/cron restart</code> 当任务失效时可以通过restart解决</p>
+<h3 id="3-表达式"><a href="#3-表达式" class="headerlink" title="3. 表达式"></a>3. 表达式</h3><p><code>* * * * * command</code> 分 小时 几号 月份 星期几<br>在以上各个字段中，还可以使用以下特殊字符：</p>
+<ul>
+<li>星号<code>*</code>：代表所有可能的值</li>
+<li>逗号<code>,</code>：可以用逗号隔开的值指定一个列表范围，例如，“1,2,5,7,8,9”</li>
+<li>中杠<code>-</code>：可以用整数之间的中杠表示一个整数范围，例如“2-6”表示“2,3,4,5,6”</li>
+<li>正斜线<code>/</code>：可以用正斜线指定时间的间隔频率，例如“0-23/2”表示每两小时执行一次。<br>   同时正斜线可以和星号一起使用，例如*/10，如果用在minute字段，表示每十分钟执行一次。</li>
+</ul>
+<h3 id="4-知识点"><a href="#4-知识点" class="headerlink" title="4. 知识点"></a>4. 知识点</h3><ul>
+<li>crond检测的时间周期是“分钟”， 每分钟会读取一次<code>/etc/crontab</code>， 以及 /var/spool/cron 里面的用户crontab记录并执行。</li>
+<li>用户执行计划保存在: <code>/var/spool/cron/username</code>中,username是cron的用户名</li>
+<li>系统执行计划保存在: <code>/etc/crontab</code></li>
+<li><code>/var/log/cron</code>中保存这cron的执行日志<h3 id="5-示例"><a href="#5-示例" class="headerlink" title="5. 示例"></a>5. 示例</h3><code>3,15 8-11 * * * command</code>  在上午8点到11点的第3和第15分钟执行<br><code>3,15 8-11 */2 * * command</code>  每隔两天的上午8点到11点的第3和第15分钟执行<br><code>10 1 * * 6,0 /etc/init.d/smb restart</code>  每周六、周日的1 : 10重启smb<br><code>45 4 1,10,22 * * /etc/init.d/smb restart</code> 每月1、10、22日的4 : 45重启smb<br><code>0 10 10 ? * 2</code>    每个星期一，10点10分 执行</li>
+</ul>
+<h4 id="指定用户执行"><a href="#指定用户执行" class="headerlink" title="指定用户执行"></a>指定用户执行</h4><ul>
+<li>命令:<br>  查看test用户下的cron任务: <code>sudo crontab -l -u test</code><br>  编辑test用户下的crontab任务: <code>sudo crontab -e -u test</code></li>
+<li>执行hive导数为示例:<ol>
+<li>将shell设置为test用户文件: <code>sudo chown test run.sh</code> , <code>sudo chgrp test run.sh</code> </li>
+<li>添加任务: <code>sudo crontab -e -u test</code> , <code>10 6 * * * /bin/bash /home/q/xxx/run.sh &gt; /home/q/xxx/log2 2&gt;&amp;1 &amp;</code><h4 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h4></li>
+</ol>
+</li>
+</ul>
+<ol>
+<li>脚本中涉及文件路径时写全局路径(因为cron执行shell的当前目录不是shell文件所在目录)；</li>
+<li>每条cron之前可以加一个注释,功能,时间,用户!</li>
+<li><strong>执行脚本前一定要检查脚本的woner和执行权限</strong> ,  确保crontab创建者有<strong>访问目录</strong>和<strong>执行shell</strong>的权限</li>
+<li>脚本执行要用到java或其他环境变量时，通过source命令引入环境变量，如:<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">!/bin/sh</span><br><span class="line">source /etc/profile #只要是cron任务,都加上吧</span><br><span class="line">export RUN_CONF=/home/d139/conf/platform/cbp/cbp_jboss.conf</span><br><span class="line">/usr/local/jboss-4.0.5/bin/run.sh -c mev &amp;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>或 <code>0 * * * * . /etc/profile;/bin/sh /var/bin/restart_audit.sh</code></p>
+<ol>
+<li>多个脚本互斥执行,可以用进程锁<code>flock</code>解决<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">*/1 * * * * /usr/bin/flock -xn /var/run/test.lock -c /home/q/test/test.sh &gt;&gt;/home/q/test/test.log 2&gt;&amp;1</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>注: <code>test.lock</code>文件需要自己手动创建并给予权限.还要注意锁的抢占，可能某个shell总是拿到锁的控制权.</p>
+<p><strong>问题:</strong><br>如果在crontab里有个定时任务设置为一分钟执行一次，但是它执行的时间可能会超过一分钟，此时crontab一分钟后会再次运行该脚本，这样就会出现冲突，<br>如果程序不做容错处理，可能会导致出现一些问题。如果想解决这个问题，可以用Linux中的进程锁控制crontab执行的并发问题。<br>解决：在crontab设置lock<br><code>*/5 * * * * /usr/bin/flock -xn /var/run/test.lock -c &#39;/scripts/test.sh &gt;/dev/null 2&gt;&amp;1&#39;</code><br>Tip：<code>flock -h</code> 查看使用,<code>test.lock</code>文件需要手动创建并给予权限,多个cron任务,注意锁的抢占!</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Linux/">Linux</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Linux/">Linux</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2016/11/12/cron，at，batch(任务调度)/" data-title="cron，at，batch(任务调度) | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/12/13/计算java对象大小的两种方法/" title="计算java对象大小的两种方法">
+  <strong>上一篇：</strong><br/>
+  <span>
+  计算java对象大小的两种方法</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/11/12/记一次22亿大数据分析处理踩坑经历/"  title="记一次22亿大数据分析处理踩坑经历">
+ <strong>下一篇：</strong><br/> 
+ <span>记一次22亿大数据分析处理踩坑经历
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#一，基础知识"><span class="toc-text">一，基础知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#二，命令"><span class="toc-text">二，命令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-常用crontab命令"><span class="toc-text">1. 常用crontab命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-ubuntu下启动、停止与重启cron"><span class="toc-text">2. ubuntu下启动、停止与重启cron:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-表达式"><span class="toc-text">3. 表达式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-知识点"><span class="toc-text">4. 知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-示例"><span class="toc-text">5. 示例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#指定用户执行"><span class="toc-text">指定用户执行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#注意"><span class="toc-text">注意</span></a></li></ol></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

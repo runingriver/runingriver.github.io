@@ -1,0 +1,619 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>记一次22亿大数据分析处理踩坑经历 | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="前言：用最简单最少的语言，分享我的坑，理不理解需求不重要，问题都在shell代码中，看shell极度枯燥，希望能有帮助！也可以看看,shell中hive,mysql等是如何处理较大数据的- -! 一. 起因需求，分析hive表中两年内用户XX的所有数据，按照每天早，中，晚三个时间段统计，按照两年内的节假日统计，按照月份">
+<meta name="keywords" content="mysql,shell,hive">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次22亿大数据分析处理踩坑经历">
+<meta property="og:url" content="http://huzongzhe.cn/2016/11/12/记一次22亿大数据分析处理踩坑经历/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="前言：用最简单最少的语言，分享我的坑，理不理解需求不重要，问题都在shell代码中，看shell极度枯燥，希望能有帮助！也可以看看,shell中hive,mysql等是如何处理较大数据的- -! 一. 起因需求，分析hive表中两年内用户XX的所有数据，按照每天早，中，晚三个时间段统计，按照两年内的节假日统计，按照月份的上旬，中旬，下旬统计，按照周末，工作日统计等等。假设现数据形式，手机号代表每一">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-01-10T11:35:28.121Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="记一次22亿大数据分析处理踩坑经历">
+<meta name="twitter:description" content="前言：用最简单最少的语言，分享我的坑，理不理解需求不重要，问题都在shell代码中，看shell极度枯燥，希望能有帮助！也可以看看,shell中hive,mysql等是如何处理较大数据的- -! 一. 起因需求，分析hive表中两年内用户XX的所有数据，按照每天早，中，晚三个时间段统计，按照两年内的节假日统计，按照月份的上旬，中旬，下旬统计，按照周末，工作日统计等等。假设现数据形式，手机号代表每一">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/11/12/记一次22亿大数据分析处理踩坑经历/" title="记一次22亿大数据分析处理踩坑经历" itemprop="url">记一次22亿大数据分析处理踩坑经历</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished"> 发表于 2016-11-12</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<p><strong>前言</strong>：用最简单最少的语言，分享我的坑，理不理解需求不重要，问题都在shell代码中，看shell极度枯燥，希望能有帮助！<br>也可以看看,shell中hive,mysql等是如何处理较大数据的- -!</p>
+<h2 id="一-起因"><a href="#一-起因" class="headerlink" title="一. 起因"></a>一. 起因</h2><p>需求，分析hive表中两年内用户XX的所有数据，按照每天早，中，晚三个时间段统计，按照两年内的节假日统计，按照月份的上旬，中旬，下旬统计，按照周末，工作日统计等等。<br>假设现数据形式，手机号代表每一个用户，用户不同时间发送的短信数量作为统计目的！<br>最后，按照类似<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mobile , am_count , noon_count , pm_count , springday_count , nationalday_count,weekend_count,weekday_count</span><br></pre></td></tr></table></figure></p>
+<p>形式统计为一张表！<br>说的太抽象，但是，你可以了解的有：</p>
+<ol>
+<li>由于hive表中存在脏数据，需要将数据导出，清洗。</li>
+<li>hive to mysql的dump方法，行不通。（如果可以麻烦告知方法，这里字段中含特殊字符导致无法正确导入）</li>
+<li>对sql使用不深，导致错误思路，导致踩坑。</li>
+</ol>
+<h2 id="二-解决方案"><a href="#二-解决方案" class="headerlink" title="二. 解决方案"></a>二. 解决方案</h2><h3 id="方案一"><a href="#方案一" class="headerlink" title="方案一"></a>方案一</h3><p>按照需求，将每一个字段对应一条sql的方式求出<code>mobile , count</code>的值，然后将这些字段统计起来（利用mysql的唯一键<code>unique index</code>和 <code>duplicate on update</code>方式）。</p>
+<h4 id="具体步骤："><a href="#具体步骤：" class="headerlink" title="具体步骤："></a>具体步骤：</h4><ol>
+<li>hive脚本导出每一列数据<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env bash</span><br><span class="line">echo &apos;-----------开始从hive查数----------------&apos;</span><br><span class="line">HIVE_SETTING=&quot;</span><br><span class="line">SET mapred.child.java.opts=-Xmx8192m;</span><br><span class="line">SET mapreduce.reduce.memory.mb=8192;</span><br><span class="line">SET mapreduce.reduce.java.opts=&apos;-Xmx8192M&apos;;</span><br><span class="line">SET mapreduce.map.memory.mb=8192;</span><br><span class="line">SET mapreduce.map.java.opts=&apos;-Xmx8192M&apos;;</span><br><span class="line">SET mapred.child.map.java.opts=&apos;-Xmx8192M&apos;;</span><br><span class="line">SET mapred.job.priority=HIGH;</span><br><span class="line">SET mapred.map.tasks.speculative.execution=false;</span><br><span class="line">SET mapred.reduce.tasks.speculative.execution=false;</span><br><span class="line">set hive.exec.dynamic.partition.mode=nonstrict;</span><br><span class="line">set hive.exec.dynamic.partition=true;</span><br><span class="line">SET hive.exec.max.dynamic.partitions=100000;</span><br><span class="line">SET hive.exec.max.dynamic.partitions.pernode=100000;</span><br><span class="line">USE xxxdb;</span><br><span class="line">set mapred.job.queue.name=xxx;</span><br><span class="line">set hive.exec.compress.output=true;</span><br><span class="line">set mapred.output.compression.codec=org.apache.hadoop.io.compress.GzipCodec;</span><br><span class="line">set hive.exec.parallel=true;</span><br><span class="line">set mapred.job.name = $&#123;0&#125;_xxx;</span><br><span class="line">&quot;</span><br><span class="line">#工作日数据查询</span><br><span class="line">HIVE_SQL=&quot;</span><br><span class="line">select mobile,count(mobile) from xxx_table where pmod(datediff(optime, &apos;2012-01-01&apos;), 7) in (1,2,3,4,5) group by mobile;</span><br><span class="line">&quot;</span><br><span class="line">#1. 将hive执行结果赋值给变量</span><br><span class="line">DATA=$(hive -e &quot;</span><br><span class="line">$&#123;HIVE_SETTING&#125;</span><br><span class="line">$&#123;HIVE_SQL&#125;;</span><br><span class="line">&quot;)</span><br><span class="line">#2. 将hive结果输出到文件中</span><br><span class="line">hive -e &quot;</span><br><span class="line">$&#123;HIVE_SETTING&#125;</span><br><span class="line">$&#123;HIVE_SQL&#125;;</span><br><span class="line">&quot; &gt;/home/q/hive_data.txt</span><br><span class="line">echo &apos;-----------结束从hive查数----------------&apos;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>查询出来数据22亿, 约占45G磁盘空间.</p>
+<ol>
+<li>mysql脚本导入数据</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env bash</span><br><span class="line">echo &quot;进程Pid: $$&quot;</span><br><span class="line">#将文本文件里面(mobile,count)字段插入到mysql中</span><br><span class="line">insertIntoMysql()&#123;</span><br><span class="line">    #获取参数</span><br><span class="line">    path=$&#123;1&#125;</span><br><span class="line">    col=$&#123;2&#125;</span><br><span class="line">    TIMESTAMP=$(date +%Y%m%d%H%M%S)</span><br><span class="line">    echo &quot;path:$&#123;path&#125;,column:$&#123;col&#125;,time:$&#123;TIMESTAMP&#125;&quot;</span><br><span class="line">    #遍历文件每一行</span><br><span class="line">    cat $&#123;path&#125; | while read line</span><br><span class="line">    do</span><br><span class="line">        #获取每一行中的每一列</span><br><span class="line">        mobile=$(echo -e &quot;$&#123;line&#125;&quot; | cut -f 1)</span><br><span class="line">        count=$(echo -e &quot;$&#123;line&#125;&quot; | cut -f 2)</span><br><span class="line">        #写入myusql</span><br><span class="line">        cmd=&quot;INSERT INTO db.xxx_table (mobile,$&#123;col&#125;) VALUES (&apos;$&#123;mobile&#125;&apos;,$&#123;count&#125;) ON DUPLICATE KEY UPDATE $&#123;col&#125;=$&#123;count&#125;;&quot;</span><br><span class="line">        eval $(mysql -uroot -pxxx --default-character-set=utf8 -e &quot;$&#123;cmd&#125;&quot;)</span><br><span class="line">        echo &quot;mobile:$&#123;mobile&#125;,count:$&#123;count&#125;&quot;</span><br><span class="line">    done</span><br><span class="line">    TIMESTAMP=$(date +%Y%m%d%H%M%S)</span><br><span class="line">    echo &quot;end time:$&#123;TIMESTAMP&#125;&quot;</span><br><span class="line">&#125;</span><br><span class="line">#保存每个字段(mobile,count)的文件目录</span><br><span class="line">path=&quot;/home/q/part1&quot;</span><br><span class="line">eval cd $&#123;path&#125;</span><br><span class="line">line=$(find $&#123;path&#125; -type f)</span><br><span class="line">for s in $&#123;line[@]&#125;</span><br><span class="line">do</span><br><span class="line">    #截取文件名，即mysql table中对应的列名！</span><br><span class="line">    col=$(echo $&#123;s&#125; |cut -d &quot;/&quot; -f5)</span><br><span class="line">    insertIntoMysql $&#123;s&#125; $&#123;col&#125;</span><br><span class="line">done</span><br><span class="line">exit;</span><br></pre></td></tr></table></figure>
+<hr>
+<p>到此,似乎是完了,多开几个脚本一起往mysql中导数就行了. <strong>但是,这只是开始!</strong></p>
+<h4 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h4><ol>
+<li>为什么不用mysql的批量导入?</li>
+<li>一行一行的插入22亿数据,要插入多久?<br>答: 批量导入的原子操作整行数据 , 无法做到聚合列! 22亿数据多个脚本,24小时插入量在2000W左右!<h4 id="改进1-ok单表插入太慢-我分表插入会快一些吧-改进脚本"><a href="#改进1-ok单表插入太慢-我分表插入会快一些吧-改进脚本" class="headerlink" title="改进1: ok单表插入太慢,我分表插入会快一些吧! 改进脚本!"></a>改进1: ok单表插入太慢,我分表插入会快一些吧! 改进脚本!</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env bash</span><br><span class="line">#多表插入,根据mobile确定表名</span><br><span class="line"># (x_financial,xxx_financial11,xxx_financial0,...,xxx_financial9)</span><br><span class="line">getTableName()&#123;</span><br><span class="line">    mobile=$&#123;1&#125;</span><br><span class="line">    table=&quot;xxx_financial&quot;</span><br><span class="line">    if [ $&#123;mobile&#125; -a -n $&#123;mobile&#125; ]</span><br><span class="line">    then</span><br><span class="line">        prefix=$(echo &quot;$&#123;mobile:0:5&#125;&quot;)</span><br><span class="line">        #861开头的手机号太多,所以又分十张表</span><br><span class="line">        if [ $&#123;prefix:0:3&#125; == &quot;861&quot; ]; then</span><br><span class="line">            model=`expr $&#123;prefix&#125; % 10`</span><br><span class="line">            table=$&#123;table&#125;&quot;$&#123;model&#125;&quot;</span><br><span class="line">        fi</span><br><span class="line">        #11位手机号的分一张xxx_financial11</span><br><span class="line">        if [ $&#123;#mobile&#125; == 11 -a $&#123;mobile:0:1&#125; == &quot;1&quot; ]; then</span><br><span class="line">            table=$&#123;table&#125;&quot;11&quot;</span><br><span class="line">        fi</span><br><span class="line">        echo &quot;$&#123;table&#125;&quot;</span><br><span class="line">    else</span><br><span class="line">        #国际,其他的分一张xxx_financial</span><br><span class="line">        echo &quot;$&#123;table&#125;&quot;</span><br><span class="line">    fi</span><br><span class="line">&#125;</span><br><span class="line">#将文本文件里面（mobile，count）字段插入到mysql中</span><br><span class="line">insertIntoMysql()&#123;</span><br><span class="line">    path=$&#123;1&#125;</span><br><span class="line">    col=$&#123;2&#125;</span><br><span class="line">    echo &quot;path:$&#123;path&#125;,column:$&#123;col&#125;&quot;</span><br><span class="line">    cat $&#123;path&#125; | while read line</span><br><span class="line">    do</span><br><span class="line">        mobile=$(echo -e &quot;$&#123;line&#125;&quot; | cut -f 1)</span><br><span class="line">        count=$(echo -e &quot;$&#123;line&#125;&quot; | cut -f 2)</span><br><span class="line">        table=`getTableName $&#123;mobile&#125;`</span><br><span class="line">        cmd=&quot;INSERT INTO db_name.$&#123;table&#125;(mobile,$&#123;col&#125;) VALUES (&apos;$&#123;mobile&#125;&apos;,$&#123;count&#125;) ON DUPLICATE KEY UPDATE $&#123;col&#125;=$&#123;count&#125;;&quot;</span><br><span class="line">        eval $(mysql -h127.0.0.1 -P3306 -uroot -p&apos;xxx&apos; --default-character-set=utf8 -e &quot;$&#123;cmd&#125;&quot;)</span><br><span class="line">        echo &quot;table:$&#123;table&#125;,mobile:$&#123;mobile&#125;,count:$&#123;count&#125;&quot;</span><br><span class="line">    done</span><br><span class="line">&#125;</span><br><span class="line">path=&quot;/home/q/data_hive/hive1&quot;</span><br><span class="line">eval cd $&#123;path&#125;</span><br><span class="line">line=$(find $&#123;path&#125; -type f)</span><br><span class="line">for s in $&#123;line[@]&#125;</span><br><span class="line">do</span><br><span class="line">    col=$(echo $&#123;s&#125; |cut -d &quot;/&quot; -f6)</span><br><span class="line">    insertIntoMysql $&#123;s&#125; $&#123;col&#125;</span><br><span class="line">done</span><br><span class="line">exit;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h4 id="问题-1"><a href="#问题-1" class="headerlink" title="问题"></a>问题</h4><ol>
+<li>的确横向分表后插入数据的确快很多,但是会出现数据集中同时插入同一张表的情况,依旧不能容忍!<h4 id="改进2-ok一条一条的插入不可以-我批量插入"><a href="#改进2-ok一条一条的插入不可以-我批量插入" class="headerlink" title="改进2: ok一条一条的插入不可以,我批量插入!"></a>改进2: ok一条一条的插入不可以,我批量插入!</h4><strong>但是,上面横向分表逻辑不能使用了!因为每一个手机号对应的表不一样,sql语句拼接很困难!既然,横切表不行,为了简单,我选择纵切表(将表的列切开<code>mobile, count1</code>,<code>mobile,count2</code>的形式).</strong><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env bash</span><br><span class="line">echo &quot;进程Pid: $$&quot;</span><br><span class="line">#将文本文件里面（mobile，count）字段插入到mysql中</span><br><span class="line">insertIntoMysql()&#123;</span><br><span class="line">   path=$&#123;1&#125;</span><br><span class="line">   col=$&#123;2&#125;</span><br><span class="line">   TIMESTAMP=$(date +%Y%m%d%H%M%S)</span><br><span class="line">   echo &quot;path:$&#123;path&#125;,column:$&#123;col&#125;,time:$&#123;TIMESTAMP&#125;&quot;</span><br><span class="line">   str1=&quot;INSERT INTO db_name.xxx_financial99(mobile,$&#123;col&#125;) VALUES &quot;</span><br><span class="line">   str2=&quot; ON DUPLICATE KEY UPDATE $&#123;col&#125;=VALUES($&#123;col&#125;);&quot;</span><br><span class="line">   n=0</span><br><span class="line">   cat $&#123;path&#125; | while read line</span><br><span class="line">   do</span><br><span class="line">       mobile=$(echo -e &quot;$&#123;line&#125;&quot; | cut -f 1)</span><br><span class="line">       count=$(echo -e &quot;$&#123;line&#125;&quot; | cut -f 2)</span><br><span class="line">       let n++</span><br><span class="line">       if [ `expr $&#123;n&#125; % 5000` == 0 ];</span><br><span class="line">       then</span><br><span class="line">           cmd=$&#123;cmd&#125;&quot;(&apos;$&#123;mobile&#125;&apos;,$&#123;count&#125;)&quot;</span><br><span class="line">           cmd=$&#123;str1&#125;$&#123;cmd&#125;$&#123;str2&#125;</span><br><span class="line">           #echo $&#123;cmd&#125;</span><br><span class="line">           eval $(mysql -h127.0.0.1 -P3306 -uroot -p&apos;xxx&apos; --default-character-set=utf8 -e &quot;$&#123;cmd&#125;&quot;)</span><br><span class="line">           cmd=&quot; &quot;</span><br><span class="line">       else</span><br><span class="line">           cmd=$&#123;cmd&#125;&quot;(&apos;$&#123;mobile&#125;&apos;,$&#123;count&#125;),&quot;</span><br><span class="line">       fi</span><br><span class="line">       #echo &quot;mobile:$&#123;mobile&#125;,count:$&#123;count&#125;&quot;</span><br><span class="line">   done</span><br><span class="line">   TIMESTAMP=$(date +%Y%m%d%H%M%S)</span><br><span class="line">   echo &quot;end $&#123;col&#125; time:$&#123;TIMESTAMP&#125;&quot;</span><br><span class="line">&#125;</span><br><span class="line">path=&quot;/home/q/xxx/xxx&quot;</span><br><span class="line">eval cd $&#123;path&#125;</span><br><span class="line">line=$(find $&#123;path&#125; -type f)</span><br><span class="line">for s in $&#123;line[@]&#125;</span><br><span class="line">do</span><br><span class="line">   col=$(echo $&#123;s&#125; |cut -d &quot;/&quot; -f6)</span><br><span class="line">   insertIntoMysql $&#123;s&#125; $&#123;col&#125;</span><br><span class="line">done</span><br><span class="line">exit;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>其中, 一次批量插入5000条, 考虑到shell中会限制参数的长度(报错: /usr/bin/mysql: Argument list too long)!<br>还有mysql提交sql长度默认为4M,我们可以通过<code>show VARIABLES like &#39;%max_allowed_packet%&#39;;</code> <code>set global max_allowed_packet=33554432;</code>查看和修改!</p>
+<hr>
+<h3 id="方案二"><a href="#方案二" class="headerlink" title="方案二"></a>方案二</h3><p>上面纵切,批量插入虽然基本满足需求,但是会存在两个问题,1. 如果mysql开启了bin-log很可能会导致磁盘报警! 2. 批量插入可能会出现死锁(期间出现过一次,调整批插文件顺序(减少在同一列上操作的机会))!<br>其实,整个问题一个hive-sql可以搞定将多列进行聚合:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env bash</span><br><span class="line">echo &apos;-----------开始从hive查数----------------&apos;</span><br><span class="line">TIMESTAMP=$(date +%Y%m%d%H%M%S)</span><br><span class="line">echo &quot;PID: $$,start time:$&#123;TIMESTAMP&#125;&quot;</span><br><span class="line">HIVE_SETTING=&quot;</span><br><span class="line">xxx</span><br><span class="line">&quot;</span><br><span class="line">HIVE_SQL=&quot;</span><br><span class="line">select a.mobile,</span><br><span class="line">  if(b1.midnight_msg_no_receive_count&gt;0, b1.midnight_msg_no_receive_count,0) as midnight_msg_no_receive_count,</span><br><span class="line">  if(b2.am_msg_no_receive_count&gt;0, b2.am_msg_no_receive_count,0) as am_msg_no_receive_count,</span><br><span class="line">  if(b3.noon_msg_no_receive_count&gt;0, b3.noon_msg_no_receive_count,0) as noon_msg_no_receive_count,</span><br><span class="line">   ...</span><br><span class="line">  if(e8.last_one_year_normal_msg_no_receive_count&gt;0,e8.last_one_year_normal_msg_no_receive_count,0) as last_one_year_normal_msg_no_receive_count</span><br><span class="line">from</span><br><span class="line">  (select mobile from hive_table where delivrd=&apos;UNDELIVRD&apos; group by mobile) a left outer join</span><br><span class="line">  (select mobile,count(mobile) as midnight_msg_no_receive_count from hive_table where delivrd=&apos;UNDELIVRD&apos; and hour(optime) in (0,1,2,3,4,5,23) group by mobile) b1 on a.mobile=b1.mobile left outer join</span><br><span class="line">  (select mobile,count(mobile) as am_msg_no_receive_count from hive_table where delivrd=&apos;UNDELIVRD&apos; and hour(optime) in (6,7,8,9,10) group by mobile) b2 on a.mobile=b2.mobile left outer join</span><br><span class="line">   ...</span><br><span class="line">  (select mobile,count(mobile) as last_one_year_normal_msg_no_receive_count from hive_table where delivrd=&apos;UNDELIVRD&apos; and ivr=0 and to_date(optime)&gt;=&apos;2016-04-01&apos; and to_date(optime)&lt;=&apos;2017-03-31&apos; group by mobile) e8 on a.mobile=e8.mobile;</span><br><span class="line">&quot;</span><br><span class="line">hive -e &quot;</span><br><span class="line">$&#123;HIVE_SETTING&#125;</span><br><span class="line">$&#123;HIVE_SQL&#125;</span><br><span class="line">&quot; &gt;/home/q/data_to_hive/data_hive/data_hive_undelivrd</span><br><span class="line">TIMESTAMP=$(date +%Y%m%d%H%M%S)</span><br><span class="line">echo &quot;end time:$&#123;TIMESTAMP&#125;&quot;</span><br><span class="line">echo &apos;-----------结束从hive查数----------------&apos;</span><br><span class="line">exit;</span><br></pre></td></tr></table></figure></p>
+<h2 id="三-总结"><a href="#三-总结" class="headerlink" title="三. 总结"></a>三. 总结</h2><p>这里,我认为价值在于我走的弯路上！为了解决mysql插入性能问题,实施的一系列探索上, 同时积累了用脚本对mysql这些操作的熟练性.<br>过程中遇到的问题都轻描淡写了(有google!)，从本文你将可以了解以下知识:</p>
+<ol>
+<li>hive脚本相关操作</li>
+<li>mysql数据插入,批量插入脚本的使用,及其中我遇到的一些坑.</li>
+<li>脚本处理数据的一些操作(遍历目录下的每一个文件, 遍历文件的每一行,获取每一行中的每一列,记录shell线程,执行时间,函数传参和返回值)</li>
+<li>理解做事情的思路是多么的重要.</li>
+<li>这是一次xxx的经历.</li>
+</ol>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/shell/">shell</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/mysql/">mysql</a><a href="/tags/shell/">shell</a><a href="/tags/hive/">hive</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2016/11/12/记一次22亿大数据分析处理踩坑经历/" data-title="记一次22亿大数据分析处理踩坑经历 | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/11/12/cron，at，batch(任务调度)/" title="cron，at，batch(任务调度)">
+  <strong>上一篇：</strong><br/>
+  <span>
+  cron，at，batch(任务调度)</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/11/12/记一次蛋疼的mongo to hive导数过程/"  title="记一次蛋疼的mongo to hive导数过程">
+ <strong>下一篇：</strong><br/> 
+ <span>记一次蛋疼的mongo to hive导数过程
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

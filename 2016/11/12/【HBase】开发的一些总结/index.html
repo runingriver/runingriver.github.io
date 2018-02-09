@@ -1,0 +1,607 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【HBase】开发的一些总结 | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="一. shell查询 基于列的精确查找列中value=861304mQc8851记录: scan &amp;#39;hbase_db:hbase_table&amp;#39;, FILTER=&amp;gt;&amp;quot;ValueFilter(=,&amp;#39;binary:861304mQc8851&am">
+<meta name="keywords" content="HBase">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【HBase】开发的一些总结">
+<meta property="og:url" content="http://huzongzhe.cn/2016/11/12/【HBase】开发的一些总结/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="一. shell查询 基于列的精确查找列中value=861304mQc8851记录: scan &amp;#39;hbase_db:hbase_table&amp;#39;, FILTER=&amp;gt;&amp;quot;ValueFilter(=,&amp;#39;binary:861304mQc8851&amp;#39;)&amp;quot; 基于列的模糊查找列中value rlike 135的记录:  scan &amp;#39;hbase_db:">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-02-09T05:48:37.750Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【HBase】开发的一些总结">
+<meta name="twitter:description" content="一. shell查询 基于列的精确查找列中value=861304mQc8851记录: scan &amp;#39;hbase_db:hbase_table&amp;#39;, FILTER=&amp;gt;&amp;quot;ValueFilter(=,&amp;#39;binary:861304mQc8851&amp;#39;)&amp;quot; 基于列的模糊查找列中value rlike 135的记录:  scan &amp;#39;hbase_db:">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/11/12/【HBase】开发的一些总结/" title="【HBase】开发的一些总结" itemprop="url">【HBase】开发的一些总结</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished"> 发表于 2016-11-12</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<h2 id="一-shell查询"><a href="#一-shell查询" class="headerlink" title="一. shell查询"></a>一. shell查询</h2><ol>
+<li>基于列的精确查找<br>列中<code>value=861304mQc8851</code>记录: <code>scan &#39;hbase_db:hbase_table&#39;, FILTER=&gt;&quot;ValueFilter(=,&#39;binary:861304mQc8851&#39;)&quot;</code></li>
+<li>基于列的模糊查找<br>列中<code>value rlike 135</code>的记录:  <code>scan &#39;hbase_db:hbase_table&#39;, FILTER=&gt;&quot;ValueFilter(=,&#39;substring:135&#39;)&quot;</code></li>
+<li>指定列的模糊查找<br><code>mobile rlike 135</code>的记录 : <code>scan &#39;hbase_db:hbase_table&#39;, FILTER=&gt;&quot;ColumnPrefixFilter(&#39;mobile&#39;) AND ValueFilter(=,&#39;substring:135&#39;)&quot;</code><br>Tip:多个列用:<code>MultipleColumnPrefixFilter (‘Col1’, ‘Col2’)</code></li>
+<li>多条件查询<br><code>scan &#39;hbase_db:hbase_table&#39;, FILTER=&gt;&quot;ColumnPrefixFilter(&#39;mobile&#39;) AND ( ValueFilter(=,&#39;substring:135&#39;) OR ValueFilter(=,&#39;substring:159&#39;) )&quot;</code></li>
+<li>QualifierFilter基于列的查询:Qualifier表示列<br><code>scan &#39;hbase_db:hbase_table&#39;, FILTER =&gt; &quot;PrefixFilter (&#39;20170713&#39;) AND (QualifierFilter (=, &#39;binary:mobile&#39;))&quot;</code></li>
+</ol>
+<hr>
+<ol>
+<li><strong>rowkey前缀范围查询</strong><br><code>scan &#39;hbase_db:hbase_table&#39;, FILTER =&gt; &quot;PrefixFilter (&#39;20170714&#39;)&quot;</code><br><code>scan &#39;hbase_db:hbase_table&#39;, {COLUMNS =&gt; [&#39;cf&#39;], LIMIT =&gt; 10, STARTROW =&gt; &#39;2017072986159tIkc0922&#39;}</code><br>注: 范围查询表示从该点开始的row,往后面查,往往会有很多结果,所以一定要加limit!</li>
+<li><code>start Rowkey~StopRowkey</code>查询,值的设置很有讲究,否则查询不到记录:<br><code>scan &#39;hbase_db:hbase_table&#39;, {STARTROW=&gt;&#39;20170713&#39;, STOPROW=&gt;&#39;2017071386189k7TT269&#39;}</code></li>
+<li><p>以rowkey前缀开始,前缀中包含xx的记录:<br><code>scan &#39;hbase_db:hbase_table&#39;, {STARTROW=&gt;&#39;20170713&#39;, FILTER =&gt; &quot;PrefixFilter (&#39;2017071386188Cyac3878&#39;)&quot;}</code></p>
+</li>
+<li><p>rowkey模糊查询<br><code>scan &#39;hbase_db:hbase_table&#39;, {FILTER =&gt; org.apache.hadoop.hbase.filter.RowFilter.new(org.apache.hadoop.hbase.filter.CompareFilter::CompareOp.valueOf(&#39;EQUAL&#39;), org.apache.hadoop.hbase.filter.SubstringComparator.new(&#39;861879Lff1782&#39;))}</code></p>
+</li>
+<li>rowkey正则查询:<br><code>scan &#39;hbase_db:hbase_table&#39;, {FILTER =&gt; org.apache.hadoop.hbase.filter.RowFilter.new(org.apache.hadoop.hbase.filter.CompareFilter::CompareOp.valueOf(&#39;EQUAL&#39;),org.apache.hadoop.hbase.filter.RegexStringComparator.new(&#39;^20170713&#39;))}</code></li>
+</ol>
+<hr>
+<ol>
+<li>基于<strong>行</strong>的过滤器<br>两行记录: <code>PageFilter (2)</code><br><code>scan &#39;hbase_db:hbase_table&#39;, FILTER =&gt; &quot;PrefixFilter (&#39;20170713&#39;) AND PageFilter (2)&quot;</code><br>等价于:  <code>scan &#39;hbase_db:hbase_table&#39;, FILTER =&gt; &quot;PrefixFilter (&#39;20170713&#39;)&quot;,LIMIT =&gt; 2</code></li>
+<li>基于<strong>列</strong>的过滤器<br>显示4列数据: <code>limit 4:ColumnCountGetFilter (4)</code><br><code>scan &#39;hbase_db:hbase_table&#39;, FILTER =&gt; &quot;PrefixFilter (&#39;20170713&#39;) AND ColumnCountGetFilter (4)&quot;</code><br>显示每行中从第1<strong>列</strong>开始的2<strong>列</strong>数据: <code>limit 1,2:ColumnPaginationFilter (2, 1)</code><br><code>scan &#39;hbase_db:hbase_table&#39;, FILTER =&gt; &quot;PrefixFilter (&#39;2017071386189k7TT2690&#39;) AND ColumnPaginationFilter (2,1)&quot;</code><br>注：如果结果集是N行M列，那么就是N<em>M个数据，<code>ColumnPaginationFilter(2,1)</code>表示从NxM个数据中的第一个数据开始取2个数据！<code>PageFilter(2)</code>，表示取2行数据，即2</em>M个数据，<code>ColumnCountGetFilter(2)</code>，表示从N*M个数据数据中取2个数据。</li>
+<li><code>get &lt;namespace:table&gt; &lt;rowkey&gt;</code> 或 <code>t.get &lt;rowkey&gt;</code></li>
+</ol>
+<h2 id="二-Hbase开发一些点"><a href="#二-Hbase开发一些点" class="headerlink" title="二. Hbase开发一些点"></a>二. Hbase开发一些点</h2><ol>
+<li>HTable是一个非线程安全的类，官方建议每个操作都去new一个HTable对象，因为其创建成本较低。个人测试写了一个HTable对象池，将HTable对象封装并缓存起来，直观影响就是在大量读写时gc相对要较少，执行时间有略微提升。</li>
+<li>基于row的<code>SubstringComparator</code>和R<code>egexStringComparator</code>在HBase表中具有大量数据时，以这两个两件来做过滤，完全不可用；不过我们可以在给定<code>starKey和endKey</code>的前提下使用，让其不去全表rowkey执行扫描。<br>Tip：同理基于column Family的Key-value扫描同样，需要先通过<code>starKey和endKey</code>等的row约束下缩小范围，然后进行过滤。</li>
+<li>对于较复杂的过滤，我们可以将符合条件数据全部查询出来，然后在client端进行过滤，但是得保证数据不能太大！</li>
+</ol>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/HBase/">HBase</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/HBase/">HBase</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2016/11/12/【HBase】开发的一些总结/" data-title="【HBase】开发的一些总结 | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/11/12/【HBase】基础整理/" title="【HBase】基础整理">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【HBase】基础整理</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/08/13/shell,bash操作快捷键/"  title="shell,bash操作快捷键">
+ <strong>下一篇：</strong><br/> 
+ <span>shell,bash操作快捷键
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

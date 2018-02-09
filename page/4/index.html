@@ -14,7 +14,7 @@
     <meta name="description" content="A server developer&apos;s blog site, focused on Java, HBase, Mysql, Mq, shell development.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="running river">
-<meta property="og:url" content="http://huzongzhe.cn/index.html">
+<meta property="og:url" content="http://huzongzhe.cn/page/4/index.html">
 <meta property="og:site_name" content="running river">
 <meta property="og:description" content="A server developer&apos;s blog site, focused on Java, HBase, Mysql, Mq, shell development.">
 <meta property="og:locale" content="zh-CN">
@@ -79,19 +79,16 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/08/13/位图(bitMap)和布隆过滤器(bloomFilter)/" title="位图(bitMap)和布隆过滤器(bloomFilter)" itemprop="url">
+    <a href="/2016/08/13/shell,bash操作快捷键/" title="shell,bash操作快捷键" itemprop="url">
   
-    <h1 itemprop="name">位图(bitMap)和布隆过滤器(bloomFilter)</h1>
+    <h1 itemprop="name">shell,bash操作快捷键</h1>
     
      
-           <p itemprop="description" >一. 位图（BitMap）位图，一种数据结构，数组中的每一位（bit）存放某种状态，每一位对应一个整数下标表示位置。
-
-是用一个数组中的每个数据的每个二进制位表示一个数是否存在。1表示存在，0表示不存在
-
-通常用一个long[]数组作为bitMap的存储结构；如果要保存2个以上的</p>
+           <p itemprop="description" >前言： 在命令行(CLI)或者bash中编辑命令的时候，了解一些基本的快捷键，和编辑技巧，会让你效率更高，节约更多的时间 - -。下面是我的总结：
+1. 编辑命令Ctrl + xx：在命令行首和光标之间移动,比较特殊！Ctrl + a ：移到命令行首Ctrl + e ：移到命令行</p>
         
     
-    <time datetime="2017-08-13T11:22:11.000Z" itemprop="datePublished">2017-08-13</time>
+    <time datetime="2016-08-13T11:22:11.000Z" itemprop="datePublished">2016-08-13</time>
   </a>
 </section>
 
@@ -103,15 +100,17 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】集群搭建(三)/" title="【ActiveMQ】集群搭建(三)" itemprop="url">
+    <a href="/2016/08/13/Ubuntu分区删除后恢复/" title="Ubuntu分区删除后恢复" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】集群搭建(三)</h1>
+    <h1 itemprop="name">Ubuntu分区删除后恢复</h1>
     
      
-           <p itemprop="description" ></p>
+           <p itemprop="description" >前言由于一次手误，在Windows中把Ubuntu的系统分区和swap分区删除了，导致不能进系统。开机直接error no such partition和grub rescue mode。下面讲述一下系统恢复过程！
+
+系统是Windows7和Ubuntu14.04双系统。DELL</p>
         
     
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+    <time datetime="2016-08-13T11:22:11.000Z" itemprop="datePublished">2016-08-13</time>
   </a>
 </section>
 
@@ -123,15 +122,21 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】Client端的运行流程(八)/" title="【ActiveMQ】Client端的运行流程(八)" itemprop="url">
+    <a href="/2016/08/13/Linux大杂烩/" title="Linux大杂烩" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】Client端的运行流程(八)</h1>
+    <h1 itemprop="name">Linux大杂烩</h1>
     
      
-           <p itemprop="description" >一. Client运行流程1. Client Consumer的工作流程消息到达socket，触发TCPTransport.run() –  TCPTransport.doRun() – … – 调用ActiveMQConnection.onCommand(obj)– Activ</p>
+           <p itemprop="description" >前言：下面总结使用Linux类系统的一些总结。
+知识点
+locate a.txt 搜索文件,其中 updatedb 强制更新locate数据库，默认一天更新一次
+命令前面添加time 可以监控命令运行时间,eg:sudo time lsof -i:9090
+
+常用命令
+查看cpu</p>
         
     
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+    <time datetime="2016-08-13T11:22:11.000Z" itemprop="datePublished">2016-08-13</time>
   </a>
 </section>
 
@@ -143,15 +148,15 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】PolicyEntry整理(四)/" title="【ActiveMQ】PolicyEntry整理(三)" itemprop="url">
+    <a href="/2016/08/13/【Guava】几个常用的方法整理/" title="【Guava】几个常用的方法整理" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】PolicyEntry整理(三)</h1>
+    <h1 itemprop="name">【Guava】几个常用的方法整理</h1>
     
      
-           <p itemprop="description" >前言: 本篇是根据相关资料和MQ运维过程中编辑整理出来的，主要在broker端配置topic和queue的相关策略，二者有很多的相似之处。个人不建议在broker端配置topic和queue的分发策略，只有在特殊情况下或保护broker稳定运行前提下，进行配置，通常使用默认配置即</p>
+           <p itemprop="description" >Predicate和Predicates——集合过滤与转换Predicate断言的最基本应用就是过滤集合。所有Guava过滤方法都返回”视图”,即并非用一个新的集合表示过滤，而只是基于原集合的视图。Predicates提供多个断言：and，or，notList的过滤视图被省略了，</p>
         
     
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+    <time datetime="2016-08-13T11:22:11.000Z" itemprop="datePublished">2016-08-13</time>
   </a>
 </section>
 
@@ -163,17 +168,18 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】消息可靠性实践(六)/" title="【ActiveMQ】消息可靠性实践(六" itemprop="url">
+    <a href="/2016/08/13/【Guava】AbstractScheduleService从源码到使用/" title="【Guava】AbstractScheduleService从源码到使用" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】消息可靠性实践(六</h1>
+    <h1 itemprop="name">【Guava】AbstractScheduleService从源码到使用</h1>
     
      
-           <p itemprop="description" >一. Broker
-HA架构ActiveMQ提供Master-Slaver模式的主从架构模式，简单Master-Slaver只能保证消息的可恢复，Master-Slaver-Slaver模式能保证系统的高可用，其中一台宕掉，仍能正常提供服务。
-持久化Broker支持基于Kahad</p>
+           <p itemprop="description" >前言： AbstractScheduledService是guava提供的一个定时任务的实现，提供更简便的使用，并提供任务生命周期的监听。
+AbstractScheduledService和Listener的生命周期
+AbstractScheduledService概述
+Abst</p>
         
     
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+    <time datetime="2016-08-13T11:22:11.000Z" itemprop="datePublished">2016-08-13</time>
   </a>
 </section>
 
@@ -185,17 +191,18 @@ HA架构ActiveMQ提供Master-Slaver模式的主从架构模式，简单Master-Sl
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】Client开发遇到的问题(九)/" title="【ActiveMQ】Client开发遇到的问题(九)" itemprop="url">
+    <a href="/2016/08/03/【扒一扒】synchronized/" title="【扒一扒】synchronized" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】Client开发遇到的问题(九)</h1>
+    <h1 itemprop="name">【扒一扒】synchronized</h1>
     
      
-           <p itemprop="description" >1. 开发的一次OOM
-OOM程序逻辑程序注册MessageListener进行消息的消费，采用一个newFixedThreadPool(10)的线程池处理消息。
-Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化是LevelDB，通过注册中心Z</p>
+           <p itemprop="description" >前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。
+synchronized1. Lock和Synchronized区别
+Synchronized同步代码块，不能保证等待线程进入同步块的顺序。
+Syn</p>
         
     
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+    <time datetime="2016-08-03T03:12:22.000Z" itemprop="datePublished">2016-08-03</time>
   </a>
 </section>
 
@@ -207,15 +214,16 @@ Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】生产者消费者流控制(五)/" title="【ActiveMQ】生产者消费者流控制(五)" itemprop="url">
+    <a href="/2016/08/03/【扒一扒】volatile/" title="【扒一扒】volatile" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】生产者消费者流控制(五)</h1>
+    <h1 itemprop="name">【扒一扒】volatile</h1>
     
      
-           <p itemprop="description" >前言:通常在开发Mq时,我们有必要关注一个点:消息从producer发往broker的速度,consumer消息的消费速度.而上面的点又涉及到:游标策略(Message Cursors), prefetchSize和producerWindowSize,生产者流控制(Produc</p>
+           <p itemprop="description" >前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。
+基础介绍Java 关键字volatile可以让变量的修改在多个线程之间可见，即cpu核心1对volatile修饰的变量进行修改会立即刷新该变量在RA</p>
         
     
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+    <time datetime="2016-08-03T03:12:22.000Z" itemprop="datePublished">2016-08-03</time>
   </a>
 </section>
 
@@ -227,16 +235,15 @@ Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】知识整理(一)/" title="【ActiveMQ】知识整理(一)" itemprop="url">
+    <a href="/2016/06/26/about/" title="About Me" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】知识整理(一)</h1>
+    <h1 itemprop="name">About Me</h1>
     
      
-           <p itemprop="description" >前言：这不是关于ActiveMq的一个全面介绍，这里整体记录使用ActiveMq过程中的一些知识点，总结起来。
-1. 基本使用知识点默认端口管理页面端口：8161LevelDB主从复制端口：62626client连接broker端口：openwire：61616；amqp：567</p>
+           <p itemprop="description" >Open Source projectgscheduler： A task scheduling system based on guava,depends on spring.seckill: A high concurrent solution,study from http</p>
         
     
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+    <time datetime="2016-06-26T13:12:22.000Z" itemprop="datePublished">2016-06-26</time>
   </a>
 </section>
 
@@ -248,35 +255,17 @@ Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】Client客户端的线程资源(七)/" title="【ActiveMQ】Client客户端的线程资源(七)" itemprop="url">
+    <a href="/2016/06/23/使用hexo和jacman搭建博客简记/" title="使用hexo和jacman搭建博客简记" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】Client客户端的线程资源(七)</h1>
+    <h1 itemprop="name">使用hexo和jacman搭建博客简记</h1>
     
      
-           <p itemprop="description" >前言: 基于activemq-client 5.14版的开发，如果简单需求，可以参照网上的教程。但是面对较复杂或者想弄清楚发送和接收的过程，阅读源码的基础上再开发，十分有必要，这里提供了一份对activemq-client进行二次封装的实现，详见githubactivemq-si</p>
+           <p itemprop="description" >写一篇博客
+在创建博客目录的.blog/source/_posts文件夹中创建一个md文件.
+支持markdown写博客, 不同之处在于文件开头需要添加一个描述:123456789101112---title: 记一次22亿大数据分析处理踩坑经历date: 2017/3/23 2</p>
         
     
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2017/06/12/【ActiveMQ】集群搭建(二)/" title="【ActiveMQ】集群搭建(二)" itemprop="url">
-  
-    <h1 itemprop="name">【ActiveMQ】集群搭建(二)</h1>
-    
-     
-           <p itemprop="description" ></p>
-        
-    
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+    <time datetime="2016-06-23T13:12:22.000Z" itemprop="datePublished">2016-06-23</time>
   </a>
 </section>
 
@@ -287,7 +276,7 @@ Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化
 
 
   <nav id="page-nav" class="clearfix unexpand">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">Next<span></span></a>
+    <a class="extend prev" rel="prev" href="/page/3/"><span></span>Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span>
   </nav>
 
 </div>

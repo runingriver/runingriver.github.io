@@ -1,0 +1,620 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【ActiveMQ】Client端的运行流程(八) | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="一. Client运行流程1. Client Consumer的工作流程消息到达socket，触发TCPTransport.run() –  TCPTransport.doRun() – … – 调用ActiveMQConnection.onCommand(obj)– ActiveMQSession.dispatch(">
+<meta name="keywords" content="ActiveMQ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【ActiveMQ】Client端的运行流程(八)">
+<meta property="og:url" content="http://huzongzhe.cn/2017/06/12/【ActiveMQ】Client端的运行流程(八)/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="一. Client运行流程1. Client Consumer的工作流程消息到达socket，触发TCPTransport.run() –  TCPTransport.doRun() – … – 调用ActiveMQConnection.onCommand(obj)– ActiveMQSession.dispatch(MessageDispatch messageDispatch) – 调用Act">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-02-09T05:54:53.366Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【ActiveMQ】Client端的运行流程(八)">
+<meta name="twitter:description" content="一. Client运行流程1. Client Consumer的工作流程消息到达socket，触发TCPTransport.run() –  TCPTransport.doRun() – … – 调用ActiveMQConnection.onCommand(obj)– ActiveMQSession.dispatch(MessageDispatch messageDispatch) – 调用Act">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/06/12/【ActiveMQ】Client端的运行流程(八)/" title="【ActiveMQ】Client端的运行流程(八)" itemprop="url">【ActiveMQ】Client端的运行流程(八)</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished"> 发表于 2017-06-12</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<h1 id="一-Client运行流程"><a href="#一-Client运行流程" class="headerlink" title="一. Client运行流程"></a>一. Client运行流程</h1><h2 id="1-Client-Consumer的工作流程"><a href="#1-Client-Consumer的工作流程" class="headerlink" title="1. Client Consumer的工作流程"></a>1. Client Consumer的工作流程</h2><p>消息到达socket，触发<code>TCPTransport.run()</code> –  <code>TCPTransport.doRun()</code> – … – 调用<code>ActiveMQConnection.onCommand(obj)</code>– <code>ActiveMQSession.dispatch(MessageDispatch messageDispatch)</code> – 调用<code>ActiveMQSessionExecutor.execute()</code><br><strong>这里分两中情况：</strong><br>第一种，系统启动第一条消息进来： <code>ActiveMQSessionExecutor.wakeup()</code>(唤醒线程池) – <code>taskRunner.wakeup()</code>创建线程池 – <code>PooledTaskRunner.wakeup()</code> – 线程池拿一个线程执行<code>execute()</code> – <code>PooledTaskRunner.runTask()</code>（每次最多处理1000条消息） – 从<code>ActiveMQSessionExecutor.iterate()</code>方法遍历MessageDispatchChannel容器获取数据。<br>第二种，线程池已经建立，直接<code>ActiveMQSessionExecutor.dispatch(MessageDispatch message)</code>;<br>两种情况都是将每条消息交给<code>ActiveMQSessionExecutor.dispatch(MessageDispatch message)</code>分发 – 通过ActiveMQSessionExecutor中保存的session获得ActiveMQMessageConsumer – <code>ActiveMQMessageConsumer.dispatch(MessageDispatch md))</code> – ActiveMQMessageConsumer中保存之前setMessageListener()的MessageListener对象调用其onMessage()方法，最后调用我们自己定义的业务逻辑代码！– 最后，处理成功回复acknowledge：<code>ActiveMQMessageConsumer.deliverAcks()</code> – 结束。</p>
+<p>解释：<br><code>PooledTaskRunner</code>负责线程池执行逻辑，每次执行最多消费1000条消息，将消费逻辑交给ActiveMQSessionExecutor来处理<br><code>ActiveMQSessionExecutor</code>中保存了Session对象，消息容器MessageDispatchChannel（TCPTransport线程将消息放到此对象中）对象，PooledTaskRunner对象，作为成员变量。<br>ActiveMQSessionExecutor扮演者接收和分发（泵）的角色，接收TCPTransport socket发来的消息保存到MessageDispatchChannel中。<br>将消息轮流分发到各个ActiveMQMessageConsumer（通过session获取该对象）去处理，这多个消息通过线程池PooledTaskRunner中的线程去处理！</p>
+<p><strong>线程池的执行逻辑：</strong><br>ActiveMQ Session 线程池，对每个队列（每个consumer）同一时刻只会有一个线程来处理消息，且线程每次先最多消费1000条消息，<br>如果MessageDispatchChannel队列中还有未消费的消息，再次执行最多1000次的迭代逻辑！迭代次数依赖prefetch size的大小，1000次是默认prefetch size的大小。<br>这是一次线程池的调用执行过程（run()方法执行一次），如果一条新消息到来，会调用wakeup()，启动第一次的话，会新建线程池，后面会将消息丢到<code>SimplePriorityMessageDispatchChannel</code>队列，<br>然后，唤醒线程池执行消费消息！<br>下面是摘自<code>org.apache.activemq.ActiveMQMessageConsumer#dispatch()</code>方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if (++dispatchedCount % 1000 == 0) &#123;</span><br><span class="line">    dispatchedCount = 0;</span><br><span class="line">     Thread.yield();</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>没循环1000次就让出cpu！<br>另外，<code>org.apache.activemq.thread.PooledTaskRunner#runTask()</code>方法，是线程池多次循环调用<code>org.apache.activemq.ActiveMQMessageConsumer#dispatch()</code>方法的起点，其中有段代码值得看一看：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">for (int i = 0; i &lt; maxIterationsPerRun; i++) &#123;</span><br><span class="line">               LOG.trace(&quot;Running task iteration &#123;&#125; - &#123;&#125;&quot;, i, task);</span><br><span class="line">               if (!task.iterate()) &#123;</span><br><span class="line">                   done = true;</span><br><span class="line">                   break;</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br></pre></td></tr></table></figure></p>
+<p>注：<code>runTask()</code>的逻辑是：每次拿到执行权就迭代<code>maxIterationsPerRun</code>次（默认也是1000），执行完交出执行cpu，如果<code>SimplePriorityMessageDispatchChannel</code>中还有消息没有消费完，则拿到执行权后继续上面的逻辑！<br>注意：多个消费者可能会共用同一个<code>ActiveMQ Session Task-x</code>线程消费，也可能多个消费者对应多个线程，但是同一个消费者只会有一个线程来处理。</p>
+<p><strong>优先级实现逻辑：</strong><br>MQ优先级消息队列采用在<code>SimplePriorityMessageDispatchChannel</code>中定义<code>LinkedList&lt;MessageDispatch&gt;[] lists;</code>实现,如果有10级优先级，则数组大小为10！<br>一个<code>ActiveMQMessageConsumer</code>对象，也即一个队列对应一个<code>MessageDispatchChannel</code>对象，<code>ActiveMQMessageConsumer</code>对象的所有消息都会按设定的优先级保<br>存在<code>MessageDispatchChannel</code>对象的<code>LinkedList&lt;MessageDispatch&gt;[] lists;</code>中。<br>ActiveMQ Session线程池会不停的迭代<code>LinkedList&lt;MessageDispatch&gt;[] lists;</code>中保存的元素，从高优先级的下标开始迭代，直至为空。<br>Tip：每个queue中的每条消息都有自己的优先级，默认是4，即消息优先级是根据单挑消息设定的，而不是根据队列设定的！</p>
+<h2 id="2-Client-Producer的工作流程"><a href="#2-Client-Producer的工作流程" class="headerlink" title="2. Client Producer的工作流程"></a>2. Client Producer的工作流程</h2><p>producer的同步发送模式：</p>
+<ol>
+<li>调用线程<code>mainThread</code>调用<code>producer.send(msg)</code>发送一条消息 ==&gt; <code>ActiveMQSession#send()</code>这里决定同步或异步发。</li>
+<li>同步发送：<code>syncSendPacket()</code>,这里会注册一个callback,调用完<code>TcpTransport.oneway()</code>后回调阻塞在<code>response = resp.getResult();</code>方法.</li>
+<li><code>mainThread</code>会走到<code>FailoverTransport.oneway()</code> ==&gt; 再到<code>TcpTransport.oneway()</code>调用socket方法并<code>flush()</code>发送一个数据出去.</li>
+<li><code>mainThread</code>将数据提给socket发送后,会阻塞等待ack的返回!</li>
+<li><code>ActiveMQ Transport</code>线程在<code>TcpTransport</code>中的<code>run()</code>方法中死循环(<code>while (!isStopped()) { doRun(); }</code>),接收socket返回的数据.</li>
+<li><code>ActiveMQ Transport</code>线程接收到数据后处理,层层<code>onCommand()</code>后,将数据交给<code>mainThread</code>线程,最后<code>mainThread</code>线程收到ack后返回.</li>
+<li>一条同步producer消息发送完成.</li>
+</ol>
+<p><code>mainThread</code>线程和<code>ActiveMQ Transport</code>线程是怎么配合一发一收的呢?<br>答: 主要实现在<code>FutureResponse</code>方法中,通过<code>ArrayBlockingQueue&lt;Response&gt; responseSlot = new ArrayBlockingQueue&lt;Response&gt;(1)</code>实现.<br>这是一个只包含一个元素的阻塞队列,<code>mainThread</code>线程发完数据后<code>responseSlot.take()</code>获取数据肯定会阻塞等待数据的到来.<br><code>ActiveMQ Transport</code>接收到数据后<code>responseSlot.offer(result)</code>从而接触<code>mainThread</code>的阻塞.</p>
+<p>producer的同步发送与异步发送的区别:<br><code>mainThread</code>线程将Message封装后提交给socket后要等待ack的返回,才算调用完成;而异步调用则是将Message封装后提交给socket后直接返回,并调用完成;</p>
+<p>注意: 异步调用如果不设置<code>ProducerWindowSize</code>,不管消息是否发送成功,都得不到通知,消息发送不成功主要因为broker的Usage到达极限;<br><code>ProducerWindowSize</code>的含义:</p>
+<blockquote>
+<p>The ProducerWindowSize is the maximum number of bytes of data that a producer will transmit to a broker before waiting for acknowledgment messages from the broker that it has accepted the previously sent messages.</p>
+</blockquote>
+<p>即，异步发送模式下，当发送<code>ProducerWindowSize</code>大小的数据后调用线程会阻塞住，等待broker的acknowledgment messages（包括ACK和异常等）；<br>这时如果broker的Usage到达极限，调用线程可以得到通知，从而进行容错处理；<br><strong>所以, 我们采用异步调用的时候一定要设置<code>ProducerWindowSize</code>的大小,ActiveMq的jar中默认设置该值为<code>0</code>。</strong></p>
+<p>Tip：如果broker的Usage到达极限，其还可能阻塞在<code>producerWindow.waitForSpace();</code>方法上，等待broker有空间后再发。</p>
+<h2 id="3-大量消息（高并发）下，消费者处理策略"><a href="#3-大量消息（高并发）下，消费者处理策略" class="headerlink" title="3. 大量消息（高并发）下，消费者处理策略"></a>3. 大量消息（高并发）下，消费者处理策略</h2><p>解决高并发下load高,消息消费慢的问题<br>首先,如果不使用线程池,消息消费非常慢,系统资源没有充分利用,broker大量消息pending!<br>如果,使用线程池,需要解决消息异常,restart等情况消息丢失,大量消息不及时消pending在内存中费导致OOM等问题.<br>另一方面,HBase没有pool,每次写入都要new对象等,导致load较高,消费较慢,加入对象缓存,加快写入hbase!<br>特殊情况处理,如一次机房迁移,ZK的master被关闭,大量Pending在broker的消息,导致MQ不能正常选举,最终导致MQ不能对外提供服务!<br>首先,尽量不让消息pending到broker,及时恢复MQ策略,将消息丢失降到最低,以及ZK和MQ集群机器异常的预处理策略!<br>测试,解决bug!</p>
+<p>高并发消息解决方案：<br>问题：使用MQ client提供的消费消息线程池，在处理大量消息时会非常慢。<br>解决方案：</p>
+<ol>
+<li>最简单的方案，多线程每次主动去broker拉取消息！实际效率并不高！</li>
+<li>采用新建线程池来接手Session线程池消息的具体业务逻辑！实际效率较高，但是较复杂（要处理消息丢失，异常等策略）！</li>
+</ol>
+<h1 id="二-Client运行异常的处理"><a href="#二-Client运行异常的处理" class="headerlink" title="二. Client运行异常的处理"></a>二. Client运行异常的处理</h1><h3 id="1-Consumer相关异常"><a href="#1-Consumer相关异常" class="headerlink" title="1. Consumer相关异常"></a>1. Consumer相关异常</h3><p><strong>结论：</strong>如果直接消费消息，也即使用Session线程消费消息，如果逻辑中抛出异常（一般是unchecked异常），在<code>ActiveMQMessageConsumer.dispatch()</code>方法中catch住，<code>isAutoAcknowledgeEach()</code>为true，执行rollback()，broker会将该消息放入<code>ActiveMQ.DLQ</code>队列！这种异常情况导致消息消息处理非常慢，如果大量异常，大量消息会pending到broker！<br><strong>注意：</strong>如果将消息交给线程池处理，那么消费消息异常只会导致该线程销毁，不会被Session线程捕获，并重新交给broker处理！原理如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">@Test</span><br><span class="line">public void testRunableAndCallable() &#123;</span><br><span class="line">    final ExecutorService service1 = Executors.newSingleThreadExecutor();</span><br><span class="line">    ExecutorService service2 = Executors.newSingleThreadExecutor();</span><br><span class="line">    service2.execute(new Runnable() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void run() &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                service1.execute(new Runnable() &#123;</span><br><span class="line">                    @Override</span><br><span class="line">                    public void run() &#123;</span><br><span class="line">                        logger.info(&quot;enter runnable.&quot;);</span><br><span class="line">                        throw new RuntimeException(&quot;mock unchecked exception.&quot;);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">                logger.info(&quot;service2 finish.&quot;);</span><br><span class="line">            &#125; catch (Exception e) &#123;</span><br><span class="line">                logger.error(&quot;error:&#123;&#125;&quot;, e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    logger.info(&quot;finish test.&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面这个单元测试，最后会报告成功，日志中会有异常信息，是由于service1的一个线程异常被片抛到栈顶！并没有抛给Test主线程，也没有抛给service2线程，<br>原理和Session线程池将任务交给另一个线程池执行原理相同！<br><strong>值得注意的是：</strong> 如果使用新建线程池执行Session线程池提交的任务(onMessage()通过传递方法执行)，新建线程池中采用的是<code>LinkedBlockingQueue&lt;Runnable&gt;()</code>，会发生什么情况？<br>如果是<code>LinkedBlockingQueue&lt;Runnable&gt;(1)</code>或者是<code>SynchronousQueue&lt;Runnable&gt;()</code>，会发生什么情况？<br>直接给出我的答案：<br>如果是<code>LinkedBlockingQueue&lt;Runnable&gt;()</code>，当有大量消息到来时，消息会保存到链表中导致OOM或者长时间Full GC（导致各种连接超时，重试，重连），而且<br>如果此时服务重启（或kill线程等），这些保存在LinkedBlockingQueue中的消息会被无声无息的丢弃（放到LinkedBlockingQueue后，session线程就认为消息消费成功，发送ACK了）。<br>如果是<code>SynchronousQueue&lt;Runnable&gt;()</code>或<code>LinkedBlockingQueue&lt;Runnable&gt;(1)</code>，当不限定最大线程池时，Session来条消息如果没有空闲线程，则会新建一个线程，大量消息同时到来时，<br>会创建大量线程，很容易导致OOM；如果限定线程最大大小，当线程池达到最大线程个数，再有消息到来没有可用线程处理时，会采取拒绝策略，默认是抛异常！</p>
+<p><strong>还得在说一句：</strong>在用线程池处理消息的时候，注意要catch住所有异常，否则，在大量消息失败时，异常会抛到栈顶，导致线程死亡，这样就会发生线程池频繁创建线程的现象！</p>
+<p><strong>拓展：</strong>疑问继续<br>使用线程池A接收Session线程池的消息，使Session线程池只起一个消息转送角色，本地线程池A来处理真正的具体业务逻辑。但是当大量消息到来线程池A中缓存队列已满，该如何处理？<br>方案一：最简单有效方式，是使用<code>CallerRunsPolicy</code>策略，即多的任务反交给Session线程池去处理，这样有效地解决了速度控制的问题！<br>方案二：使用Semaphore，当线程池A到达极限，则让Seesion线程池等一下。也可以拓展现有线程池，实现成阻塞线程池！<br>方案三：使用流量控制，比如使用guava的RateLimiter，使用固定速率往线程池A中push消息！</p>
+<h3 id="2-Connection和Producer相关异常"><a href="#2-Connection和Producer相关异常" class="headerlink" title="2. Connection和Producer相关异常"></a>2. Connection和Producer相关异常</h3><p>首先，一个问题，broker宕机或网络断掉，producer持续不断的在发消息，会发生什么情况，发送的消息会丢失吗？<br>分两种情况：<code>tcp://ip:61616</code>类型连接和<code>failover:(tcp://primary:61616)</code>类型连接<br>开发中我们通常会设置两种监听器：<code>ExceptionListener</code>和<code>TransportListener</code><br>设置<code>TransportListener</code>：<code>connectionFactory.setTransportListener(transportListener)</code>设置监听连接异常!<br>设置<code>ExceptionListener</code>：<br><code>connectionFactory.setExceptionListener(new MQExceptionListener(&quot;consumer connectionFactory&quot;));</code><br><code>queueConnection.setExceptionListener(new MQExceptionListener(&quot;consumer queueConnection&quot;));</code><br>注：这两个都是设置的同一个listener,且后面的会覆盖前面的!<br>注：consumer一般不设置该监听器，因为每条消息过来都会触发一次onCommand()的回调!</p>
+<ol>
+<li><code>tcp://ip:61616</code>类型连接<br>当broker宕机或网络断掉，连接断开(broker down掉)，无论consumer或producer，如果注册了<code>ExceptionListener</code>和<code>TransportListener</code>，则两者都会监听到异常!都是在<code>onException</code>方法中抛异常!<br>在Producer中，如果生产者还在不停地生产消息，每生成一条消息，session会在创建一条消息前（<code>queueSession.createTextMessage(message)</code>），<br>检查session是否close（<code>ActiveMQSession.checkClosed()</code>），此时连接断开，<code>checkClosed()</code>中会抛<code>IllegalStateException(&quot;The Session is closed&quot;)</code>异常到调用线程！<br>Broker和网络恢复，consumer和producer不能自恢复！<br>注：如果连接是failover，连接会自动恢复，否则需要重启!</li>
+</ol>
+<ol>
+<li><code>failover:(tcp://primary:61616)</code>类型连接<br><code>failover:(tcp://primary:61616)?timeout=3000</code><br>如果连接断开<code>ActiveMQ Task-</code>线程会不停地尝试每次尝试10次，对于每条消息会等待3000ms，若扔不能发送出去则抛异常，直到连接重新建立，恢复正常，但是这期间异常消息会被丢弃，不会重新发送!<br><code>failover:(tcp://primary:61616)</code><br>不加timeout，连接断开，监听的TransportListener中抛transportInterupted异常，<code>ActiveMQ Task-</code>线程不停地尝试每次重连10次，发送消息线程在该消息处阻塞住，直到连接重新建立，恢复正常，触发TransportListener.transportResumed()，这期间没有消息发送，不会出现消息丢失的情况!<br>注：failover连接下，consumer端，如果连接broker down掉或连接中断，不会抛任何异常(没有注册<code>TransportListener</code>)，直到failover连接重新建立，重新开始消费消息!<br>注：failover连接下的producer端，注册了<code>ExceptionListener</code>，连接断开不会抛<code>ExceptionListener.onException()</code>异常!</li>
+</ol>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/ActiveMQ/">ActiveMQ</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/ActiveMQ/">ActiveMQ</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2017/06/12/【ActiveMQ】Client端的运行流程(八)/" data-title="【ActiveMQ】Client端的运行流程(八) | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/06/12/【ActiveMQ】集群搭建(三)/" title="【ActiveMQ】集群搭建(三)">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【ActiveMQ】集群搭建(三)</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/06/12/【ActiveMQ】PolicyEntry整理(四)/"  title="【ActiveMQ】PolicyEntry整理(三)">
+ <strong>下一篇：</strong><br/> 
+ <span>【ActiveMQ】PolicyEntry整理(三)
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

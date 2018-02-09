@@ -1,0 +1,607 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【ActiveMQ】Client客户端的线程资源(七) | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="前言: 基于activemq-client 5.14版的开发，如果简单需求，可以参照网上的教程。但是面对较复杂或者想弄清楚发送和接收的过程，阅读源码的基础上再开发，十分有必要，这里提供了一份对activemq-client进行二次封装的实现，详见githubactivemq-simple-client。 本文从以下几个">
+<meta name="keywords" content="ActiveMQ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【ActiveMQ】Client客户端的线程资源(七)">
+<meta property="og:url" content="http://huzongzhe.cn/2017/06/12/【ActiveMQ】Client客户端的线程资源(七)/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="前言: 基于activemq-client 5.14版的开发，如果简单需求，可以参照网上的教程。但是面对较复杂或者想弄清楚发送和接收的过程，阅读源码的基础上再开发，十分有必要，这里提供了一份对activemq-client进行二次封装的实现，详见githubactivemq-simple-client。 本文从以下几个方面叙述：  从线程的角度来阅读其源码，帮助快速了解整个逻辑。 从流程出发，叙述">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-02-09T05:55:36.418Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【ActiveMQ】Client客户端的线程资源(七)">
+<meta name="twitter:description" content="前言: 基于activemq-client 5.14版的开发，如果简单需求，可以参照网上的教程。但是面对较复杂或者想弄清楚发送和接收的过程，阅读源码的基础上再开发，十分有必要，这里提供了一份对activemq-client进行二次封装的实现，详见githubactivemq-simple-client。 本文从以下几个方面叙述：  从线程的角度来阅读其源码，帮助快速了解整个逻辑。 从流程出发，叙述">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/06/12/【ActiveMQ】Client客户端的线程资源(七)/" title="【ActiveMQ】Client客户端的线程资源(七)" itemprop="url">【ActiveMQ】Client客户端的线程资源(七)</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished"> 发表于 2017-06-12</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<p><strong>前言: </strong>基于<code>activemq-client 5.14</code>版的开发，如果简单需求，可以参照网上的教程。但是面对较复杂或者想弄清楚发送和接收的过程，阅读源码的基础上再开发，十分有必要，这里提供了一份对<code>activemq-client</code>进行二次封装的实现，详见github<code>activemq-simple-client</code>。</p>
+<p>本文从以下几个方面叙述：</p>
+<ol>
+<li>从线程的角度来阅读其源码，帮助快速了解整个逻辑。</li>
+<li>从流程出发，叙述producer和consumer源码的执行流程。</li>
+<li>从异常的角度，说明特殊情况的问题和可能的处理方式。<h2 id="一-Client资源占用"><a href="#一-Client资源占用" class="headerlink" title="一. Client资源占用"></a>一. Client资源占用</h2><h3 id="1-client启动"><a href="#1-client启动" class="headerlink" title="1. client启动"></a>1. client启动</h3>创建一个生产者或消费者的基本流程: <code>new ActiveMQConnectionFactory(url)</code> –&gt; <code>connectionFactory.createQueueConnection()</code>(其中会<code>new ActiveMQConnection</code>) –&gt; <code>queueConnection.createQueueSession(transacted, acknowledge)</code> –&gt; session创建<code>createQueue</code>或<code>createProducer</code> –&gt; session创建<code>createConsumer</code>或<code>createProducer</code> –&gt; ok!</li>
+</ol>
+<ul>
+<li><code>createQueueConnection()</code>会创建一个客户端和Broker的连接,</li>
+</ul>
+<h3 id="2-client启动启用的线程"><a href="#2-client启动启用的线程" class="headerlink" title="2. client启动启用的线程"></a>2. client启动启用的线程</h3><h4 id="1-ActiveMQConnection创建一个线程池用于异步处理一些杂碎的事情"><a href="#1-ActiveMQConnection创建一个线程池用于异步处理一些杂碎的事情" class="headerlink" title="(1) ActiveMQConnection创建一个线程池用于异步处理一些杂碎的事情:"></a>(1) <code>ActiveMQConnection</code>创建一个线程池用于异步处理一些杂碎的事情:</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">executor = new ThreadPoolExecutor(1, 1, 5, TimeUnit.SECONDS, new LinkedBlockingQueue&lt;Runnable&gt;(), new ThreadFactory() &#123;</span><br><span class="line">            public Thread newThread(Runnable r) &#123;</span><br><span class="line">                Thread thread = new Thread(r, &quot;ActiveMQ Connection Executor: &quot; + transport);</span><br><span class="line">                return thread;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+<p>杂碎的事情包括：</p>
+<ol>
+<li>异常情况，由于某些异常并不影响整个连接的正常逻辑，所以抛异常进行了异步处理；</li>
+<li>生产者的流控制，如果broker的Usage到达limit，则异步通知生产者broker的Usage，通知producer上的监听器（如果设置了usage的监听），以及处理Usage Full和Not Full的一些回调。</li>
+</ol>
+<h4 id="2-AbstractInactivityMonitor创建两个Timer和一个线程池："><a href="#2-AbstractInactivityMonitor创建两个Timer和一个线程池：" class="headerlink" title="(2)AbstractInactivityMonitor创建两个Timer和一个线程池："></a>(2)<code>AbstractInactivityMonitor</code>创建两个Timer和一个线程池：</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">READ_CHECK_TIMER = new Timer(&quot;ActiveMQ InactivityMonitor ReadCheckTimer&quot;, true);</span><br><span class="line">WRITE_CHECK_TIMER = new Timer(&quot;ActiveMQ InactivityMonitor WriteCheckTimer&quot;, true);</span><br><span class="line"></span><br><span class="line">READ_CHECK_TIMER.schedule(readCheckerTask, initialDelayTime, readCheckTime);</span><br><span class="line">WRITE_CHECK_TIMER.schedule(writeCheckerTask, initialDelayTime, writeCheckTime);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">ASYNC_TASKS = createExecutor();</span><br><span class="line">private final ThreadFactory factory = new ThreadFactory() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public Thread newThread(Runnable runnable) &#123;</span><br><span class="line">            Thread thread = new Thread(runnable, &quot;ActiveMQ InactivityMonitor Worker&quot;);</span><br><span class="line">            thread.setDaemon(true);</span><br><span class="line">            return thread;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">private ThreadPoolExecutor createExecutor() &#123;</span><br><span class="line">        ThreadPoolExecutor exec = new ThreadPoolExecutor(0, Integer.MAX_VALUE, getDefaultKeepAliveTime(), TimeUnit.SECONDS, new SynchronousQueue&lt;Runnable&gt;(), factory);</span><br><span class="line">        exec.allowCoreThreadTimeOut(true);</span><br><span class="line">        return exec;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>Timer定时执行<code>readCheck</code>和<code>writeCheck</code>，真正的执行是丢给<code>ASYNC_TASKS</code>这个线程池去执行！</p>
+<h4 id="3-TransportThreadSupport创建一个Tcp连接线程"><a href="#3-TransportThreadSupport创建一个Tcp连接线程" class="headerlink" title="(3)TransportThreadSupport创建一个Tcp连接线程"></a>(3)<code>TransportThreadSupport</code>创建一个Tcp连接线程</h4><p>该线程将socket收到的消息enqueue到MessageDispatchChannel（SimplePriorityMessageDispatchChannel具体保存每条消息的容器）中，并唤醒（新建）线程池（如果线程池没有实例化）。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">protected void doStart() throws Exception &#123;</span><br><span class="line">        runner = new Thread(null, this, &quot;ActiveMQ Transport: &quot; + toString(), stackSize);</span><br><span class="line">        runner.setDaemon(daemon);</span><br><span class="line">        runner.start();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>线程名Like：<code>ActiveMQ Transport: tcp:///xxx.87:56161@48695</code><br>这个线程是在<code>ActiveMQConnectionFactory.createActiveMQConnection()</code>中创建连接并开启IO连接相关线程（包括InactivityMonitor）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Transport transport = createTransport(); //创建一个Tcp连接</span><br><span class="line">connection = createActiveMQConnection(transport, factoryStats);</span><br><span class="line">//....</span><br><span class="line">transport.start(); //开启连接线程</span><br></pre></td></tr></table></figure></p>
+<p><code>createTransport()</code>创建线程过程：<code>TcpTransportFactory -- createTransport -- new TcpTransport</code><br>其中，<code>TcpTransport</code>对象两个参数<code>socketBufferSize = 64 * 1024;</code>和<code>ioBufferSize = 8 * 1024;</code>前者是Socket的buffer，后者是JVM中<code>InputStream</code>的buffer！<br>Tip：每个Consumer和Producer实例都对应这样一个<code>ActiveMQ Transport</code>线程，该线程用于接收socket的发送回来的包（eg：ack包数据）。<br>Tip：producer中同步调用方式中，调用线程直接将数据<code>marshal</code>后交给给socket，这个<code>ActiveMQ Transport</code>线程则负责接收socket回来的ACK包，然后写入阻塞队列<code>responseSlot = new ArrayBlockingQueue&lt;Response&gt;(1)</code>，此之前调用线程会阻塞在<code>responseSlot.take();</code>方法上。直到<code>ActiveMQ Transport</code>线程收到ACK。详见：<code>FutureResponse</code></p>
+<h4 id="3-1-Failover连接线程池（用于管理网络连接，比如断开重连）"><a href="#3-1-Failover连接线程池（用于管理网络连接，比如断开重连）" class="headerlink" title="(3.1) Failover连接线程池（用于管理网络连接，比如断开重连）"></a>(3.1) Failover连接线程池（用于管理网络连接，比如断开重连）</h4><p>以上，是基于<code>tcp://ip:61616</code>类型连接下情况，当使用<code>failover:(tcp://primary:61616)</code>类型连接时，会额外创建一个命名为<code>ActiveMQ Task-</code>的线程池。<br>该线程池和session的consumer消费线程池一样，<code>TaskRunnerFactory.createDefaultExecutor()</code>中创建，<code>corePoolSize=0，maxPoolSize=Integer.MAX，timeout=30s，SynchronousQueue</code>。<br>该线程池会在系统系统由调用线程实例化，<code>FailoverTransportFactory</code>中调用TaskRunnerFactory创建PooledTaskRunner线程池的封装对象，它用于创建failover类型的连接，随后30s，该线程池线程会被回收，所以查询系统线程很难发现它。<br>当broker 宕掉或连接断开，此时由<code>ActiveMQ Transport:xxx</code>线程调用，又会创建一个<code>ActiveMQ Task-</code>线程来进行重连接，不停地尝试连接每次尝试10次，重连中如果不成功会抛下面异常：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[08-10 17:25:33.031 [ActiveMQ Task-3] WARN o.a.a.transport.failover.FailoverTransport.doReconnect:1100]-Failed to connect to [tcp://xx:56161] after: 10 attempt(s) continuing to retry.</span><br><span class="line">[08-10 17:30:03.781 [ActiveMQ Task-3] WARN o.a.a.transport.failover.FailoverTransport.doReconnect:1100]-Failed to connect to [tcp://xx:56161] after: 20 attempt(s) continuing to retry.</span><br></pre></td></tr></table></figure></p>
+<p>Tip：该线程池用完就会被回收，且仅用于failover类型连接的建立和重连，producer发送消息于该线程池无关。</p>
+<h4 id="4-重头戏Session相关的线程："><a href="#4-重头戏Session相关的线程：" class="headerlink" title="(4)重头戏Session相关的线程："></a>(4)重头戏Session相关的线程：</h4><p><code>ActiveMQSession</code>是从建立连接到消费或生产消息，这整个逻辑的核心，保存着所有的信息(对象)，以组合的方式将<code>ActiveMQConnection</code>连接引入，解决消费和生产消息链路！<br>Session处理收发消息是<code>ActiveMQSessionExecutor</code>对象，其中涉及几个重要的成员变量：<code>MessageDispatchChannel</code>保存消息，<code>TaskRunner</code>线程池处理消息。<br>Session创建过程：<code>ActiveMQConnection.createSession()</code>首先连接创建完毕并start，通过ActiveMQConnection对象创建ActiveMQSession对象并把自己传给ActiveMQSession。<br>创建ActiveMQSession中同时创建<code>ActiveMQSessionExecutor</code>收发消息，<code>SimplePriorityMessageDispatchChannel</code>保存消息，<code>PooledTaskRunner</code>线程池处理消息等对象。<br>另外，<code>ActiveMQMessageConsumer</code>和<code>ActiveMQMessageProducer</code>是消费消息和生产消息的实现，在Session和Connection基础上进一步的封装。<br>将<code>ActiveMQConnection</code>以组合方式封装到<code>ActiveMQMessageConsumer</code>和<code>ActiveMQMessageProducer</code>中。<br>同时，一个Session可以对应多个Consumer和Producer，所以Session中保存了Consumer和Producer的实例引用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">protected final CopyOnWriteArrayList&lt;ActiveMQMessageConsumer&gt; consumers = new CopyOnWriteArrayList&lt;ActiveMQMessageConsumer&gt;();</span><br><span class="line">protected final CopyOnWriteArrayList&lt;ActiveMQMessageProducer&gt; producers = new CopyOnWriteArrayList&lt;ActiveMQMessageProducer&gt;();</span><br></pre></td></tr></table></figure></p>
+<p>创建一个Session线程池流程：<code>ActiveMQConnection</code>对象中保存<code>TaskRunnerFactory sessionTaskRunner</code>创建线程池（<code>TaskRunner</code>）的引用，对外提供<code>getSessionTaskRunner()</code>方法，该方法是一个<code>TaskRunner</code>创建工厂！<br><code>ActiveMQSessionExecutor</code>中当消息进入队列(MessageDispatchChannel)会触发<code>wakeup()</code>方法，<code>wakeup()</code>会创建<code>PooledTaskRunner</code>对象并创建线程池！</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">this.taskRunner = session.connection.getSessionTaskRunner().createTaskRunner(this,&quot;ActiveMQ Session: &quot; + session.getSessionId());</span><br><span class="line">//....</span><br><span class="line">taskRunner.wakeup();</span><br></pre></td></tr></table></figure>
+<p>Tip：该线程池也会在<code>ActiveMQMessageConsumer</code>实例化的时候，且connection已经启动后start！<br><code>TaskRunnerFactory</code>用于创建线程池，最大1000个线程，keepAliveTime 30s，SynchronousQueue阻塞消息！<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">protected ExecutorService createDefaultExecutor() &#123;</span><br><span class="line">        ThreadPoolExecutor rc = new ThreadPoolExecutor(0, getMaxThreadPoolSize(), getDefaultKeepAliveTime(), TimeUnit.SECONDS, new SynchronousQueue&lt;Runnable&gt;(), new ThreadFactory() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public Thread newThread(Runnable runnable) &#123;</span><br><span class="line">                String threadName = name + &quot;-&quot; + id.incrementAndGet();</span><br><span class="line">                Thread thread = new Thread(runnable, threadName);</span><br><span class="line">                thread.setDaemon(daemon);</span><br><span class="line">                thread.setPriority(priority);</span><br><span class="line"></span><br><span class="line">                LOG.trace(&quot;Created thread[&#123;&#125;]: &#123;&#125;&quot;, threadName, thread);</span><br><span class="line">                return thread;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        if (rejectedTaskHandler != null) &#123;</span><br><span class="line">            rc.setRejectedExecutionHandler(rejectedTaskHandler);</span><br><span class="line">        &#125;</span><br><span class="line">        return rc;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/ActiveMQ/">ActiveMQ</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/ActiveMQ/">ActiveMQ</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2017/06/12/【ActiveMQ】Client客户端的线程资源(七)/" data-title="【ActiveMQ】Client客户端的线程资源(七) | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/06/12/【ActiveMQ】知识整理(一)/" title="【ActiveMQ】知识整理(一)">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【ActiveMQ】知识整理(一)</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/06/12/【ActiveMQ】集群搭建(二)/"  title="【ActiveMQ】集群搭建(二)">
+ <strong>下一篇：</strong><br/> 
+ <span>【ActiveMQ】集群搭建(二)
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

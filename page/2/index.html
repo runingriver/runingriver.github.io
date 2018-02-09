@@ -14,7 +14,7 @@
     <meta name="description" content="A server developer&apos;s blog site, focused on Java, HBase, Mysql, Mq, shell development.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="running river">
-<meta property="og:url" content="http://huzongzhe.cn/index.html">
+<meta property="og:url" content="http://huzongzhe.cn/page/2/index.html">
 <meta property="og:site_name" content="running river">
 <meta property="og:description" content="A server developer&apos;s blog site, focused on Java, HBase, Mysql, Mq, shell development.">
 <meta property="og:locale" content="zh-CN">
@@ -79,36 +79,15 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/08/13/位图(bitMap)和布隆过滤器(bloomFilter)/" title="位图(bitMap)和布隆过滤器(bloomFilter)" itemprop="url">
+    <a href="/2017/06/12/【ActiveMQ】消息唯一性的保证(十)/" title="【ActiveMQ】消息唯一性的保证(十)" itemprop="url">
   
-    <h1 itemprop="name">位图(bitMap)和布隆过滤器(bloomFilter)</h1>
+    <h1 itemprop="name">【ActiveMQ】消息唯一性的保证(十)</h1>
     
      
-           <p itemprop="description" >一. 位图（BitMap）位图，一种数据结构，数组中的每一位（bit）存放某种状态，每一位对应一个整数下标表示位置。
+           <p itemprop="description" >前言：一次broker的failover，导致DLQ队列中多出了很多消息，这些消息都是由client端报duplicate message异常提交到DLQ队列中的。由此必须得深入client端的源码了解一下其机制。
 
-是用一个数组中的每个数据的每个二进制位表示一个数是否存在。1表示存在，0表示不存在
-
-通常用一个long[]数组作为bitMap的存储结构；如果要保存2个以上的</p>
-        
-    
-    <time datetime="2017-08-13T11:22:11.000Z" itemprop="datePublished">2017-08-13</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2017/06/12/【ActiveMQ】集群搭建(三)/" title="【ActiveMQ】集群搭建(三)" itemprop="url">
-  
-    <h1 itemprop="name">【ActiveMQ】集群搭建(三)</h1>
-    
-     
-           <p itemprop="description" ></p>
+消息是如何保证不被重复消费？
+上述现象在client端是如何产</p>
         
     
     <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
@@ -123,15 +102,16 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】Client端的运行流程(八)/" title="【ActiveMQ】Client端的运行流程(八)" itemprop="url">
+    <a href="/2017/05/12/【ZooKeeper】基于Curator的开发(四)/" title="【ZooKeeper】基于Curator的开发(四)" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】Client端的运行流程(八)</h1>
+    <h1 itemprop="name">【ZooKeeper】基于Curator的开发(四)</h1>
     
      
-           <p itemprop="description" >一. Client运行流程1. Client Consumer的工作流程消息到达socket，触发TCPTransport.run() –  TCPTransport.doRun() – … – 调用ActiveMQConnection.onCommand(obj)– Activ</p>
+           <p itemprop="description" >Curator开发介绍当前基于zookeeper的client开发有zookeeper提供的原生jar包，也有第三方ZKClient jar包，但是更多的是使用Curator的jar包。
+封装Curator通常简单使用Zookeeper的场景,直接使用Curator即可,无需进行</p>
         
     
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+    <time datetime="2017-05-12T03:12:22.000Z" itemprop="datePublished">2017-05-12</time>
   </a>
 </section>
 
@@ -143,15 +123,15 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】PolicyEntry整理(四)/" title="【ActiveMQ】PolicyEntry整理(三)" itemprop="url">
+    <a href="/2017/05/12/【ZooKeeper】集群搭建(二)/" title="【ZooKeeper】集群搭建(二)" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】PolicyEntry整理(三)</h1>
+    <h1 itemprop="name">【ZooKeeper】集群搭建(二)</h1>
     
      
-           <p itemprop="description" >前言: 本篇是根据相关资料和MQ运维过程中编辑整理出来的，主要在broker端配置topic和queue的相关策略，二者有很多的相似之处。个人不建议在broker端配置topic和queue的分发策略，只有在特殊情况下或保护broker稳定运行前提下，进行配置，通常使用默认配置即</p>
+           <p itemprop="description" >前言：在实际搭建zk集群过程中遇到不少困难,简单配置可以google到,但是想深入一点,对zk的配置做更为深入自定义配置,就有点力不从心了,而且很多的配置都没有做深入的研究.记录此博客,一方面整理记录一下zk常用操作,将网上人云亦云的杂乱中整理成可用的部分,另一方面,根据zk启动</p>
         
     
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+    <time datetime="2017-05-12T03:12:22.000Z" itemprop="datePublished">2017-05-12</time>
   </a>
 </section>
 
@@ -163,17 +143,15 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】消息可靠性实践(六)/" title="【ActiveMQ】消息可靠性实践(六" itemprop="url">
+    <a href="/2017/05/12/【ZooKeeper】集群配置（三）/" title="【ZooKeeper】集群配置（三）" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】消息可靠性实践(六</h1>
+    <h1 itemprop="name">【ZooKeeper】集群配置（三）</h1>
     
      
-           <p itemprop="description" >一. Broker
-HA架构ActiveMQ提供Master-Slaver模式的主从架构模式，简单Master-Slaver只能保证消息的可恢复，Master-Slaver-Slaver模式能保证系统的高可用，其中一台宕掉，仍能正常提供服务。
-持久化Broker支持基于Kahad</p>
+           <p itemprop="description" >配置本节是在【ZooKeeper】集群搭建（二）的基础之上，记录zk集群搭建的常用配置。配置具体意义和更详细内容请看，配置与Google的结果有部分出入，可以根据需求进行配置。Tip：所有配置文件都在./conf目录下! 该节配置与一些博客写法有部分出入,通过阅读启动脚本,根据脚</p>
         
     
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+    <time datetime="2017-05-12T03:12:22.000Z" itemprop="datePublished">2017-05-12</time>
   </a>
 </section>
 
@@ -185,17 +163,18 @@ HA架构ActiveMQ提供Master-Slaver模式的主从架构模式，简单Master-Sl
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】Client开发遇到的问题(九)/" title="【ActiveMQ】Client开发遇到的问题(九)" itemprop="url">
+    <a href="/2017/05/12/【ZooKeeper】我认识的zk(一)/" title="【ZooKeeper】我认识的zk(一)" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】Client开发遇到的问题(九)</h1>
+    <h1 itemprop="name">【ZooKeeper】我认识的zk(一)</h1>
     
      
-           <p itemprop="description" >1. 开发的一次OOM
-OOM程序逻辑程序注册MessageListener进行消息的消费，采用一个newFixedThreadPool(10)的线程池处理消息。
-Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化是LevelDB，通过注册中心Z</p>
+           <p itemprop="description" >一. zk使用场景
+服务发现： 对集群中节点机器的变化，做出对应的对策！如，dubbo中消费者访问某个服务可以通过zk知道哪些机器在提供服务，从而实现负载均衡策略。
+配置管理：集中管理配置文件，配置实时更新。
+分布式锁：集群中存在独占资源时，利用zk的顺序节点或节点version</p>
         
     
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+    <time datetime="2017-05-12T03:12:22.000Z" itemprop="datePublished">2017-05-12</time>
   </a>
 </section>
 
@@ -207,15 +186,16 @@ Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】生产者消费者流控制(五)/" title="【ActiveMQ】生产者消费者流控制(五)" itemprop="url">
+    <a href="/2017/03/08/Java排查工具之jvisualvm,jps,jmap,jstack/" title="Java排查工具之jvisualvm,jps,jmap,jstack" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】生产者消费者流控制(五)</h1>
+    <h1 itemprop="name">Java排查工具之jvisualvm,jps,jmap,jstack</h1>
     
      
-           <p itemprop="description" >前言:通常在开发Mq时,我们有必要关注一个点:消息从producer发往broker的速度,consumer消息的消费速度.而上面的点又涉及到:游标策略(Message Cursors), prefetchSize和producerWindowSize,生产者流控制(Produc</p>
+           <p itemprop="description" >前言：总结java开发中常用到的一些工具，这里都是实际操作命令，很多时候在服务器上操作需要注意的地方，如果有疑问建议加google来看，这里精简描述。
+1. jps 查看jvm中运行的Java进程参数说明:-q 不输出类名、Jar名和传入main方法的参数-m 输出传入main方</p>
         
     
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+    <time datetime="2017-03-08T03:12:22.000Z" itemprop="datePublished">2017-03-08</time>
   </a>
 </section>
 
@@ -227,16 +207,18 @@ Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】知识整理(一)/" title="【ActiveMQ】知识整理(一)" itemprop="url">
+    <a href="/2017/03/08/Java排查利器之BTrace，Greys/" title="Java排查利器之BTrace，Greys" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】知识整理(一)</h1>
+    <h1 itemprop="name">Java排查利器之BTrace，Greys</h1>
     
      
-           <p itemprop="description" >前言：这不是关于ActiveMq的一个全面介绍，这里整体记录使用ActiveMq过程中的一些知识点，总结起来。
-1. 基本使用知识点默认端口管理页面端口：8161LevelDB主从复制端口：62626client连接broker端口：openwire：61616；amqp：567</p>
+           <p itemprop="description" >前言： 关于btrace和greys的使用方法，网上不计其数。这里根据我的使用整理了个精简版，零复制纯手打，高度概括，适用快速入门。萝卜青菜各有所爱，greys好用太多有木有！
+一. Greys安装安装非常简单
+
+直接安装：mkdir greys;cd greys，curl -s</p>
         
     
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+    <time datetime="2017-03-08T03:12:22.000Z" itemprop="datePublished">2017-03-08</time>
   </a>
 </section>
 
@@ -248,15 +230,16 @@ Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】Client客户端的线程资源(七)/" title="【ActiveMQ】Client客户端的线程资源(七)" itemprop="url">
+    <a href="/2017/03/08/JVM实用参数整理/" title="JVM实用参数整理" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】Client客户端的线程资源(七)</h1>
+    <h1 itemprop="name">JVM实用参数整理</h1>
     
      
-           <p itemprop="description" >前言: 基于activemq-client 5.14版的开发，如果简单需求，可以参照网上的教程。但是面对较复杂或者想弄清楚发送和接收的过程，阅读源码的基础上再开发，十分有必要，这里提供了一份对activemq-client进行二次封装的实现，详见githubactivemq-si</p>
+           <p itemprop="description" >前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看《深入理解Java虚拟机》这本书，正好配合日常所需好好地整理下。
+一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不</p>
         
     
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+    <time datetime="2017-03-08T03:12:22.000Z" itemprop="datePublished">2017-03-08</time>
   </a>
 </section>
 
@@ -268,15 +251,38 @@ Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/06/12/【ActiveMQ】集群搭建(二)/" title="【ActiveMQ】集群搭建(二)" itemprop="url">
+    <a href="/2016/12/13/计算java对象大小的两种方法/" title="计算java对象大小的两种方法" itemprop="url">
   
-    <h1 itemprop="name">【ActiveMQ】集群搭建(二)</h1>
+    <h1 itemprop="name">计算java对象大小的两种方法</h1>
     
      
-           <p itemprop="description" ></p>
+           <p itemprop="description" >前言： 主要介绍下精确计算java对象大小的两种方法：Instrumentation和Unsafe方式。关于Instrumentation的使用和原理Google一大推，这里说说如何在IDEA中，一步一步的操作，计算对象的大小！关于Unsafe方式，这个使用方法很简单，直接复制代</p>
         
     
-    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished">2017-06-12</time>
+    <time datetime="2016-12-13T11:22:11.000Z" itemprop="datePublished">2016-12-13</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2016/11/12/cron，at，batch(任务调度)/" title="cron，at，batch(任务调度)" itemprop="url">
+  
+    <h1 itemprop="name">cron，at，batch(任务调度)</h1>
+    
+     
+           <p itemprop="description" >一，基础知识
+corntab周期执行任务,anacron调度每日、每周或每月执行的作业,at调度只运行一次的作业.
+batch 命令被用来在系统平均负载达到 0.8% 以下时执行一次性的任务，通俗的所就是系统空闲时执行任务。
+crontab调度的任务是不会加载任何环境变量的,这就</p>
+        
+    
+    <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
   </a>
 </section>
 
@@ -287,7 +293,7 @@ Broker的架构AMQ采用HA架构，一台Master，两条Slaver，消息持久化
 
 
   <nav id="page-nav" class="clearfix unexpand">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">Next<span></span></a>
+    <a class="extend prev" rel="prev" href="/"><span></span>Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/3/">Next<span></span></a>
   </nav>
 
 </div>

@@ -1,0 +1,604 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【ActiveMQ】消息唯一性的保证(十) | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="前言：一次broker的failover，导致DLQ队列中多出了很多消息，这些消息都是由client端报duplicate message异常提交到DLQ队列中的。由此必须得深入client端的源码了解一下其机制。  消息是如何保证不被重复消费？ 上述现象在client端是如何产生的？一. 起因1. 场景描述现MQ的架">
+<meta name="keywords" content="ActiveMQ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【ActiveMQ】消息唯一性的保证(十)">
+<meta property="og:url" content="http://huzongzhe.cn/2017/06/12/【ActiveMQ】消息唯一性的保证(十)/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="前言：一次broker的failover，导致DLQ队列中多出了很多消息，这些消息都是由client端报duplicate message异常提交到DLQ队列中的。由此必须得深入client端的源码了解一下其机制。  消息是如何保证不被重复消费？ 上述现象在client端是如何产生的？一. 起因1. 场景描述现MQ的架构是Master+ Slaver + Slaver，底层持久化采用LevelDB">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-02-09T05:54:23.154Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【ActiveMQ】消息唯一性的保证(十)">
+<meta name="twitter:description" content="前言：一次broker的failover，导致DLQ队列中多出了很多消息，这些消息都是由client端报duplicate message异常提交到DLQ队列中的。由此必须得深入client端的源码了解一下其机制。  消息是如何保证不被重复消费？ 上述现象在client端是如何产生的？一. 起因1. 场景描述现MQ的架构是Master+ Slaver + Slaver，底层持久化采用LevelDB">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/06/12/【ActiveMQ】消息唯一性的保证(十)/" title="【ActiveMQ】消息唯一性的保证(十)" itemprop="url">【ActiveMQ】消息唯一性的保证(十)</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2017-06-12T03:12:22.000Z" itemprop="datePublished"> 发表于 2017-06-12</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<p>前言：一次broker的failover，导致DLQ队列中多出了很多消息，这些消息都是由client端报duplicate message异常提交到DLQ队列中的。由此必须得深入client端的源码了解一下其机制。</p>
+<ol>
+<li>消息是如何保证不被重复消费？</li>
+<li>上述现象在client端是如何产生的？<h2 id="一-起因"><a href="#一-起因" class="headerlink" title="一. 起因"></a>一. 起因</h2><h3 id="1-场景描述"><a href="#1-场景描述" class="headerlink" title="1. 场景描述"></a>1. 场景描述</h3>现MQ的架构是<code>Master+ Slaver + Slaver</code>，底层持久化采用LevelDB，由于业务原因需要将其中一台Slaver服务器转移，具体操作很简单：1. stop old slaver mq；2. start new slaver mq。<br>在stop slaver后，奇怪的master发生了failover，原master权重30，竟然failover到权重为10的另外一台Slaver上了（权重根据机器性能设置的），好奇怪mq使用zk的选举策略是怎么做的。<br>先不探究这个failover，因为经验证数据并没有丢失，但是failover过程中DLQ队列中多出了2000多条消息，这两千多条消息都是记录的下面异常：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java.lang.Throwable: Suppressing duplicate delivery on connection, consumer ID:l-xxxx.xxx.xxx-41868-1510630408156-11:1:1:1</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>服务器也报了如下异常：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[2017-11-23 12:03:20.521 [ActiveMQ Session Task-2691] WARN o.a.activemq.ActiveMQMessageConsumer.dispatch:1457]-</span><br><span class="line">ID:l-xxx.xx.xxx-41868-1510630408156-11:1:1:1 suppressing duplicate delivery on connection, </span><br><span class="line">poison acking: MessageDispatch &#123;commandId = 0, responseRequired = false, </span><br><span class="line">consumerId = ID:l-xxx.xxx.xxx-41868-1510630408156-11:1:1:1, destination = queue://xxx.xxx.xxx.update, </span><br><span class="line">message = ActiveMQTextMessage &#123;commandId = 46551652, responseRequired = true, </span><br><span class="line">messageId = ID:l-xxx.xx.xxx-39490-1509524021580-1:1:1:1:46551648, originalDestination = null, </span><br><span class="line">originalTransactionId = null, producerId = ID:l-xxx.xx.xx-39490-1509524021580-1:1:1:1, </span><br><span class="line">destination = queue://xxx.xxx.xxxx.update, transactionId = null, expiration = 0, </span><br><span class="line">timestamp = 1511409744482, arrival = 0, brokerInTime = 1511409744482, brokerOutTime = 1511409795129, </span><br><span class="line">correlationId = null, replyTo = null, persistent = true, type = null, priority = 4, groupID = null, </span><br><span class="line">groupSequence = 0, targetConsumerId = null, compressed = false, userID = null, </span><br><span class="line">content = org.apache.activemq.util.ByteSequence@7bcee2f8, marshalledProperties = null, </span><br><span class="line">dataStructure = null, redeliveryCounter = 0, size = 0, properties = null, readOnlyProperties = true, </span><br><span class="line">readOnlyBody = true, droppable = false, jmsXGroupFirstForConsumer = false, </span><br><span class="line">text = &#123;&quot;condition&quot;:&#123;&quot;xxx&quot;:&quot;56201711231200538...:&quot;xxx&quot;&#125;&#125;&#125;, redeliveryCounter = 0&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-结论"><a href="#2-结论" class="headerlink" title="2. 结论"></a>2. 结论</h3><p>很简单：网络连接断开，broker进行failover或网络异常等情况发送后，连接恢复，此时broker会将没有ACK回来的消息重新发送给原来接受该消息的client，<br>此时client如果检测到这个是重复消息，那么会在接收这条消息时抛异常，并将其返回给broker放入DLQ队列中去.<br>No,No,No，没有结束，检测到是重复的消息抛异常？No,真实处理是：检测到重复消息后给broker发一个特殊ack（<code>posionAck</code>），<br>ack中携带消息<code>MessageDispatch</code>实体和封装的一个异常对象返回给服务器，服务器收到该ack后，才将这条消息丢到了DLQ中。<br>具体，且看下面的源码解析：</p>
+<h2 id="二-过程分析"><a href="#二-过程分析" class="headerlink" title="二. 过程分析"></a>二. 过程分析</h2><p>首先，所有的分析都不考虑Transaction的情况！</p>
+<h3 id="1-重复消息处理流程"><a href="#1-重复消息处理流程" class="headerlink" title="1. 重复消息处理流程"></a>1. 重复消息处理流程</h3><p>这个现象的所有过程都在<code>org.apache.activemq.ActiveMQMessageConsumer#dispatch()</code>方法中，此方法会被<code>ActiveMQ Session Task-x</code>线程循环重复调用去消费消息。<br>逻辑简化后如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">synchronized (unconsumedMessages.getMutex() ) &#123;</span><br><span class="line">	if ( !unconsumedMessages.isClosed() )</span><br><span class="line">	&#123;</span><br><span class="line">		if ( this.info.isBrowser() || !session.connection.isDuplicate( this, md.getMessage() ) )</span><br><span class="line">		&#123;</span><br><span class="line">			if ( listener != null &amp;&amp; unconsumedMessages.isRunning() )</span><br><span class="line">			&#123;</span><br><span class="line">				ActiveMQMessage message = createActiveMQMessage( md );</span><br><span class="line">				beforeMessageIsConsumed( md );</span><br><span class="line">				try &#123;</span><br><span class="line">					boolean expired = isConsumerExpiryCheckEnabled() &amp;&amp; message.isExpired();</span><br><span class="line">					if ( !expired )</span><br><span class="line">					&#123;</span><br><span class="line">						listener.onMessage( message );</span><br><span class="line">					&#125;</span><br><span class="line">					afterMessageIsConsumed( md, expired );</span><br><span class="line">				&#125; else &#123;</span><br><span class="line">					/* deal with duplicate delivery */</span><br><span class="line">					LOG.warn( &quot;&#123;&#125; suppressing duplicate delivery on connection, poison acking: &#123;&#125;&quot;, getConsumerId(), md );</span><br><span class="line">					posionAck( md, &quot;Suppressing duplicate delivery on connection, consumer &quot; + getConsumerId() );</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br></pre></td></tr></table></figure></p>
+<p>首先获取消息执行权，然后判断是否是重复调用的消息，如果不是则正常逻辑处理，如果是重复消息，则记录日志并给broker发送一个<code>posionAck</code>。<br>过程很简单，这里我是如何判断是重复消息的呢？</p>
+<h3 id="2-重复消息判断逻辑"><a href="#2-重复消息判断逻辑" class="headerlink" title="2. 重复消息判断逻辑"></a>2. 重复消息判断逻辑</h3><p><code>org.apache.activemq.ConnectionAudit#isDuplicate()</code>方法是封装重复消息检查的逻辑：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">class ConnectionAudit &#123;</span><br><span class="line">    private LinkedHashMap&lt;ActiveMQDestination, ActiveMQMessageAudit&gt; destinations = new LRUCache&lt;&gt;(1000);</span><br><span class="line">    synchronized boolean isDuplicate(ActiveMQDispatcher dispatcher, Message message) &#123;</span><br><span class="line">        if (checkForDuplicates &amp;&amp; message != null) &#123;</span><br><span class="line">            ActiveMQDestination destination = message.getDestination();</span><br><span class="line">            if (destination != null) &#123;</span><br><span class="line">                ActiveMQMessageAudit audit = destinations.get(destination);</span><br><span class="line">                if (audit == null) &#123;</span><br><span class="line">                    audit = new ActiveMQMessageAudit(xx, xx);</span><br><span class="line">                    destinations.put(destination, audit);</span><br><span class="line">                &#125;</span><br><span class="line">                boolean result = audit.isDuplicate(message);</span><br><span class="line">                return result;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>没有什么比代码解释的更清楚，其中<code>LRUCache</code>是基于<code>LinkedHashMap</code>的简单缓存实现，这里将<code>ActiveMQDestination</code>和<code>ActiveMQMessageAudit</code>缓存起来。<br><code>ActiveMQDestination</code>是MQ中destination对象，<code>ActiveMQMessageAudit</code>是具体的check duplicate对象。<br>下一步，研究<code>ActiveMQMessageAudit</code>的<code>isDuplicate</code>方法的实现：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">public boolean isDuplicate(final MessageId id) &#123;</span><br><span class="line">    boolean answer = false;</span><br><span class="line">    if (id != null) &#123;</span><br><span class="line">        ProducerId pid = id.getProducerId();</span><br><span class="line">        if (pid != null) &#123;</span><br><span class="line">            BitArrayBin bab = map.get(pid.toString());</span><br><span class="line">            if (bab == null) &#123;</span><br><span class="line">                bab = new BitArrayBin(64);</span><br><span class="line">                map.put(pid.toString(), bab);</span><br><span class="line">                modified = true;</span><br><span class="line">            &#125;</span><br><span class="line">            answer = bab.setBit(id.getProducerSequenceId(), true);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return answer;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里map定义：<code>new LRUCache&lt;String, BitArrayBin&gt;(0, 2048, 0.75f, true)</code> 也是一个LRU缓存，根据<code>ProducerId</code>作为key，<code>BitArrayBin</code>作为<code>value</code>。<br>重点：<code>BitArrayBin</code>，它是一个精心设计保存<code>producerSequenceId</code>的容器，这里<code>producerSequenceId</code>是每条消息的唯一序列号，只保存它是因为，前面有两层LRU缓存。<br>分别保存<code>destination</code>和<code>producerId</code>这样就唯一确定了一条消息，<code>producerId</code>采用bitmap实现判断消息是否已经消费过，即<code>BitArrayBin</code>实现。<br><code>BitArrayBin</code>采用<code>LinkedList&lt;BitArray&gt;</code>保存<code>BitArray</code>，<code>BitArray</code>是一个数组，处理<code>producerSequenceId</code>后作为其数组的下标，boolean为value，true表示该位上有值（已经消费）！<br>Tip：两层LRU并不是二级缓存的意思，destinations存储的是每一个队列，map存储的是每一个队列中的所有Producer，真正判断是否重复发送的是<code>BitArrayBin</code>！</p>
+<h2 id="三-ACK的原理"><a href="#三-ACK的原理" class="headerlink" title="三. ACK的原理"></a>三. ACK的原理</h2><p>ACK类型：autoACK，DupACK，ClientACK，IndividualACK。下面简单从源码的角度看看实现，这里只看consumer端client的情况（Producer端是一样的原理）：<br><code>ActiveMQMessageConsumer</code>中通过<code>protected final LinkedList&lt;MessageDispatch&gt; deliveredMessages = new LinkedList&lt;&gt;();</code>保存已经发送的消息。<br>每条消息处理前后都会调用：<code>beforeMessageIsConsumed(md);</code>和<code>afterMessageIsConsumed(md, expired);</code>这两个方法。</p>
+<p><code>beforeMessageIsConsumed(md);</code>源码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">private void beforeMessageIsConsumed(MessageDispatch md) throws JMSException &#123;</span><br><span class="line">       md.setDeliverySequenceId(session.getNextDeliveryId());</span><br><span class="line">       lastDeliveredSequenceId = md.getMessage().getMessageId().getBrokerSequenceId();</span><br><span class="line">       if (!isAutoAcknowledgeBatch()) &#123;</span><br><span class="line">           synchronized(deliveredMessages) &#123;</span><br><span class="line">               deliveredMessages.addFirst(md);</span><br><span class="line">           &#125;</span><br><span class="line">           if (session.getTransacted()) &#123;</span><br><span class="line">               if (transactedIndividualAck) &#123;</span><br><span class="line">                   immediateIndividualTransactedAck(md);</span><br><span class="line">               &#125; else &#123;</span><br><span class="line">                   ackLater(md, MessageAck.DELIVERED_ACK_TYPE);</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure></p>
+<p>基本逻辑就是，除开<code>Topic</code>模式下<code>DupACK</code>情况，所有消息处理前先放入<code>deliveredMessages</code>链表的头中(而不是尾部)。如果是事务消息则xxx。</p>
+<p><code>afterMessageIsConsumed(md, expired);</code>源码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">private void afterMessageIsConsumed(MessageDispatch md, boolean messageExpired) throws JMSException &#123;</span><br><span class="line">    //先判断unconsumedMessages有没有关闭，若关闭直接返回。</span><br><span class="line">    if (messageExpired) &#123;</span><br><span class="line">        //如果该消息是过期消息，则返回该消息的ack（EXPIRED_ACK_TYPE）</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        if (session.getTransacted()) &#123;</span><br><span class="line">            // 事务消息，不做任务处理</span><br><span class="line">        &#125; else if (isAutoAcknowledgeEach()) &#123;</span><br><span class="line">            //如果是autoAck，走下面流程</span><br><span class="line">            if (optimizeAcknowledge) &#123;</span><br><span class="line">                //如果启用优化ack，则这里批量确认ACK逻辑</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                MessageAck ack = makeAckForAllDeliveredMessages(MessageAck.STANDARD_ACK_TYPE);</span><br><span class="line">                if (ack != null) &#123;</span><br><span class="line">                    deliveredMessages.clear();</span><br><span class="line">                    session.sendAck(ack);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; else if (isAutoAcknowledgeBatch()) &#123;</span><br><span class="line">            ackLater(md, MessageAck.STANDARD_ACK_TYPE);</span><br><span class="line">        &#125; else if (session.isClientAcknowledge() || session.isIndividualAcknowledge()) &#123;</span><br><span class="line">            boolean messageUnackedByConsumer = false;</span><br><span class="line">            synchronized (deliveredMessages) &#123;</span><br><span class="line">                messageUnackedByConsumer = deliveredMessages.contains(md);</span><br><span class="line">            &#125;</span><br><span class="line">            if (messageUnackedByConsumer) &#123;</span><br><span class="line">                ackLater(md, MessageAck.DELIVERED_ACK_TYPE);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            throw new IllegalStateException(&quot;Invalid session state.&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如果是autoAck则<code>makeAckForAllDeliveredMessages</code>回复brokerack，<code>makeAckForAllDeliveredMessages</code>是将<code>deliveredMessages</code>链表中首尾的两个<code>MessageId</code>对象附带ACK返回。</p>
+<ul>
+<li>因为这里是autoAck，所以正常情况下<code>deliveredMessages</code>中只有一条消息，注意，这里如果autoAck未能及时回复ack（比如网络异常，未获取到<code>deliveryingAcknowledgements</code>），<code>deliveredMessages</code>中也可能会有多条需要ack的消息，这时client会返回一条ack以确认全部未回复的ack！</li>
+<li>如果是如果是批量ack的情况，则走<code>ackLater</code>逻辑，<code>ackLater</code>逻辑是如果未ack的message数量大于等于<code>PrefetchSize</code>一半时，就将这些消息以一条<code>MessageAck</code>的方式返回给broker，<code>MessageAck</code>中保存了首尾message的messageId。</li>
+<li>至于clientAck和IndividualAck逻辑就不赘述了。</li>
+</ul>
+<p>结论：所有待回复broker的ACK都保存在一个链表中，autoAck一般情况下每条消息回复一条ack，当网络异常或消息并发很高(<code>deliveryingAcknowledgements.compareAndSet(false, true))</code>失败)时，会多条消息一起ack！DupACK是当未ack消息到达prefetchSize的一半时以一条ack的方式，进行全部确认！</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/ActiveMQ/">ActiveMQ</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/ActiveMQ/">ActiveMQ</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2017/06/12/【ActiveMQ】消息唯一性的保证(十)/" data-title="【ActiveMQ】消息唯一性的保证(十) | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/06/12/【ActiveMQ】集群搭建(二)/" title="【ActiveMQ】集群搭建(二)">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【ActiveMQ】集群搭建(二)</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/05/12/【ZooKeeper】基于Curator的开发(四)/"  title="【ZooKeeper】基于Curator的开发(四)">
+ <strong>下一篇：</strong><br/> 
+ <span>【ZooKeeper】基于Curator的开发(四)
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

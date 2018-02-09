@@ -1,0 +1,825 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>Linux大杂烩 | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="前言：下面总结使用Linux类系统的一些总结。 知识点 locate a.txt 搜索文件,其中 updatedb 强制更新locate数据库，默认一天更新一次 命令前面添加time 可以监控命令运行时间,eg:sudo time lsof -i:9090  常用命令 查看cpu核心数：grep &amp;#39;mo">
+<meta name="keywords" content="Linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux大杂烩">
+<meta property="og:url" content="http://huzongzhe.cn/2016/08/13/Linux大杂烩/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="前言：下面总结使用Linux类系统的一些总结。 知识点 locate a.txt 搜索文件,其中 updatedb 强制更新locate数据库，默认一天更新一次 命令前面添加time 可以监控命令运行时间,eg:sudo time lsof -i:9090  常用命令 查看cpu核心数：grep &amp;#39;model name&amp;#39; /proc/cpuinfo | wc -l 查看所有用户：c">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-01-03T09:59:56.171Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux大杂烩">
+<meta name="twitter:description" content="前言：下面总结使用Linux类系统的一些总结。 知识点 locate a.txt 搜索文件,其中 updatedb 强制更新locate数据库，默认一天更新一次 命令前面添加time 可以监控命令运行时间,eg:sudo time lsof -i:9090  常用命令 查看cpu核心数：grep &amp;#39;model name&amp;#39; /proc/cpuinfo | wc -l 查看所有用户：c">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/08/13/Linux大杂烩/" title="Linux大杂烩" itemprop="url">Linux大杂烩</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2016-08-13T11:22:11.000Z" itemprop="datePublished"> 发表于 2016-08-13</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+		<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#知识点"><span class="toc-text">知识点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#常用命令"><span class="toc-text">常用命令</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#查看文件夹大小"><span class="toc-text">查看文件夹大小</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#删除swap空间内容"><span class="toc-text">删除swap空间内容</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#根据access-计算QPS"><span class="toc-text">根据access 计算QPS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#根据access-计算PV"><span class="toc-text">根据access 计算PV</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#atnodes，fornodes，tonodes多服务器操作"><span class="toc-text">atnodes，fornodes，tonodes多服务器操作</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#文件查看，编辑"><span class="toc-text">文件查看，编辑</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-linux中查看文件的命令如下："><span class="toc-text">1. linux中查看文件的命令如下：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-more的动作指令："><span class="toc-text">2. more的动作指令：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-less动作指令：less比more更强大，命令类似于vi"><span class="toc-text">3. less动作指令：less比more更强大，命令类似于vi</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#vim"><span class="toc-text">vim</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-模式切换"><span class="toc-text">1. 模式切换</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-普通模式"><span class="toc-text">(1) 普通模式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#光标的移动"><span class="toc-text">光标的移动</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-编辑模式"><span class="toc-text">(2) 编辑模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-可视模式"><span class="toc-text">(3) 可视模式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-输入命令："><span class="toc-text">2. 输入命令：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#常用操作"><span class="toc-text">常用操作</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-安装"><span class="toc-text">3. 安装</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#AWK"><span class="toc-text">AWK</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#语法："><span class="toc-text">语法：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#基本语法"><span class="toc-text">基本语法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#awk脚本"><span class="toc-text">awk脚本</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#用法："><span class="toc-text">用法：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-基本使用："><span class="toc-text">1. 基本使用：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-指定分隔符"><span class="toc-text">2. 指定分隔符:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-设置变量"><span class="toc-text">3. 设置变量:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-过滤"><span class="toc-text">4. 过滤:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-正则："><span class="toc-text">5. 正则：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#脚本"><span class="toc-text">脚本</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#find-grep"><span class="toc-text">find,grep</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-find-最常见和最强大的查找命令，你可以用它找到任何你想找的文件"><span class="toc-text">1. find 最常见和最强大的查找命令，你可以用它找到任何你想找的文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-grep"><span class="toc-text">2. grep</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#find与grep，sed组合，查询文件中的内容"><span class="toc-text">find与grep，sed组合，查询文件中的内容</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#wget-scp-nc"><span class="toc-text">wget,scp,nc,</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-wget"><span class="toc-text">1. wget</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#wget下载整个目录"><span class="toc-text">wget下载整个目录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#wget-下载指定格式的文件"><span class="toc-text">wget 下载指定格式的文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#wget镜像网站"><span class="toc-text">wget镜像网站</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#wget使用代理下载"><span class="toc-text">wget使用代理下载</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-scp"><span class="toc-text">2. scp</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-nc"><span class="toc-text">3. nc</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#nc基本参数"><span class="toc-text">nc基本参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#文件传输"><span class="toc-text">文件传输</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其他作用"><span class="toc-text">其他作用</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Top-pmap-iostat-dstat-sar-pidstat-vmstat"><span class="toc-text">Top,pmap,iostat,dstat,sar,pidstat,vmstat</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-top系统监控"><span class="toc-text">1. top系统监控</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-pmap-查看进程空间"><span class="toc-text">2. pmap 查看进程空间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-iostat-磁盘IO和CPU监控统计"><span class="toc-text">3. iostat 磁盘IO和CPU监控统计</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#vmstat系统监控"><span class="toc-text">vmstat系统监控</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-dstat系统监控"><span class="toc-text">4. dstat系统监控</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-pidstat-（用于监控全部或指定进程占用系统资源的情况）"><span class="toc-text">5. pidstat （用于监控全部或指定进程占用系统资源的情况）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-sar-系统历史情况统计"><span class="toc-text">6. sar 系统历史情况统计</span></a></li></ol></li></ol></li></ol>
+		
+		</div>
+		
+		<p>前言：下面总结使用Linux类系统的一些总结。</p>
+<h1 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h1><ul>
+<li><code>locate a.txt</code> 搜索文件,其中 <code>updatedb</code> 强制更新locate数据库，默认一天更新一次</li>
+<li>命令前面添加<code>time</code> 可以监控命令运行时间,eg:<code>sudo time lsof -i:9090</code></li>
+</ul>
+<h3 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h3><ul>
+<li>查看cpu核心数：<code>grep &#39;model name&#39; /proc/cpuinfo | wc -l</code></li>
+<li>查看所有用户：<code>cat /etc/passwd |cut -f 1 -d :</code><h4 id="查看文件夹大小"><a href="#查看文件夹大小" class="headerlink" title="查看文件夹大小"></a>查看文件夹大小</h4></li>
+<li><code>du -sh *</code>   查看当前目录下的文件夹大小</li>
+<li><code>du -sh .</code>  查看当前目录大小<h4 id="删除swap空间内容"><a href="#删除swap空间内容" class="headerlink" title="删除swap空间内容"></a>删除swap空间内容</h4></li>
+</ul>
+<ol>
+<li><code>swapoff -a</code>  关闭swap<code>/etc/fstab</code>中设置为swap的分区</li>
+<li><code>swapon -a</code>  打开<code>/etc/fstab</code>中设置为swap的分区<br>-a  将/etc/fstab文件中所有设置为swap的设备关闭</li>
+</ol>
+<p>注：所有的分区记录在： <code>/etc/fstab</code>文件中<br><code>swapon -s</code> 显示交换分区的信息<br><code>mkswap</code> 创建swap分区</p>
+<h3 id="根据access-计算QPS"><a href="#根据access-计算QPS" class="headerlink" title="根据access 计算QPS"></a>根据access 计算QPS</h3><p>设access日志格式：<code>[26/Sep/2017:14:59:17 +0800] 10.88.65.39 &quot;POST /shell/hive HTTP/1.1&quot; 200 (6 ms)</code>，其中<code>/shell/hive</code>是接口。<br><strong>按分钟统计平均qps：<code>grep &#39;/shell/hive&#39; access_log.2017-09-26.log | cut -d &quot;:&quot; -f 2,3 |sort|uniq -c| awk &#39;{qps=$1/60;print $2,$1,qps}&#39;</code></strong><br>按小时统计：<code>grep &#39;/shell/hive&#39; access_log.2017-09-26.log | cut -d &quot;:&quot; -f 2 |sort|uniq -c| awk &#39;{qps=$1/3600;print $2,$1,qps}&#39;</code><br>按秒统计：<code>grep &#39;/shell/hive&#39; access_log.2017-09-26.log | cut -d &quot;:&quot; -f 2,3,4 |sort|uniq -c| awk &#39;{print $2,$1}&#39;</code><br><strong>Tip：如果是<code>tar.gz</code>压缩文件，使用<code>zgrep</code></strong></p>
+<h3 id="根据access-计算PV"><a href="#根据access-计算PV" class="headerlink" title="根据access 计算PV"></a>根据access 计算PV</h3><p>按小时统计PV：<code>grep &#39;/shell/hive&#39; access_log.2017-09-26.log | cut -d &quot;:&quot; -f 2 |sort|uniq -c| awk &#39;{print $2,$1}&#39;</code></p>
+<h3 id="atnodes，fornodes，tonodes多服务器操作"><a href="#atnodes，fornodes，tonodes多服务器操作" class="headerlink" title="atnodes，fornodes，tonodes多服务器操作"></a>atnodes，fornodes，tonodes多服务器操作</h3><ol>
+<li><code>fornodes</code> 主要提供域名缩写，一般不单独使用，<code>atnodes</code>和<code>tonodes</code>默认调用！</li>
+<li>一般需要在跳板机上执行！如没安装：<code>sudo cpan SSH::Batch</code>安装</li>
+<li>使用：<code>atnodes ‘ls’ ‘l-xxx[5-6].wap.cn6’</code></li>
+<li>配置别名使用：<br><code>cat &gt; ~/.fornodesrc</code> 输入 <code>abc=l-xxx[5-6].xx.xx.xxx.com</code><br><code>atnodes &#39;ls&#39; &#39;{abc}&#39;</code></li>
+</ol>
+<h1 id="文件查看，编辑"><a href="#文件查看，编辑" class="headerlink" title="文件查看，编辑"></a>文件查看，编辑</h1><p><strong>压缩文件对应：zless、zmore、zcat 和 zgrep </strong></p>
+<h2 id="1-linux中查看文件的命令如下："><a href="#1-linux中查看文件的命令如下：" class="headerlink" title="1. linux中查看文件的命令如下："></a>1. linux中查看文件的命令如下：</h2><ul>
+<li><code>cat</code>： 由第一行开始显示档案内容</li>
+<li><code>tac</code>： 从最后一行开始显示，可以看出 tac 是 cat 的反向显示！</li>
+<li><code>nl</code>： 显示的时候，随便输出行号！</li>
+<li><code>more</code>： 一页一页的显示档案内容less 与 more 类似，按h可以在输出文件内容的时候查看帮助</li>
+<li><code>head</code>： 查看头几行</li>
+<li><code>tail</code>： 查看尾几行</li>
+<li><code>od</code>： 以二进制的方式读取档案内容</li>
+</ul>
+<h2 id="2-more的动作指令："><a href="#2-more的动作指令：" class="headerlink" title="2. more的动作指令："></a>2. more的动作指令：</h2><ul>
+<li><code>Enter</code>            向下n行，需要定义，默认为1行；</li>
+<li><code>Ctrl+f</code>            向下滚动一屏；</li>
+<li><code>空格键</code>         向下滚动一屏；</li>
+<li><code>Ctrl+b</code>           返回上一屏；</li>
+<li><code>=</code>                   输出当前行的行号；</li>
+</ul>
+<h2 id="3-less动作指令：less比more更强大，命令类似于vi"><a href="#3-less动作指令：less比more更强大，命令类似于vi" class="headerlink" title="3. less动作指令：less比more更强大，命令类似于vi"></a>3. less动作指令：less比more更强大，命令类似于vi</h2><p>空格键 向下滚动一屏；<br><code>f</code> 向下滚动一屏；前移<br><code>b</code> 向上滚动一屏；后移<br><code>d</code> 向下滚动半屏；<br><code>u</code> 向上洋动半屏；<br>(也可以在<code>fbdu</code>前面按<code>ctrl</code>)<br>在显示内容的时候可以输入：-N显示行号；/或者？向前或者向后搜索（按n搜索下一个，N上一个）！<br><code>G</code>文件末尾（shift+g），<code>gg</code>文件开头<br><strong>注: </strong> less在查看一些不规律文件时可能会提示<code>may be a binary file.  See it anyway</code>, 比如,<code>gc.log</code>, <code>xx.gz</code>等. 可以<strong><code>less -f -r file</code></strong>来查看!</p>
+<h1 id="vim"><a href="#vim" class="headerlink" title="vim"></a>vim</h1><h2 id="1-模式切换"><a href="#1-模式切换" class="headerlink" title="1. 模式切换"></a>1. 模式切换</h2><h3 id="1-普通模式"><a href="#1-普通模式" class="headerlink" title="(1) 普通模式"></a>(1) 普通模式</h3><p>其他模式<code>2次ESC</code>即可进入普通模式</p>
+<ul>
+<li>删除：<br><strong><code>x</code> 删除光标位置字符</strong><br><strong><code>dd</code>删除当前行（以后按.就可以直接删）</strong><br><code>d)</code>删除从光标开始到句末，<code>d(</code>删除当前光标到句首，<code>d{</code>段落后删除，<code>d}</code>段落前删除<br><code>dw，db</code>也是删除单词，<code>d0</code>光标到行首删除</li>
+<li>常用操作<br>前进后退：<code>u</code>：撤销上一次操作（后退），<code>Ctrl+r</code>：撤销（重做，前进）<br>查找：<code>/</code>向下，<code>?</code>向上查找，n匹配后一个，N匹配前一个<br>替换：<code>：%s/内容/新内容/</code><br>复制：<code>yy</code> 复制光标所在行的所有字符<br>粘贴：<code>p</code> 将最后一个删除或复制文本放在当前字符之后 ，<code>P</code> 光标字符之前<br><code>.</code>  重复执行上一个命令<h4 id="光标的移动"><a href="#光标的移动" class="headerlink" title="光标的移动"></a>光标的移动</h4></li>
+<li>上下左右：<code>h</code>，<code>j</code>，<code>k</code>，<code>l</code></li>
+<li><code>w</code>上一单词，<code>b</code> 下一单词；<code>e</code>光标单词末尾；</li>
+<li><code>G</code>文件末尾，<code>gg</code>文件开头</li>
+<li><code>H</code>屏幕左上角，<code>M</code>屏幕中间，<code>L</code>屏幕最后一行</li>
+<li><code>Ctrl + f</code>,<code>Ctrl + b</code>；前后滚动一页；<code>u</code>，<code>d</code>前后滚动半页</li>
+<li><code>0</code>当前行的行首，<code>shift+a</code>调到行尾并编辑，<code>$</code>调到行尾。</li>
+<li><code>{}</code>段前段尾；<code>（）</code>句首句尾</li>
+</ul>
+<h3 id="2-编辑模式"><a href="#2-编辑模式" class="headerlink" title="(2) 编辑模式"></a>(2) 编辑模式</h3><p>命令模式下输入以下命令，即进入编辑模式，两次ESC退出该模式！<br><code>i</code>，当前位置插入；<code>shift + i</code>，当前行首插入<br><code>a</code>，后一个位置插入；<code>shift + a</code> 行尾追加<br><code>o</code>，光标下一行新建一行开始编辑，<code>shift + o</code>，光标上一行新建一行开始编辑；</p>
+<h3 id="3-可视模式"><a href="#3-可视模式" class="headerlink" title="(3) 可视模式"></a>(3) 可视模式</h3><p>命令模式下输入以下命令，即进入可视模式，两次ESC退出该模式！<br><code>v</code> 进入字符可视化模式<br><code>shift+v</code> 进入行可视化模式（按照行选取一块）<br><code>Ctrl+v</code> 进入块可视化模式（按照列选取内容）<br>选择指定文本后，可以输入命令模式下的命令，对指定文件进行操作！<br>eg：删除(<code>x</code>)，剪切(<code>d</code>)，复制(<code>y</code>)<br>eg：移动文本：首先v模式下选定文本，<code>d</code>剪切，<code>p（贴在光标后）或P（贴在光标前）</code>粘贴<br>eg：选定的文本输出到文件：v模式下，选定文本，输入<code>:write file.txt</code><br>eg：选定的文本排序：v模式下，选定文本，输入<code>:sort</code></p>
+<h2 id="2-输入命令："><a href="#2-输入命令：" class="headerlink" title="2. 输入命令："></a>2. 输入命令：</h2><p><code>:5m3</code>：把第五行移动到第四行<br><code>:2,5m0</code>  把第2-5行移动到文件头<br><code>:&lt;</code> <code>:&gt;</code>  光标所在行移动4个空格，<code>:&lt;&lt;</code>  <code>:&gt;&gt;</code>  8个空格</p>
+<h3 id="常用操作"><a href="#常用操作" class="headerlink" title="常用操作"></a>常用操作</h3><p><code>back</code>或<code>2次ESC</code>：进入普通模式<br>保存退出<code>：wq</code> <code>shift zz</code><br>强制退出：<code>:q!</code><br><code>set nu</code>  设置行号<br><code>set tabstop=4</code> tab 长度设置为 4<br><code>set ai</code> 设置自动缩进<br><code>set all</code> 查看所有选项值<br><code>split</code>或<code>sp</code>：窗口切成上下两部分，<code>ctrl+w</code>上下切换。<code>q</code>关闭，<code>vsplit</code>左右切分（<code>vs</code>简写命令）</p>
+<h2 id="3-安装"><a href="#3-安装" class="headerlink" title="3. 安装"></a>3. 安装</h2><ol>
+<li><code>sudo apt-get install vim-gtk</code></li>
+<li><code>sudo vim /etc/vim/vimrc</code> 修改配置文件<br>3.在末尾添加：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">set nu                           // 在左侧行号</span><br><span class="line">set tabstop                  //tab 长度设置为 4</span><br><span class="line">set nobackup               //覆盖文件时不备份</span><br><span class="line">set cursorline               //突出显示当前行</span><br><span class="line">set ruler                       //在右下角显示光标位置的状态行</span><br><span class="line">set autoindent             //自动缩进</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>插件安装：<br><code>wget -qO- https://raw.github.com/ma6174/vim/master/setup.sh | sh -x</code></p>
+<ol>
+<li>按F5可以直接编译并执行C、C++、java代码以及执行shell脚本，按“F8”可进行C、C++代码的调试</li>
+<li>自动插入文件头 ，新建C、C++源文件时自动插入表头：包括文件名、作者、联系方式、建立时间等，读者可根据需求自行更改</li>
+<li>映射“Ctrl + A”为全选并复制快捷键，方便复制代码</li>
+<li>按“F2”可以直接消除代码中的空行</li>
+<li>“F3”可列出当前目录文件，打开树状文件目录</li>
+<li>按“Ctrl + P”可自动补全</li>
+</ol>
+<h1 id="AWK"><a href="#AWK" class="headerlink" title="AWK"></a>AWK</h1><h2 id="语法："><a href="#语法：" class="headerlink" title="语法："></a>语法：</h2><h3 id="基本语法"><a href="#基本语法" class="headerlink" title="基本语法"></a>基本语法</h3><p><code>awk [选项参数] &#39;script&#39; var=value file(s)</code> 或  <code>awk [选项参数] -f scriptfile var=value file(s)   执行awk脚本</code></p>
+<h3 id="awk脚本"><a href="#awk脚本" class="headerlink" title="awk脚本"></a>awk脚本</h3><p>三个部分:</p>
+<ol>
+<li>BEGIN{ 这里面放的是执行前的语句 }</li>
+<li>END {这里面放的是处理完所有的行后要执行的语句 }</li>
+<li>{这里面放的是处理每一行时要执行的语句}；可以没有BEGIN和END，这个一定有<h2 id="用法："><a href="#用法：" class="headerlink" title="用法："></a>用法：</h2><h3 id="1-基本使用："><a href="#1-基本使用：" class="headerlink" title="1. 基本使用："></a>1. 基本使用：</h3><ul>
+<li><code>awk &#39;{print $1,$4}&#39; log.txt</code>  每行按空格或TAB分割，输出文本中的1、4项  <h3 id="2-指定分隔符"><a href="#2-指定分隔符" class="headerlink" title="2. 指定分隔符:"></a>2. 指定分隔符:</h3><code>awk -F</code>  <code>-F</code>相当于内置变量<code>FS</code>, 指定分割字符，多个字符分隔<code>-F&#39;[a b c]&#39;</code>  abc三个分隔符间以空格分开,<code>-F&#39;\t&#39;</code>  以tab作为分隔符</li>
+<li><code>awk -F, &#39;{print $1,$2}&#39; log.txt</code>使用”,”分割<br><code>awk &#39;BEGIN{FS=&quot;,&quot;} {print $1,$2}&#39; log.txt</code> 使用内建变量 </li>
+<li><code>awk -F &#39;[ ,]&#39; &#39;{print $1,$2,$5}&#39; log.txt</code>  使用多个分隔符,  先使用空格分割，然后对分割结果再使用<code>,</code>分割</li>
+<li><code>awk -F &#39;[, :]&#39; &#39;{print $1,$2,$3}&#39;</code>  使用<code>,</code>和<code>:</code>分隔 <h3 id="3-设置变量"><a href="#3-设置变量" class="headerlink" title="3. 设置变量:"></a>3. 设置变量:</h3></li>
+<li><code>awk -va=1 &#39;{print $1,$1+a}&#39; log.txt</code>   其中<code>awk -v</code> 设置变量 <h3 id="4-过滤"><a href="#4-过滤" class="headerlink" title="4. 过滤:"></a>4. 过滤:</h3></li>
+<li><code>awk &#39;$1&gt;2&#39; log.txt</code> 过滤第一列大于2的行 </li>
+<li><code>awk &#39;$1==2 {print $1,$3}&#39; log.txt</code>   过滤第一列等于2的行  <h3 id="5-正则："><a href="#5-正则：" class="headerlink" title="5. 正则："></a>5. 正则：</h3></li>
+<li><code>awk &#39;$2 ~ /th/ {print $2,$4}&#39; log.txt</code>   输出第二列包含 “th”，并打印第二列与第四列     <code>~ 表示模式开始。// 中是模式</code></li>
+<li><code>awk &#39;/re/ &#39; log.txt</code>   输出包含”re” 的行 </li>
+<li><code>awk &#39;BEGIN{IGNORECASE=1} /this/&#39; log.txt</code>忽略大小写</li>
+<li>模式取反<br><code>awk &#39;$2 !~ /th/ {print $2,$4}&#39; log.txt</code><br><code>awk &#39;!/th/ {print $2,$4}&#39; log.txt</code><h2 id="脚本"><a href="#脚本" class="headerlink" title="脚本"></a>脚本</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>!/bin/awk -f</span><br><span class="line"><span class="meta">#</span>运行前</span><br><span class="line">BEGIN &#123;</span><br><span class="line">    math = 0</span><br><span class="line">    english = 0</span><br><span class="line">    computer = 0</span><br><span class="line">    printf "NAME    NO.   MATH  ENGLISH  COMPUTER   TOTAL\n"</span><br><span class="line">    printf "---------------------------------------------\n"</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">#</span>运行中</span><br><span class="line">&#123;</span><br><span class="line">    math+=$3</span><br><span class="line">    english+=$4</span><br><span class="line">    computer+=$5</span><br><span class="line">    printf "%-6s %-6s %4d %8d %8d %8d\n", $1, $2, $3,$4,$5, $3+$4+$5</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">#</span>运行后</span><br><span class="line">END &#123;</span><br><span class="line">    printf "---------------------------------------------\n"</span><br><span class="line">    printf "  TOTAL:%10d %8d %8d \n", math, english, computer</span><br><span class="line">    printf "AVERAGE:%10.2f %8.2f %8.2f\n", math/NR, english/NR, computer/NR</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>计算文件大小<br><code>ls -l *.txt | awk &#39;{sum+=$6} END {print sum}&#39;</code></li>
+<li>从文件中找出长度大于80的行<br><code>awk &#39;lenght&gt;80&#39; log.txt</code></li>
+<li>分析access.log获得访问前10位的ip地址<br><code>awk &#39;{print $1}&#39; access.log |sort|uniq -c|sort -nr|head -10</code></li>
+<li>文本文件中第三列的所有数字求和：<code>awk &#39;{ x += $3 } END { print x }&#39;</code></li>
+<li>统计netstat各个状态：<code>netstat -n | awk &#39;/^tcp/ {++S[$NF]} END {for(a in S) print a, S[a]}&#39;</code></li>
+</ul>
+<h1 id="find-grep"><a href="#find-grep" class="headerlink" title="find,grep"></a>find,grep</h1><h2 id="1-find-最常见和最强大的查找命令，你可以用它找到任何你想找的文件"><a href="#1-find-最常见和最强大的查找命令，你可以用它找到任何你想找的文件" class="headerlink" title="1. find 最常见和最强大的查找命令，你可以用它找到任何你想找的文件"></a>1. find 最常见和最强大的查找命令，你可以用它找到任何你想找的文件</h2><p><code>find &lt;指定目录&gt; &lt;指定条件&gt; &lt;指定动作&gt;</code><br>最常使用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#语法</span><br><span class="line">find &lt;指令目录&gt; &lt;指令条件&gt; &lt;指定动作&gt;</span><br><span class="line"></span><br><span class="line">#搜索当前目录中，所有文件名以my开头的文件，并显示它们的详细信息</span><br><span class="line">find . -name &apos;my*&apos; -ls</span><br><span class="line"></span><br><span class="line">#当前目录及其子目录下查找lee.log这支文件</span><br><span class="line">find . -name &apos;lee.log&apos;</span><br><span class="line"></span><br><span class="line">#将build.log中所有包含error字段的行列出来并显示行号</span><br><span class="line">grep -n &apos;error&apos; build.log</span><br><span class="line"></span><br><span class="line">find /home/admin -size +250000k(超过250000k的文件，当然+改成-就是小于了)</span><br><span class="line">find /home/admin -atime -1  1天内访问过的文件</span><br><span class="line">find /home/admin -ctime -1  1天内状态改变过的文件 </span><br><span class="line">find /home/admin -mtime -1  1天内修改过的文件</span><br><span class="line">find /home/admin -amin -1  1分钟内访问过的文件</span><br><span class="line">find /home/admin -cmin -1  1分钟内状态改变过的文件   </span><br><span class="line">find /home/admin -mmin -1  1分钟内修改过的文件</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><p><code>find /home/q/www/ -maxdepth 2 -name logs</code> 文件名，深度查找</p>
+</li>
+<li><p>find 常用参数<br><code>-print</code>，find命令将匹配的文件输出到标准输出<br><code>-exec/-ok</code>，find命令对匹配的文件执行该参数所给出的shell命令。相应命令的形式为<code>&#39;command&#39; {} \;</code>，注意<code>{}</code>和<code>\;</code>之间的空<br><code>-ok</code>删除文件前,要询问是否删除!, 用<code>-exec</code> 执行指令是每次操作生产一个线程, 用<code>xargs</code>只在一个shell中处理.<br>eg: 删除文件大小为零的文件 方法一: <code>find ./ -size 0 -exec rm {} \;</code> 方法二: <code>rm -i $(find ./ -size 0)</code>  方法三: <code>find ./ -size 0 | xargs rm -f &amp;</code><br><code>find /etc -type d –print</code> 在/etc目录下查找所有的目录<br><code>find . ! -type d –print</code> 在当前目录下查找除目录以外的所有类型的文件<br><code>find ./ -mtime +3 -print|xargs rm -f –r</code> 删除3天以前的所有东西 （<code>find . -ctime +3 -exec rm -rf {} \;</code>）<br><code>find . -type f -mtime +7 -name &quot;*.log&quot; -exec mv {} /tmp \;</code> 将7天前的<code>log</code>文件移动到<code>/tmp</code>目录下，<code>\;</code>表示命令结束。<br><code>find ./ -size 0 | xargs rm -f &amp;</code> 删除文件大小为零的文件</p>
+</li>
+</ul>
+<h2 id="2-grep"><a href="#2-grep" class="headerlink" title="2. grep"></a>2. grep</h2><ul>
+<li>查找当前目录下所有文件包含’text’的文件及行数： <code>grep -rn &#39;text&#39; .</code> 其中<code>r</code>表示递归, <code>n</code>表示显示匹配字符在文件中的行!</li>
+<li>只显示匹配的字符：<code>grep -o &#39;type.*groupid&#39;</code> 只显示以<code>type</code>开头，以<code>groupid</code>结尾，中间任意个字符的这部分。</li>
+<li>AND与：grep ‘parttern1’ | grep ‘parttern2’</li>
+<li>OR或：<code>egrep &#39;pattern1|pattern2&#39; filename</code> 等价于  <code>grep -E &#39;pattern1|pattern2&#39; filename</code>，也可以： <code>grep -e pattern1 -e pattern2 filename</code></li>
+<li>NOT非：<code>grep -v &#39;parttern&#39;</code>，即不包含。</li>
+<li>范围输出：<code>grep -A 5</code>，<code>grep -B 5</code>，<code>grep -C 5</code>分别是匹配行的后5行，前5行，前后各5行。</li>
+<li><code>egrep</code> 正则匹配，<code>zgrep</code> 查看压缩文件</li>
+</ul>
+<h3 id="find与grep，sed组合，查询文件中的内容"><a href="#find与grep，sed组合，查询文件中的内容" class="headerlink" title="find与grep，sed组合，查询文件中的内容"></a>find与grep，sed组合，查询文件中的内容</h3><ul>
+<li><code>find . | xargs grep &#39;pattern&#39;</code> 查找当前目录及子目录下所有文件中包含<code>pattern</code>的字符行。</li>
+<li><code>find . -name &#39;abc*&#39; | xargs grep &#39;pattern&#39;</code> 查找当前目录及子目录中文件名以<code>abc</code>开头的，文件中包含<code>pattern</code>的字符行。<br><strong>Tip:压缩文件<code>tar.gz</code>请用<code>zgrep</code></strong></li>
+<li><code>find . -name &#39;*.txt&#39; | xargs sed -i &quot;s/233/666/g;s/235/626/g;s/333/616/g;s/233/664/g&quot;</code> 查找当前及子目录所有txt文件，并全文替换，多种类型字符串替换！</li>
+</ul>
+<h1 id="wget-scp-nc"><a href="#wget-scp-nc" class="headerlink" title="wget,scp,nc,"></a>wget,scp,nc,</h1><h2 id="1-wget"><a href="#1-wget" class="headerlink" title="1. wget"></a>1. wget</h2><p>wget默认占用全部可能的带宽下载！</p>
+<ul>
+<li><code>wget -b [url]</code>  后台下载</li>
+<li><code>wget -c [url]</code> 断点续传，继续一个终止的文件下载。</li>
+<li><code>wget --limit-rate=300k [url]</code> 限速下载 ，<code>--limit-rate=10M</code></li>
+</ul>
+<p>实例：</p>
+<ol>
+<li><code>wget http://path.to.the/file -O newname</code> 下载file用newname命名</li>
+<li><code>wget -P path/to/directory http://path.to.the/file</code> 将文件下载到指定目录</li>
+</ol>
+<h3 id="wget下载整个目录"><a href="#wget下载整个目录" class="headerlink" title="wget下载整个目录"></a>wget下载整个目录</h3><ul>
+<li>下载整个目录：<code>wget -c -r -np -k -L -p www.xxx.com/pub/path/</code></li>
+<li>下载包含外部域名的资源：<code>wget -np -nH -r –span-hosts www.xxx.com/pub/path/</code><br>参数：<br><code>-c</code> 断点续传<br><code>-r</code> 递归下载，下载指定网页某一目录下（包括子目录）的所有文件<br><code>-nd</code> 递归下载时不创建一层一层的目录，把所有的文件下载到当前目录<br><code>-np</code> 递归下载时不搜索上层目录，如wget -c -r www.xxx.com/pub/path/ ，如不加参数-np，就会同时下载path的上一级目录pub下的其它文件<br><code>-k</code> 将绝对链接转为相对链接，下载整个站点后脱机浏览网页，最好加上这个参数<br><code>-L</code> 递归时不进入其它主机，如wget -c -r www.xxx.com/ 会递归下载所有相关主机资源！<br><code>-p</code> 下载网页所需的所有文件，如图片等<br><code>-A</code> 指定要下载的文件样式列表，多个样式用逗号分隔<br><code>-i</code> 后面跟一个文件，文件内指明要下载的URL<h3 id="wget-下载指定格式的文件"><a href="#wget-下载指定格式的文件" class="headerlink" title="wget 下载指定格式的文件"></a>wget 下载指定格式的文件</h3><code>wget -r -np -nd --accept=txt http://example.com/dir/</code> 下载<code>dir</code>目录下所有以<code>txt</code>结尾的文件，多个后缀用逗号分割！<h3 id="wget镜像网站"><a href="#wget镜像网站" class="headerlink" title="wget镜像网站"></a>wget镜像网站</h3><code>wget -m -k (-H) http://www.example.com/</code>， 如果网站中的图像是放在另外的站点，那么可以使用<code>-H</code> 选项。<h3 id="wget使用代理下载"><a href="#wget使用代理下载" class="headerlink" title="wget使用代理下载"></a>wget使用代理下载</h3><code>wget -Y on -p -k https://xxx.net/projects/wvware/</code><br><strong>代理可以在<code>环境变量</code>或<code>wgetrc</code>文件中设定:</strong> </li>
+</ul>
+<ol>
+<li>在环境变量中设定代理<br><code>export PROXY=http://211.90.168.94:8080/</code></li>
+<li>在~/.wgetrc中设定代理<br><code>http_proxy = http://proxy.xxx.com:18023/</code><br><code>ftp_proxy = http://proxy.xxx.com:18023/</code></li>
+</ol>
+<h2 id="2-scp"><a href="#2-scp" class="headerlink" title="2. scp"></a>2. scp</h2><p>语法：<code>scp [参数] [被传输的文件地址路径] [文件传输目的地路径]</code><br>参数:<br><code>-v</code>:详细方式显示输出<br><code>-r</code>:递归复制整个目录</p>
+<ol>
+<li>上传，本地上传远程:<br>格式： <code>scp foo.txt user@example.com:remote/dir</code>，其中user@example.com可以改为IP<br>例：<code>scp -v ./file.txt xxusername@l-xxx.xxx.xx.xx.com:/home/xxusername</code> 其中，<code>/home/xxusername</code>表示远程路径</li>
+<li>下载，远程下载本地:<br>格式： <code>scp user@example.com:remote/dir/foo.txt local/dir</code>，其中user@example.com可以改为IP<br>例： <code>scp -v ./file.txt xxusername@100.80.xx8.xx7:/tmp</code>，在服务器上操作，将文件传到本地主机</li>
+</ol>
+<h2 id="3-nc"><a href="#3-nc" class="headerlink" title="3. nc"></a>3. nc</h2><p>前言：nc是一个可以通过TCP或UDP进行数据传输，可用来<strong>传输文件</strong>，<strong>聊天</strong>，<strong>端口扫描</strong>，<strong>远程执行命令</strong>。</p>
+<h3 id="nc基本参数"><a href="#nc基本参数" class="headerlink" title="nc基本参数"></a>nc基本参数</h3><p><code>-l</code> 使用监听模式，管控传入的资料。<br><code>-n</code> 直接使用IP地址，而不通过域名服务器。<br><code>-p&lt;local port&gt;</code> 设置本地主机使用的通信端口，通常可以这样<code>nc -l 1234</code>直接指定<br><code>-s&lt;destination port&gt;</code> 设置本地主机送出数据包的IP地址，可以<code>nc 10.86.219.204 1234</code>直接指定IP。<br><code>-u</code> 使用UDP传输协议。<br><code>-v</code> 显示指令执行过程。<br><code>-w&lt;timeout seconds&gt;</code> 设置等待连线的时间。</p>
+<h3 id="文件传输"><a href="#文件传输" class="headerlink" title="文件传输"></a>文件传输</h3><p>机器A(Ip:<code>192.90.123.112</code>)向机器B(IP:<code>192.90.123.110</code>)传输文件<code>file.txt</code></p>
+<ol>
+<li>B: <code>nc -l 1567 &gt;file.txt</code>，<code>-l</code>开启监听模式，<code>1567</code> Tcp端口号，输出到<code>file.txt</code></li>
+<li>A: <code>nc 192.90.123.110 1567 &lt; file.txt</code>。</li>
+</ol>
+<p>Tip：A，B两个机器任何一个监听都可以，保证流向即可！</p>
+<p><strong>等价：</strong></p>
+<ol>
+<li>B: <code>nc 192.90.123.112 1567 &gt;file.txt</code></li>
+<li>A：<code>nc -l 1567 &lt;file.txt</code></li>
+</ol>
+<h3 id="其他作用"><a href="#其他作用" class="headerlink" title="其他作用"></a>其他作用</h3><ol>
+<li>端口扫描：<code>nc -vv &lt;ip&gt; 1025-65535</code>，扫描对应ip的端口是否开放！</li>
+<li>执行远程命令： <code>echo stat | nc &lt;ip&gt; 2181</code>,远程执行zk命令。</li>
+<li>聊天：A：<code>nc -l 1567</code>，B：<code>nc &lt;A ip&gt; 1567</code></li>
+</ol>
+<h1 id="Top-pmap-iostat-dstat-sar-pidstat-vmstat"><a href="#Top-pmap-iostat-dstat-sar-pidstat-vmstat" class="headerlink" title="Top,pmap,iostat,dstat,sar,pidstat,vmstat"></a>Top,pmap,iostat,dstat,sar,pidstat,vmstat</h1><h3 id="1-top系统监控"><a href="#1-top系统监控" class="headerlink" title="1. top系统监控"></a>1. top系统监控</h3><p><strong>列含义：</strong></p>
+<blockquote>
+<p><strong>VIRT:</strong> 虚拟内存中含有共享库、共享内存、栈、堆，所有已申请的总内存空间。(进程地址空间没有映射之前的内存)<br><strong>RES: </strong> 是进程正在使用的内存空间(栈、堆)，申请内存后该内存段已被重新赋值。<br><strong>SHR: </strong> 是共享内存正在使用的空间。<br><strong>SWAP:</strong> 交换的是已经申请，但没有使用的空间，包括(栈、堆、共享内存)。<br><strong>DATA:</strong> 是进程栈、堆申请的总空间。<br><strong>CODE:</strong>    可执行代码占用的物理内存大小，单位kb<br><strong>PR:    </strong>优先级<br><strong>NI:</strong>    nice值。负值表示高优先级，正值表示低优先级</p>
+</blockquote>
+<p><strong>交互：</strong></p>
+<ul>
+<li><code>c</code> 或<code>top -c</code>：显示启动参数</li>
+<li><code>z</code>：高亮显示，再按<code>x</code>高亮当前排序的列，继续<code>shift + &lt;</code>或<code>shift + &gt;</code> 左右选择排序的列。</li>
+<li><code>1</code> ： 展开显示CPU每个核的使用情况。</li>
+<li><code>shift + p</code>即<code>P</code>：按CPU排序</li>
+<li><code>shift + m</code>即<code>M</code>：按内存排序</li>
+<li><strong>f</strong> 键可以选择显示的内容</li>
+<li><strong>h</strong> 查看帮助</li>
+<li><strong>k</strong> 再输入pid，kill一个进程</li>
+<li><strong><code>top -p pid</code></strong> 只监控一个进程 <code>top -bH -d 3 -p  &lt;pid&gt;</code> 监控进程的线程运行, 或者按H，也可<code>top -Hp &lt;pid&gt;</code> 查看PID下最耗CPU的线程pid.</li>
+</ul>
+<p><strong>字段含义：</strong><br><code>uptime</code>：系统负载；先看15分钟的。1.7表示有70%的进程在等待。<br><code>进程统计</code>：Tasks: 215 total,   1 running, 213 sleeping,   0 stopped,   1 zombie：zombie表示僵尸进程。<br><code>cpu使用率</code>：%Cpu(s): 27.9 us使用率,  4.4 sy内核使用率,  0.0 ni, 67.8 id空闲,  0.0 wa等待IOcpu占比，比较高，则表示cpu多半在等待IO,  0.0 hi,  0.0 si,  0.0 st</p>
+<h3 id="2-pmap-查看进程空间"><a href="#2-pmap-查看进程空间" class="headerlink" title="2. pmap 查看进程空间"></a>2. pmap 查看进程空间</h3><p><code>sudo pmap -x pid</code>  <code>sudo pmap -q pid</code> 简略方式查看进程空间<br><strong>列含义：</strong></p>
+<blockquote>
+<p><strong>Address</strong>:  start address of map  映像起始地址<br><strong>Kbytes: </strong> size of map in kilobytes  映像大小<br><strong>RSS</strong>:  resident set size in kilobytes  驻留集大小<strong>(真是存在与RAM中的部分),其他分布与swap或文件系统,或可执行部分没有加载</strong><br><strong>Dirty:</strong>  dirty pages (both shared and private) in kilobytes  脏页大小<br><strong>Mode:</strong>  permissions on map 映像权限: r=read, w=write, x=execute, s=shared, p=private (copy on write)<br><strong>Mapping:</strong>  file backing the map , or ‘[ anon ]’ for allocated memory, or ‘[ stack ]’ for the program stack.  映像支持文件,[anon]为已分配内存 [stack]为程序堆栈<br><strong>Offset:</strong>  offset into the file  文件偏移<br><strong>Device:</strong>  device name (major:minor)  设备名</p>
+</blockquote>
+<h3 id="3-iostat-磁盘IO和CPU监控统计"><a href="#3-iostat-磁盘IO和CPU监控统计" class="headerlink" title="3. iostat 磁盘IO和CPU监控统计"></a>3. iostat 磁盘IO和CPU监控统计</h3><ul>
+<li><p><strong><code>iostat -c 2 5</code>（等价于<code>sar -u 2 5</code>），统计cpu使用情况</strong><br><code>%user</code>：CPU处在用户模式下的时间百分比。<br><code>%nice</code>：CPU处在带NICE值的用户模式下的时间百分比。<br><code>%system</code>：CPU处在系统模式下的时间百分比。<br><code>%iowait</code>：CPU等待输入输出完成时间的百分比。<br><code>%steal</code>：管理程序维护另一个虚拟处理器时，虚拟CPU的无意识等待时间百分比。<br><code>%idle</code>：CPU空闲时间百分比。<br>备注：如果<code>%iowait</code>的值过高，表示硬盘存在I/O瓶颈，<code>%idle</code>值高，表示CPU较空闲，如果<code>%idle</code>值高但系统响应慢时，有可能是CPU等待分配内存，此时应加大内存容量。<br><code>%idle</code>值如果持续低于10，那么系统的CPU处理能力相对较低，表明系统中最需要解决的资源是CPU。</p>
+</li>
+<li><p><strong><code>iostat -x 2 5</code> （等价于<code>sar -d 2 5</code>）或<code>iostat -x -k 2 5</code> 统计磁盘IO情况</strong><br><code>rrqm/s</code>: 每秒对该设备的读请求被合并次数，文件系统会对读取同块(block)的请求进行合并<br><code>wrqm/s</code>: 每秒对该设备的写请求被合并次数<br><code>r/s</code>:  每秒完成的读 I/O 次数。即 rio/s<br><code>w/s</code>:  每秒完成的写 I/O 次数。即 wio/s<br><code>rsec/s</code>:  每秒读扇区数。即 rsect/s<br><code>wsec/s</code>:  每秒写扇区数。即 wsect/s<br><code>rkB/s</code>:  每秒读K字节数。是 rsect/s 的一半，因为每扇区大小为512字节。<br><code>wkB/s</code>:  每秒写K字节数。是 wsect/s 的一半。<br><code>avgrq-sz</code>:  平均每次IO操作的数据大小(扇区数为单位)<br><code>avgqu-sz</code>:  平均等待处理的IO请求队列长度<br><code>await</code>:  平均每次设备I/O操作的等待时间 (包括等待时间和处理时间，毫秒为单位)。<br><code>svctm</code>: 平均每次IO请求的处理时间(毫秒)，已不具备参考价值<br><code>%util</code>:  一秒中有百分之多少的时间用于 I/O 操作，即被io消耗的cpu百分比<br>备注：如果 <code>%util</code> 接近 100%，说明产生的I/O请求太多，I/O系统已经满负荷，该磁盘可能存在瓶颈。</p>
+</li>
+</ul>
+<p>上述指令：<code>iostat -x -k 2 5</code>，<code>-k</code>表示将按扇区统计，改为可读的方式：按KB统计。</p>
+<ol>
+<li>每秒44次读IO，1次写IO。</li>
+<li>每秒读1MB左右数据，写入6kb数据。</li>
+<li>等到IO队列<code>avgqu-sz</code>，中每秒有0.26请求驻留，说明IO较快。</li>
+<li>每次IO平均处理时间是5.48ms。</li>
+</ol>
+<ul>
+<li><code>iostat -d -k 2 5</code>，<code>-k</code>可换成<code>-m</code>，分别表示IO的KB，MB；统计磁盘IO</li>
+</ul>
+<h4 id="vmstat系统监控"><a href="#vmstat系统监控" class="headerlink" title="vmstat系统监控"></a>vmstat系统监控</h4><ul>
+<li><code>vmstat 2</code> 每隔2秒采集一次数据。</li>
+<li><code>vmstat 2 5</code> 每隔2秒采集一次数据，总共采样5次。</li>
+</ul>
+<p><strong>列含义：</strong><br><strong>free</strong>   空闲的物理内存的大小<br><strong>cache</strong> 用来记忆我们打开的文件,给文件做缓冲<br><strong>in</strong> 每秒CPU的中断次数，包括时间中断<br><strong>cs</strong> 每秒上下文切换次数<br><strong>us</strong> 用户CPU时间<br><strong>sy</strong> 系统CPU时间</p>
+<h3 id="4-dstat系统监控"><a href="#4-dstat系统监控" class="headerlink" title="4. dstat系统监控"></a>4. dstat系统监控</h3><p>该命令和<code>vmstat</code>相同，提供更直观的彩色输出，但是需要我们先安装：<code>sudo yum install dstat</code>；<code>sudo apt-get install dstat</code></p>
+<ul>
+<li><code>dstat -dnyc -N eth0 -C total -f 5</code></li>
+<li><code>dstat -taf --debug</code></li>
+<li><code>dstat -tcndylp --top-cpu</code></li>
+<li><code>dstat --time --cpu --net --disk --sys --load --proc --top-cpu</code></li>
+<li><code>dstat -tcyif</code></li>
+<li><strong><code>dstat -tvn 5</code>，使用最多！！！</strong><br>显示信息说明:<br>cpu：hiq、siq分别为硬中断和软中断次数。<br>system：int、csw分别为系统的中断次数（interrupt）和上下文切换（context switch）。</li>
+</ul>
+<h3 id="5-pidstat-（用于监控全部或指定进程占用系统资源的情况）"><a href="#5-pidstat-（用于监控全部或指定进程占用系统资源的情况）" class="headerlink" title="5. pidstat （用于监控全部或指定进程占用系统资源的情况）"></a>5. pidstat （用于监控全部或指定进程占用系统资源的情况）</h3><ul>
+<li><code>pidstat -w 1 2</code> 每1秒采样一次，共采样2次，获取进程上下文切换情况：<br>cswch 自愿的上下文切换，当某一任务处于阻塞等待时，将主动让出自己的CPU资源。<br>nvcswch 非自愿的上下文切换，时间片到，更高优先级抢占！<br><code>pidstat -w -p &lt;pid&gt; 1</code> 每秒采样一次，统计指定进程上下文切换情况！</li>
+<li><code>pidstat -d 1</code>  每1秒采样一次，统计IO使用情况</li>
+<li><code>pidstat -l</code> 列出所有进程名和它的启动参数！</li>
+<li><code>pidstat -u -p &lt;pid&gt; 2</code> 2秒采样一次，查看指定进程CPU使用情况。</li>
+</ul>
+<h3 id="6-sar-系统历史情况统计"><a href="#6-sar-系统历史情况统计" class="headerlink" title="6. sar 系统历史情况统计"></a>6. sar 系统历史情况统计</h3><ol>
+<li><p><code>sar -q</code> 查看运行队列中的进程数、系统上的进程大小、平均负载<br><code>runq-sz</code>：运行队列的长度（等待运行的进程数）<br><code>plist-sz</code>：进程列表中进程（processes）和线程（threads）的数量<br><code>ldavg-1</code>：最后1分钟的系统平均负载 ldavg-5：过去5分钟的系统平均负载<br><code>ldavg-15</code>：过去15分钟的系统平均负载</p>
+</li>
+<li><p><code>sar -r</code> 查看内存使用状况<br><code>kbmemfree</code>：这个值和free命令中的free值基本一致,所以它不包括buffer和cache的空间.<br><code>kbmemused</code>：这个值和free命令中的used值基本一致,所以它包括buffer和cache的空间.<br><strong><code>%memused</code>：物理内存使用率，这个值是kbmemused和内存总量(不包括swap)的一个百分比.</strong><br><code>kbbuffers和kbcached</code>：这两个值就是free命令中的buffer和cache.<br><code>kbcommit</code>：保证当前系统所需要的内存,即为了确保不溢出而需要的内存(RAM+swap).<br><code>%commit</code>：这个值是kbcommit与内存总量(包括swap)的一个百分比.</p>
+</li>
+<li><p><code>sar -W</code>查看页面交换发生状况<br>页面发生交换时，服务器的吞吐量会大幅下降；服务器状况不良时，如果怀疑因为内存不足而导致了页面交换的发生，可以使用这个命令来确认是否发生了大量的交换；<br><code>pswpin/s</code>：每秒系统换入的交换页面（swap page）数量<br><code>pswpout/s</code>：每秒系统换出的交换页面（swap page）数量</p>
+</li>
+<li><code>sar -u</code> 查看CPU使用率<br><code>%user</code> 用户模式下消耗的CPU时间的比例；<br><code>%nice</code> 通过nice改变了进程调度优先级的进程，在用户模式下消耗的CPU时间的比例<br><code>%system</code> 系统模式下消耗的CPU时间的比例；<br><strong><code>%iowait</code> CPU等待磁盘I/O导致空闲状态消耗的时间比例；iowait比例太高说明性能瓶颈在IO上</strong><br><code>%steal</code> 利用Xen等操作系统虚拟化技术，等待其它虚拟CPU计算占用的时间比例；<br><code>%idle</code> CPU空闲时间比例；</li>
+</ol>
+<p><strong>Tip：要判断系统瓶颈问题，有时需几个 sar 命令选项结合起来：</strong><br>怀疑CPU存在瓶颈，可用 <code>sar -u</code> 和 <code>sar -q</code> 等来查看<br>怀疑内存存在瓶颈，可用<code>sar -B</code>、<code>sar -r</code> 和 <code>sar -W</code> 等来查看<br>怀疑I/O存在瓶颈，可用 <code>sar -b</code>、<code>sar -u</code> 和 <code>sar -d</code> 等来查看</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Linux/">Linux</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Linux/">Linux</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2016/08/13/Linux大杂烩/" data-title="Linux大杂烩 | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/08/13/Ubuntu分区删除后恢复/" title="Ubuntu分区删除后恢复">
+  <strong>上一篇：</strong><br/>
+  <span>
+  Ubuntu分区删除后恢复</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/08/13/【Guava】几个常用的方法整理/"  title="【Guava】几个常用的方法整理">
+ <strong>下一篇：</strong><br/> 
+ <span>【Guava】几个常用的方法整理
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#知识点"><span class="toc-text">知识点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#常用命令"><span class="toc-text">常用命令</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#查看文件夹大小"><span class="toc-text">查看文件夹大小</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#删除swap空间内容"><span class="toc-text">删除swap空间内容</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#根据access-计算QPS"><span class="toc-text">根据access 计算QPS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#根据access-计算PV"><span class="toc-text">根据access 计算PV</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#atnodes，fornodes，tonodes多服务器操作"><span class="toc-text">atnodes，fornodes，tonodes多服务器操作</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#文件查看，编辑"><span class="toc-text">文件查看，编辑</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-linux中查看文件的命令如下："><span class="toc-text">1. linux中查看文件的命令如下：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-more的动作指令："><span class="toc-text">2. more的动作指令：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-less动作指令：less比more更强大，命令类似于vi"><span class="toc-text">3. less动作指令：less比more更强大，命令类似于vi</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#vim"><span class="toc-text">vim</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-模式切换"><span class="toc-text">1. 模式切换</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-普通模式"><span class="toc-text">(1) 普通模式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#光标的移动"><span class="toc-text">光标的移动</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-编辑模式"><span class="toc-text">(2) 编辑模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-可视模式"><span class="toc-text">(3) 可视模式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-输入命令："><span class="toc-text">2. 输入命令：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#常用操作"><span class="toc-text">常用操作</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-安装"><span class="toc-text">3. 安装</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#AWK"><span class="toc-text">AWK</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#语法："><span class="toc-text">语法：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#基本语法"><span class="toc-text">基本语法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#awk脚本"><span class="toc-text">awk脚本</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#用法："><span class="toc-text">用法：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-基本使用："><span class="toc-text">1. 基本使用：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-指定分隔符"><span class="toc-text">2. 指定分隔符:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-设置变量"><span class="toc-text">3. 设置变量:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-过滤"><span class="toc-text">4. 过滤:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-正则："><span class="toc-text">5. 正则：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#脚本"><span class="toc-text">脚本</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#find-grep"><span class="toc-text">find,grep</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-find-最常见和最强大的查找命令，你可以用它找到任何你想找的文件"><span class="toc-text">1. find 最常见和最强大的查找命令，你可以用它找到任何你想找的文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-grep"><span class="toc-text">2. grep</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#find与grep，sed组合，查询文件中的内容"><span class="toc-text">find与grep，sed组合，查询文件中的内容</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#wget-scp-nc"><span class="toc-text">wget,scp,nc,</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-wget"><span class="toc-text">1. wget</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#wget下载整个目录"><span class="toc-text">wget下载整个目录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#wget-下载指定格式的文件"><span class="toc-text">wget 下载指定格式的文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#wget镜像网站"><span class="toc-text">wget镜像网站</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#wget使用代理下载"><span class="toc-text">wget使用代理下载</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-scp"><span class="toc-text">2. scp</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-nc"><span class="toc-text">3. nc</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#nc基本参数"><span class="toc-text">nc基本参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#文件传输"><span class="toc-text">文件传输</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其他作用"><span class="toc-text">其他作用</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Top-pmap-iostat-dstat-sar-pidstat-vmstat"><span class="toc-text">Top,pmap,iostat,dstat,sar,pidstat,vmstat</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-top系统监控"><span class="toc-text">1. top系统监控</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-pmap-查看进程空间"><span class="toc-text">2. pmap 查看进程空间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-iostat-磁盘IO和CPU监控统计"><span class="toc-text">3. iostat 磁盘IO和CPU监控统计</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#vmstat系统监控"><span class="toc-text">vmstat系统监控</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-dstat系统监控"><span class="toc-text">4. dstat系统监控</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-pidstat-（用于监控全部或指定进程占用系统资源的情况）"><span class="toc-text">5. pidstat （用于监控全部或指定进程占用系统资源的情况）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-sar-系统历史情况统计"><span class="toc-text">6. sar 系统历史情况统计</span></a></li></ol></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

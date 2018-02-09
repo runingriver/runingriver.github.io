@@ -1,0 +1,618 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【Guava】AbstractScheduleService从源码到使用 | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="前言： AbstractScheduledService是guava提供的一个定时任务的实现，提供更简便的使用，并提供任务生命周期的监听。 AbstractScheduledService和Listener的生命周期 AbstractScheduledService概述 AbstractScheduledService">
+<meta name="keywords" content="Guava">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【Guava】AbstractScheduleService从源码到使用">
+<meta property="og:url" content="http://huzongzhe.cn/2016/08/13/【Guava】AbstractScheduleService从源码到使用/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="前言： AbstractScheduledService是guava提供的一个定时任务的实现，提供更简便的使用，并提供任务生命周期的监听。 AbstractScheduledService和Listener的生命周期 AbstractScheduledService概述 AbstractScheduledService抽象类提供和JDK提供的ScheduledExecutorService相同的功">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://huzongzhe.cn/2016/08/13/【Guava】AbstractScheduleService从源码到使用/images/scheduler-service.png">
+<meta property="og:updated_time" content="2018-01-03T12:24:30.446Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【Guava】AbstractScheduleService从源码到使用">
+<meta name="twitter:description" content="前言： AbstractScheduledService是guava提供的一个定时任务的实现，提供更简便的使用，并提供任务生命周期的监听。 AbstractScheduledService和Listener的生命周期 AbstractScheduledService概述 AbstractScheduledService抽象类提供和JDK提供的ScheduledExecutorService相同的功">
+<meta name="twitter:image" content="http://huzongzhe.cn/2016/08/13/【Guava】AbstractScheduleService从源码到使用/images/scheduler-service.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/08/13/【Guava】AbstractScheduleService从源码到使用/" title="【Guava】AbstractScheduleService从源码到使用" itemprop="url">【Guava】AbstractScheduleService从源码到使用</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2016-08-13T11:22:11.000Z" itemprop="datePublished"> 发表于 2016-08-13</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+		<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#AbstractScheduledService和Listener的生命周期"><span class="toc-text">AbstractScheduledService和Listener的生命周期</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#AbstractScheduledService概述"><span class="toc-text">AbstractScheduledService概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#监听器ScheduleListener实现"><span class="toc-text">监听器ScheduleListener实现</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#自定义scheduler-实现"><span class="toc-text">自定义scheduler()实现</span></a></li></ol></li></ol>
+		
+		</div>
+		
+		<p><strong>前言：</strong> AbstractScheduledService是guava提供的一个定时任务的实现，提供更简便的使用，并提供任务生命周期的监听。</p>
+<h1 id="AbstractScheduledService和Listener的生命周期"><a href="#AbstractScheduledService和Listener的生命周期" class="headerlink" title="AbstractScheduledService和Listener的生命周期"></a>AbstractScheduledService和Listener的生命周期</h1><p><img src="./images/scheduler-service.png" alt="AbstractScheduledService和Listener的生命周期"></p>
+<h1 id="AbstractScheduledService概述"><a href="#AbstractScheduledService概述" class="headerlink" title="AbstractScheduledService概述"></a>AbstractScheduledService概述</h1><ol>
+<li><code>AbstractScheduledService</code>抽象类提供和JDK提供的<code>ScheduledExecutorService</code>相同的功能，其优势在于，能够管理执行线程的生命周期，并提供监听器。</li>
+<li>继承 <code>AbstractScheduledService</code>必须实现以下两个方法<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public class TaskScheduler extends AbstractScheduledService &#123;</span><br><span class="line">    @Override</span><br><span class="line">    protected void runOneIteration() throws Exception &#123; /*执行逻辑*/ &#125;</span><br><span class="line">    protected Scheduler scheduler() &#123;</span><br><span class="line">        //Scheduler.newFixedDelaySchedule(1,1, TimeUnit.SECONDS);</span><br><span class="line">        return Scheduler.newFixedRateSchedule(1, 1, TimeUnit.SECONDS);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>其中，<code>scheduler()</code>方法除上面两种方法外，我们可以自定义执行计划，比如想cron表达式那样执行！<code>runOneIteration()</code>中是你的业务逻辑代码！<br>Tip：后面将给出如何实现<code>cron</code>的调度！</p>
+<ol>
+<li>还可以覆写以下方法<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">public class TaskScheduler extends AbstractScheduledService &#123;</span><br><span class="line">    //可以自定义ScheduledExecutorService,默认是newSingleThreadScheduledExecutor</span><br><span class="line">    protected ScheduledExecutorService executor() &#123; return super.executor(); &#125;</span><br><span class="line">    //自定义定时任务线程名</span><br><span class="line">    protected String serviceName() &#123; return super.serviceName(); &#125;</span><br><span class="line">    //关闭定时任务线程时调用</span><br><span class="line">    protected void shutDown() throws Exception &#123; super.shutDown(); &#125;</span><br><span class="line">    //开启定时任务时(startAsync().awaitRunning())调用</span><br><span class="line">    protected void startUp() throws Exception &#123; super.startUp(); &#125;</span><br><span class="line">    @Override</span><br><span class="line">    protected void runOneIteration() throws Exception &#123; /*执行逻辑*/ &#125;</span><br><span class="line">    protected Scheduler scheduler() &#123;</span><br><span class="line">        //Scheduler.newFixedDelaySchedule(1,1, TimeUnit.SECONDS);</span><br><span class="line">        return Scheduler.newFixedRateSchedule(1, 1, TimeUnit.SECONDS);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p><code>executor()</code> 方法是定义定时任务的线程池，默认使用<code>Executors.newSingleThreadScheduledExecutor</code>，如果我们需要将多个任务放在同一个线程池中执行可以覆写此方法！</p>
+<p>由于一个<code>TaskScheduler</code>对象代表一个任务，所以默认情况下多个任务开启多个<code>Executors.newSingleThreadScheduledExecutor</code>线程池！且每个线程池始终之后有一个线程来执行定时任务，即使一个任务的执行时长大于执行周期，也只会有一个线程顺序执行这些任务(虽已达到执行时间但是仍要等到上一次任务执行结束)！</p>
+<p>另外，覆写<code>executor()</code>方法，可以多个<code>TaskScheduler</code>对象共用同一个线程池，如<code>Executors.newScheduledThreadPool(10);</code>，初始开启10个线程（即：<code>corePoolSize=10，maximumPoolSize=Integer.MAX_VALUE，DelayedWorkQueue()）</code>，即10个线程不会被销毁，如果有<code>&gt;10</code>的<code>TaskScheduler</code>存在，则会将任务放入<code>DelayedWorkQueue()</code>延时队列，直到执行时间到或有空余线程，如果线程不足该任务会等到有空余线程后才执行！<br>所以，只推荐仅在线程资源紧缺时使用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public class TaskScheduler extends AbstractScheduledService &#123;</span><br><span class="line">    public static final int THREAD_NUM = 2;</span><br><span class="line">    private String taskName;</span><br><span class="line">    private static final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(THREAD_NUM);</span><br><span class="line">    public ScheduledExecutorService executor() &#123;</span><br><span class="line">        addListener( new Listener() &#123;</span><br><span class="line">                    public void terminated(State from) &#123;  executorService.shutdown();  &#125;</span><br><span class="line">                    public void failed(State from, Throwable failure) &#123; executorService.shutdown();  &#125;</span><br><span class="line">                &#125;,executorService);</span><br><span class="line">        return executorService;</span><br><span class="line">    &#125;</span><br><span class="line">    protected String serviceName() &#123;</span><br><span class="line">        return taskName;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>注：这里<code>addListener</code>目的是，任务关闭或失败后(<code>terminated</code>和<code>failed</code>)，关闭线程池！<br><code>serviceName()</code>，线程每到生命周期的一个阶段，线程池都会更新线程名（<code>serviceName() + &quot; &quot; + Stat</code>的格式），所以无需自定义<code>ThreadFactory</code>！</p>
+<ol>
+<li>启动关闭<br>启动：<code>taskScheduler.startAsync().awaitRunning()</code><br>启动时添加监听器：<code>taskScheduler.addListener(new ScheduleListener(), listenerService);</code><br>关闭：<code>taskScheduler.stopAsync().awaitTerminated()</code>，该方法会等到本次任务执行完毕后才退出（不执行下一周期任务）！并不是异步关闭,当前线程会等待直到正在执行的任务执行完毕!<br>Tip：<code>listenerService</code>是一个新线程池专门执行监听！</li>
+</ol>
+<h1 id="监听器ScheduleListener实现"><a href="#监听器ScheduleListener实现" class="headerlink" title="监听器ScheduleListener实现"></a>监听器ScheduleListener实现</h1><p>我们可以根据业务逻辑实现定时任务生命周期的监听：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">private static class ScheduleListener extends Service.Listener &#123;</span><br><span class="line">    public void failed(Service.State from, Throwable failure) &#123;&#125;</span><br><span class="line">    public void running() &#123; logger.info(&quot;Listener:开始运行,监听线程:&#123;&#125;&quot;, Thread.currentThread().getName()); &#125;</span><br><span class="line">    public void starting() &#123; logger.info(&quot;Listener:任务启动,当前监听定时任务线程:&#123;&#125;&quot;, Thread.currentThread().getName()); &#125;</span><br><span class="line">    //只可能有两种状态:RUNNING,STARTING</span><br><span class="line">    public void stopping(Service.State from) &#123; logger.info(&quot;Listener: 开始停止,线程:&#123;&#125;&quot;, Thread.currentThread().getName()); &#125;</span><br><span class="line">    //State:转换成TERMINATED状态,之前的状态</span><br><span class="line">    public void terminated(Service.State from) &#123;</span><br><span class="line">        logger.info(&quot;Listener:任务终止. State:&#123;&#125;&quot;, from.toString());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="自定义scheduler-实现"><a href="#自定义scheduler-实现" class="headerlink" title="自定义scheduler()实现"></a>自定义scheduler()实现</h2><p>下面给出借助spring 的cron解析类，实现cron形式的定时任务调度：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">// 解析cron表达式,每次执行完任务都要重新获取并设置延迟,每个任务对应一个CronTrigger实例</span><br><span class="line">private final static class CronTrigger extends AbstractScheduledService.CustomScheduler &#123;</span><br><span class="line">    private final CronSequenceGenerator sequenceGenerator;</span><br><span class="line">    private Date nextExecutionDate;</span><br><span class="line">    private CronTrigger(String cronExpression) &#123;</span><br><span class="line">        this.sequenceGenerator = new CronSequenceGenerator(cronExpression);</span><br><span class="line">    &#125;</span><br><span class="line">    public Date getNextExecutionDate() &#123;</span><br><span class="line">        return sequenceGenerator.next(nextExecutionDate);</span><br><span class="line">    &#125;</span><br><span class="line">    protected Schedule getNextSchedule() throws Exception &#123;</span><br><span class="line">        Date now = new Date();</span><br><span class="line">        nextExecutionDate = sequenceGenerator.next(now);</span><br><span class="line">        // 如果timeDiff&lt;0,ScheduleExecutorService会自动处理:将delay置0,立即执行</span><br><span class="line">        long timeDiff = nextExecutionDate.getTime() - now.getTime();</span><br><span class="line">        return new Schedule(timeDiff, TimeUnit.MILLISECONDS);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Guava/">Guava</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Guava/">Guava</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2016/08/13/【Guava】AbstractScheduleService从源码到使用/" data-title="【Guava】AbstractScheduleService从源码到使用 | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/08/13/【Guava】几个常用的方法整理/" title="【Guava】几个常用的方法整理">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【Guava】几个常用的方法整理</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/08/03/【扒一扒】synchronized/"  title="【扒一扒】synchronized">
+ <strong>下一篇：</strong><br/> 
+ <span>【扒一扒】synchronized
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#AbstractScheduledService和Listener的生命周期"><span class="toc-text">AbstractScheduledService和Listener的生命周期</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#AbstractScheduledService概述"><span class="toc-text">AbstractScheduledService概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#监听器ScheduleListener实现"><span class="toc-text">监听器ScheduleListener实现</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#自定义scheduler-实现"><span class="toc-text">自定义scheduler()实现</span></a></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

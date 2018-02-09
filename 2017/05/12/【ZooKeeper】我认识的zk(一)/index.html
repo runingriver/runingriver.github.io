@@ -1,0 +1,631 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【ZooKeeper】我认识的zk(一) | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="一. zk使用场景 服务发现： 对集群中节点机器的变化，做出对应的对策！如，dubbo中消费者访问某个服务可以通过zk知道哪些机器在提供服务，从而实现负载均衡策略。 配置管理：集中管理配置文件，配置实时更新。 分布式锁：集群中存在独占资源时，利用zk的顺序节点或节点version特性实现公平锁和乐观锁。 leader选">
+<meta name="keywords" content="zookeeper">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【ZooKeeper】我认识的zk(一)">
+<meta property="og:url" content="http://huzongzhe.cn/2017/05/12/【ZooKeeper】我认识的zk(一)/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="一. zk使用场景 服务发现： 对集群中节点机器的变化，做出对应的对策！如，dubbo中消费者访问某个服务可以通过zk知道哪些机器在提供服务，从而实现负载均衡策略。 配置管理：集中管理配置文件，配置实时更新。 分布式锁：集群中存在独占资源时，利用zk的顺序节点或节点version特性实现公平锁和乐观锁。 leader选举：master-slave架构中常用zk来实现故障转移，master选举。二.">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-01-11T02:10:59.275Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【ZooKeeper】我认识的zk(一)">
+<meta name="twitter:description" content="一. zk使用场景 服务发现： 对集群中节点机器的变化，做出对应的对策！如，dubbo中消费者访问某个服务可以通过zk知道哪些机器在提供服务，从而实现负载均衡策略。 配置管理：集中管理配置文件，配置实时更新。 分布式锁：集群中存在独占资源时，利用zk的顺序节点或节点version特性实现公平锁和乐观锁。 leader选举：master-slave架构中常用zk来实现故障转移，master选举。二.">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/05/12/【ZooKeeper】我认识的zk(一)/" title="【ZooKeeper】我认识的zk(一)" itemprop="url">【ZooKeeper】我认识的zk(一)</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2017-05-12T03:12:22.000Z" itemprop="datePublished"> 发表于 2017-05-12</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<h2 id="一-zk使用场景"><a href="#一-zk使用场景" class="headerlink" title="一. zk使用场景"></a>一. zk使用场景</h2><ol>
+<li>服务发现： 对集群中节点机器的变化，做出对应的对策！如，dubbo中消费者访问某个服务可以通过zk知道哪些机器在提供服务，从而实现负载均衡策略。</li>
+<li>配置管理：集中管理配置文件，配置实时更新。</li>
+<li>分布式锁：集群中存在独占资源时，利用zk的顺序节点或节点version特性实现公平锁和乐观锁。</li>
+<li>leader选举：master-slave架构中常用zk来实现故障转移，master选举。<h2 id="二-zk基本知识"><a href="#二-zk基本知识" class="headerlink" title="二. zk基本知识"></a>二. zk基本知识</h2></li>
+<li>zk集群里分三种角色: Leader, Follower和Observer。Leader和Follower参与投票，Observer只监听投票结果，不参与投票。</li>
+<li>投票集群里的节点数要求是奇数。</li>
+<li>一个集群容忍挂掉的节点数的等式为 N = 2F + 1，N为投票集群节点数，F为能同时容忍失败节点数。比如一个三节点集群，可以挂掉一个节点，5节点集群可以挂掉两个。</li>
+<li>一个写操作需要半数以上的节点ack，所以集群节点数越多，整个集群可以抗挂点的节点数越多(越可靠)，但是吞吐量越差。</li>
+<li>zk里所有节点以及节点的数据都会放在内存里，形成一棵树的数据结构。并且定时的dump snapshot到磁盘。</li>
+<li>Client（应用程序）与zk servers之间维持的是长连接，并且保持心跳。<br>Session超时时间：首先zk Servers里配置了Session超时的最小值和最大值，如果client的值在这两个值之间则采用client的，否则采用zk servers的最值。<br>zk默认最大最小值: <code>minSessionTimeout</code> (默认值为：<code>tickTime * 2</code>) , <code>maxSessionTimeout</code> (默认值为 : <code>tickTime * 20</code>)</li>
+<li>Client（应用程序）可以watch zk那个树形数据结构里的某个节点或数据，当有变化的时候会得到通知。</li>
+<li>zk会产生三种日志：1.txlog：每个写操作，包括新Session都会记录一条log；2. 内存数据dump的Snapshot；3. 运行的应用产生的日志（<code>zookeeper.out</code>）。</li>
+<li><p>3.5.0之前的版本都是采用静态配置，3.5.0之后<code>group，port，server</code>都可以动态配置了。</p>
+<h2 id="三-zk集群搭建"><a href="#三-zk集群搭建" class="headerlink" title="三. zk集群搭建"></a>三. zk集群搭建</h2><p>与zk交互较少的集群搭建很简单，这里记录复杂zk集群搭建：</p>
+</li>
+<li><p>分Group，首先 要确保zk整个集群可靠运行，就是要确保投票zk集群可靠。所以一般将Leader+Follower划为核心Group，核心Group不向外提供服务。再根据不同业务划分Group，如，将服务发现，消息，锁三个业务划分为三个Observe Group。</p>
+</li>
+<li>Client（应用程序）只会连接分配给它的Observer Group，不去连接核心Group。这样核心Group就不会给Client提供长连接服务，也不负责长连接的心跳，这大大的减轻了核心Group的压力。<br>Tip: 因为在实际环境中，一个Zookeeper集群要为上万台机器提供服务，维持长连接和心跳还是要消耗一定的资源的。<br>Tip: 因为Observer是不参与投票的所以加Observer并不会降低整体的吞吐量，而且Observer挂掉不会影响整个集群的健康。</li>
+</ol>
+<p><strong>分Group的不足：</strong> 所有的写入还是要交给核心Group来处理的，在写入量大的情况下，系统吞吐率会急速下降，这时可以采用集群隔离！<br>所谓集群隔离就是重新搭建一套zk集群，如将服务发现，消息，锁三个业务划分为三个三个集群！</p>
+<h2 id="zk集群要注意的问题"><a href="#zk集群要注意的问题" class="headerlink" title="zk集群要注意的问题"></a>zk集群要注意的问题</h2><ol>
+<li>zk所有数据都放在内存中，所以要规划好JVM内存大小，防止Swap！可以在<code>zookeeper-env.sh</code>中个性化设置</li>
+<li>zk需要频繁写txlog并定期将内存dump到磁盘作为一个快照（snapshot），所以要注意定期清理磁盘日志。另外zk默认不会分割日志，而将所有日志保存在<code>zookeeper.out</code>日志文件中。<br>可以在<code>zookeeper-env.sh</code>脚本中设置日志轮转。</li>
+<li>在服务依赖多的情况下要做好监控。写一个监控程序，定时去操作zk集群中每个节点，记录状态；监控树结构中的节点数和监控节点数据的Watcher数；还可以监控连接zk集群的Client，并监控它们的流量。</li>
+<li>尽可能的不要强依赖与zk集群，比如缓存配置文件，缓存应用程序集群节点信息，当zk出现问题时，做服务降级。</li>
+<li>不要用zk作数据存储，不做交互频繁的锁操作（细粒度锁）</li>
+<li>临时节点不能不能有子节点.</li>
+</ol>
+<h2 id="四-zk权限控制-acl-访问控制-quota-几点数据控制"><a href="#四-zk权限控制-acl-访问控制-quota-几点数据控制" class="headerlink" title="四. zk权限控制(acl(访问控制),quota(几点数据控制))"></a>四. zk权限控制(acl(访问控制),quota(几点数据控制))</h2><p>zk中每个节点都可以设置访问权限,并设置节点的数据权限(设置子节点数量,节点数据大小)</p>
+<h3 id="Acl"><a href="#Acl" class="headerlink" title="Acl"></a>Acl</h3><ul>
+<li><code>getAcl path</code>来查看节点的访问权限<h4 id="ZooKeeper提供了如下几种验证模式-scheme-："><a href="#ZooKeeper提供了如下几种验证模式-scheme-：" class="headerlink" title="ZooKeeper提供了如下几种验证模式(scheme)："></a>ZooKeeper提供了如下几种验证模式(scheme)：</h4></li>
+</ul>
+<ol>
+<li><p><code>digest</code>：Client端由用户名和密码验证，譬如<code>user:password</code>，digest的密码生成方式是Sha1摘要的base64形式</p>
+<ul>
+<li><code>java -cp ./zookeeper-3.4.9.jar:./lib/log4j-1.2.16.jar:./lib/slf4j-log4j12-1.6.1.jar:./lib/slf4j-api-1.6.1.jar org.apache.zookeeper.server.auth.DigestAuthenticationProvider test:test</code>  获取加密后的密码</li>
+<li><code>setAcl /test1 digest:test:V28q/NynI4JI3Rk54h0r8O5kMug=:crwda</code>  设置节点<code>/test1</code>为digest访问权限</li>
+<li><code>addauth digest test:test</code>  认证digest权限,这样就可以访问<code>/test1</code>节点了.</li>
+</ul>
+</li>
+<li><p><code>auth</code>：不使用任何id，代表任何已确认用户。</p>
+</li>
+<li><code>ip</code>：Client端由IP地址验证，如 : <code>setAcl /test ip:10.194.157.58:crwda</code></li>
+<li><code>world</code>：固定用户为anyone，为所有Client端开放权限</li>
+<li><code>super</code>：在这种scheme情况下，对应的id拥有超级权限，可以做任何事情(cdrwa）<br>注:<code>exists</code>操作和<code>getAcl</code>操作并不受ACL许可控制，因此任何客户端可以查询节点的状态和节点的ACL。</li>
+</ol>
+<h4 id="节点的权限（perms）主要有以下几种-cdrwa-："><a href="#节点的权限（perms）主要有以下几种-cdrwa-：" class="headerlink" title="节点的权限（perms）主要有以下几种(cdrwa)："></a>节点的权限（perms）主要有以下几种(<code>cdrwa</code>)：</h4><p><code>Create</code> 允许对子节点Create操作<br><code>Read</code> 允许对本节点GetChildren和GetData操作<br><code>Write</code> 允许对本节点SetData操作<br><code>Delete</code> 允许对子节点Delete操作<br><code>Admin</code> 允许对本节点setAcl操作<br>注: 节点的权限不具有继承性,各个节点的acl是独立的.</p>
+<h3 id="quota"><a href="#quota" class="headerlink" title="quota"></a>quota</h3><p>设置每个节点的数据大小和子节点个数</p>
+<ul>
+<li>格式: <code>setquota -n|-b val path</code> 其中<code>-n</code> 表示子节点个数,<code>-b</code>节点数据大小.</li>
+</ul>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/zookeeper/">zookeeper</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/zookeeper/">zookeeper</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2017/05/12/【ZooKeeper】我认识的zk(一)/" data-title="【ZooKeeper】我认识的zk(一) | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/05/12/【ZooKeeper】集群配置（三）/" title="【ZooKeeper】集群配置（三）">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【ZooKeeper】集群配置（三）</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/03/08/Java排查工具之jvisualvm,jps,jmap,jstack/"  title="Java排查工具之jvisualvm,jps,jmap,jstack">
+ <strong>下一篇：</strong><br/> 
+ <span>Java排查工具之jvisualvm,jps,jmap,jstack
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
