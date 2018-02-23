@@ -19,12 +19,12 @@
 <meta property="og:site_name" content="running river">
 <meta property="og:description" content="前言：一次HBase的rowkey设计，走了些弯路，踩了些坑，故这里记录下来，供参考引以为戒吧。在介绍rowkey设计之前，有必要对HBase有个最基本的了解。  三. 设计Rowkey演化1，rowkey设计原则 全局唯一，hbase以此为索引检索数据，一个rowkey对应一行数据！ 以字典顺序排序，最大64k，存为byte[]字节数组，尽可能短（若rowkey=100byte，1000w行，就">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://huzongzhe.cn/2017/06/05/【HBase】一次rowkey设计/images/rowkey-design-result.png">
-<meta property="og:updated_time" content="2018-02-09T06:45:34.046Z">
+<meta property="og:image" content="http://huzongzhe.cn/images/rowkey-design-result.png">
+<meta property="og:updated_time" content="2018-02-23T08:37:15.193Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【HBase】一次rowkey设计">
 <meta name="twitter:description" content="前言：一次HBase的rowkey设计，走了些弯路，踩了些坑，故这里记录下来，供参考引以为戒吧。在介绍rowkey设计之前，有必要对HBase有个最基本的了解。  三. 设计Rowkey演化1，rowkey设计原则 全局唯一，hbase以此为索引检索数据，一个rowkey对应一行数据！ 以字典顺序排序，最大64k，存为byte[]字节数组，尽可能短（若rowkey=100byte，1000w行，就">
-<meta name="twitter:image" content="http://huzongzhe.cn/2017/06/05/【HBase】一次rowkey设计/images/rowkey-design-result.png">
+<meta name="twitter:image" content="http://huzongzhe.cn/images/rowkey-design-result.png">
 
     
     <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
@@ -132,7 +132,7 @@
 </ol>
 <p>创建表时指定创建10个分区，范围从<code>0~10</code>，<code>10~20</code>，…，<code>90~</code>十个预分区，此时就需要Hash散列，在rowkey前两位随机产生0~100的随机数。</p>
 <ol>
-<li>Hash散列：表示根据rowkey中某个字段Hash出一个范围数字，作为rowkey的高位，这样这个散列可以重现，使得我们能通过rowkey进行get查询，也可以进行范围查询。<br>Hash出来的数字是可以根据rowkey中某个字段重新计算出来的，如果要随机产生0~100的随机数最简单与100取余即可，但实际应用中可能需要进行数据抽样分析，确保能均匀分散到每一块。如，Hash Mobile可以直接取mobile后两位作为rowkey的高位，也可以先获求一个mobile的Hash值，再与100取余。<br>另外，如果服务器RegionServer只有5个，那么预分区设置成5个或许会更好。<br>这里给出，测试约1500w数据的写入结果：<br><img src="./images/rowkey-design-result.png" alt=""></li>
+<li>Hash散列：表示根据rowkey中某个字段Hash出一个范围数字，作为rowkey的高位，这样这个散列可以重现，使得我们能通过rowkey进行get查询，也可以进行范围查询。<br>Hash出来的数字是可以根据rowkey中某个字段重新计算出来的，如果要随机产生0~100的随机数最简单与100取余即可，但实际应用中可能需要进行数据抽样分析，确保能均匀分散到每一块。如，Hash Mobile可以直接取mobile后两位作为rowkey的高位，也可以先获求一个mobile的Hash值，再与100取余。<br>另外，如果服务器RegionServer只有5个，那么预分区设置成5个或许会更好。<br>这里给出，测试约1500w数据的写入结果：<br><img src="/images/rowkey-design-result.png" alt=""></li>
 </ol>
 <p>数据能够均匀分布在不同的RS上。其中，前两位是取mobile的最后一位和一个随机数（这里选择的是区间中间值5）包括（05,15,25,35,45,55,65,75,85,95）等10种情况。当然，这里取一位也可以，但是这里考虑到其他情况所以选择两位，可能还有其他很好方法具体情况就具体分析了。</p>
 <p>有个问题：如果具体业务中历史数据随着时间的推移使用和查询几率越来越小，会不会因为历史数据和最新数据混合在一起导致查询效率的降低？<br>答：不会！首先rowkey的设计一般会根据时间递增或递减，所以在Region中数据会按照时间排列在一起，最新的数据始终会在最前或最后，rowkey的范围查询，并不会遍历到历史数据！并且HBase还有BloomFilter和Cache等策略保证查询不那么低效。</p>
@@ -321,15 +321,15 @@
 			
 		
 			
-				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
 			
 		
 			

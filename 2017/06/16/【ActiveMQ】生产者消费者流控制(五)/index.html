@@ -19,14 +19,14 @@
 <meta property="og:site_name" content="running river">
 <meta property="og:description" content="前言:通常在开发Mq时,我们有必要关注一个点:消息从producer发往broker的速度,consumer消息的消费速度.而上面的点又涉及到:游标策略(Message Cursors), prefetchSize和producerWindowSize,生产者流控制(Producer Flow Control)等.对于消费者的Flow Control是prefetchSize,消息消费速度涉及到M">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://huzongzhe.cn/2017/06/16/【ActiveMQ】生产者消费者流控制(五)/images/DispatchFastConsumers.png">
-<meta property="og:image" content="http://huzongzhe.cn/2017/06/16/【ActiveMQ】生产者消费者流控制(五)/images/VMCursor.png">
-<meta property="og:image" content="http://huzongzhe.cn/2017/06/16/【ActiveMQ】生产者消费者流控制(五)/images/NonPersistentMsgs.png">
-<meta property="og:updated_time" content="2018-02-09T06:42:30.826Z">
+<meta property="og:image" content="http://huzongzhe.cn/images/DispatchFastConsumers.png">
+<meta property="og:image" content="http://huzongzhe.cn/images/VMCursor.png">
+<meta property="og:image" content="http://huzongzhe.cn/images/NonPersistentMsgs.png">
+<meta property="og:updated_time" content="2018-02-23T08:37:02.921Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【ActiveMQ】生产者消费者流控制(五)">
 <meta name="twitter:description" content="前言:通常在开发Mq时,我们有必要关注一个点:消息从producer发往broker的速度,consumer消息的消费速度.而上面的点又涉及到:游标策略(Message Cursors), prefetchSize和producerWindowSize,生产者流控制(Producer Flow Control)等.对于消费者的Flow Control是prefetchSize,消息消费速度涉及到M">
-<meta name="twitter:image" content="http://huzongzhe.cn/2017/06/16/【ActiveMQ】生产者消费者流控制(五)/images/DispatchFastConsumers.png">
+<meta name="twitter:image" content="http://huzongzhe.cn/images/DispatchFastConsumers.png">
 
     
     <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
@@ -120,9 +120,9 @@
 </ol>
 <h2 id="游标-Message-Cursors"><a href="#游标-Message-Cursors" class="headerlink" title="游标(Message Cursors)"></a>游标(Message Cursors)</h2><p>触发游标策略：消费者处理消息速度赶不上生产者。</p>
 <h3 id="storeCursor（store-based-cursor）"><a href="#storeCursor（store-based-cursor）" class="headerlink" title="storeCursor（store based cursor）"></a>storeCursor（store based cursor）</h3><p>broker默认情况下不使用游标，默认是直接将持久化消息分发到对应的消费者的Dispatch队列，如下图:</p>
-<p><img src="./images/DispatchFastConsumers.png" alt=""><br><img src="./images/VMCursor.png" alt=""></p>
+<p><img src="/images/DispatchFastConsumers.png" alt=""><br><img src="/images/VMCursor.png" alt=""></p>
 <p>上图，是5.x的默认方式：当消费者的消费速度能赶上生产者的速度，那么对于持久化消息会先持久化到磁盘，然后直接发给<code>Dispatch Queue</code>（左图）。<br>当消费者速度赶不上生产者时，会有部分消息pending在broker，此时broker默认的做法是启用游标（Cursor），由于还有很大旧消息未发送到consumer，且<code>Dispatch Queue</code>大小固定，新来的消息不能直接发给<code>Dispatch Queue</code>，此时会启用游标策略，将新来的消息持久化到磁盘后，发给<code>Cursor</code>。实际上这里<code>Cursor</code>起的是一个缓冲区作用，解决生产者和消费者速度不均衡的问题！<br>Tip：上图<code>Message Store</code>不一定是磁盘哈，当使用的是levelDB时，就是内存memstore，不过会持久化LOG到磁盘。<br>Tip：这里<code>Pending Cursor</code>的实现是磁盘文件，配置文件中的<code>tempUsage</code>的地方！<br>与非持久化消息处理对比：</p>
-<p><img src="./images/NonPersistentMsgs.png" alt=""></p>
+<p><img src="/images/NonPersistentMsgs.png" alt=""></p>
 <p>默认情况下，非持久化消息由于不持久到磁盘，当消费者速度慢于生产者后，会启用游标策略，将一部分消息持久化到临时文件中。<br>注意这里不是在当内存空间不够时才去持久化到一个临时文件中。<br>参考：</p>
 <blockquote>
 <p> Note that, since the introduction of the new file cursor in ActiveMQ 5.x, non-persisted messages are shunted into the temporary file store to reduce the amount of memory used for non-persistent messaging. As a result, you may find that a queue’s memoryLimit is never reached, as the cursor doesn’t use very much memory. If you really do want to keep all your non-persistent messages in memory, and stop producers when the limit is reached, you should configure the <vmqueuecursor>.</vmqueuecursor></p>
@@ -322,15 +322,15 @@
 			
 		
 			
-				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
 			
 		
 			

@@ -19,13 +19,13 @@
 <meta property="og:site_name" content="running river">
 <meta property="og:description" content="前言： copy整理的一些东西，部分参考HBase实战和HBase权威指南。 HBase基础知识整理 Hbase是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，Zookeeper + Master+Region Server + HLog保证高可靠，面向列的存储提供了高性能（通常写入性能要好，读要差点，虽然号称有百万吞吐量每秒）. Region的自动分裂机制保证了系统的可伸缩性。当一台服务">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://huzongzhe.cn/2017/06/03/【HBase】基础整理/images/hbase-processe.png">
-<meta property="og:image" content="http://huzongzhe.cn/2017/06/03/【HBase】基础整理/images/hfile.png">
-<meta property="og:updated_time" content="2018-02-09T06:45:09.734Z">
+<meta property="og:image" content="http://huzongzhe.cn/images/hbase-processe.png">
+<meta property="og:image" content="http://huzongzhe.cn/images/hfile.png">
+<meta property="og:updated_time" content="2018-02-23T08:37:20.373Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【HBase】基础整理">
 <meta name="twitter:description" content="前言： copy整理的一些东西，部分参考HBase实战和HBase权威指南。 HBase基础知识整理 Hbase是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，Zookeeper + Master+Region Server + HLog保证高可靠，面向列的存储提供了高性能（通常写入性能要好，读要差点，虽然号称有百万吞吐量每秒）. Region的自动分裂机制保证了系统的可伸缩性。当一台服务">
-<meta name="twitter:image" content="http://huzongzhe.cn/2017/06/03/【HBase】基础整理/images/hbase-processe.png">
+<meta name="twitter:image" content="http://huzongzhe.cn/images/hbase-processe.png">
 
     
     <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
@@ -123,14 +123,14 @@
 <li><code>Zookeeper</code>：首先Zookeeper是作为HBase Master的HA解决方案。也就是说，是Zookeeper保证了至少有一个HBase Master处于运行状态。<br>并且Zookeeper负责Region和Region Server的注册。</li>
 <li><code>HDFS</code>：虽然HBase也可以存储在本地文件系统，通常使用HDFS作为底层存储，HDFS保证了分布式文件系统的数据可靠性（一般每份数据有3个copy）。</li>
 </ol>
-<h2 id="2，Hbase工作原理流程"><a href="#2，Hbase工作原理流程" class="headerlink" title="2，Hbase工作原理流程"></a>2，Hbase工作原理流程</h2><p>综上所述，来张图，并讲述一下Hbase的工作流程：<br><img src="./images/hbase-processe.png" alt=""></p>
+<h2 id="2，Hbase工作原理流程"><a href="#2，Hbase工作原理流程" class="headerlink" title="2，Hbase工作原理流程"></a>2，Hbase工作原理流程</h2><p>综上所述，来张图，并讲述一下Hbase的工作流程：<br><img src="/images/hbase-processe.png" alt=""></p>
 <h3 id="写工作流程："><a href="#写工作流程：" class="headerlink" title="写工作流程："></a>写工作流程：</h3><p>当一个Client访问HBase集群时，Client需要先和Zookeeper来通信，找到对应的Region Server，一个Region Server管理着很多个Region。<br>Client写入 -&gt; 存入内存MemStore，一直到MemStore满 -&gt; Flush成一个新StoreFile，<br>StoreFile增长到一定阈值 -&gt; 触发Compact合并操作 -&gt; 多个StoreFile合并成一个StoreFile，同时进行版本合并和数据删除。<br>当StoreFiles Compact后，逐步形成越来越大的StoreFile -&gt; 单个StoreFile大小超过一定阈值后，触发Split操作<br>把当前Region Split成2个Region（可以简单理解成：从中间切开，100G从中间切成2个50G），原Region会下线，新Split出的2个孩子Region会被HMaster分配到相应的HRegionServer上（自动rebalance），使得原先1个Region的压力得以分流到2个Region上。<br>由此过程可知，HBase只是增加数据，有所得更新和删除操作，都是在Compact阶段做的，所以，用户写操作只需要进入到内存即可立即返回，从而保证I/O高性能。</p>
 <p><strong>Tip：</strong>HBase的删除操作不是真正的物理删除，因为HFile文件是不可变的，只是在相应记录上做一个标记，使得scan/get不返回该记录，真正的物理删除实在合并压缩阶段！<br><strong>Tip：</strong>HBase是行锁，也即修改一行中的多个数据时要么都成功，要么都失败！<br><strong>关于切分点：</strong></p>
 <blockquote>
 <p>切分点为，整个region中最大store中的最大文件中最中心的一个block的首个rowkey<br>另外，HBase还规定，如果定位到的rowkey是整个文件的首个rowkey或者最后一个rowkey的话，就认为没有切分点。<br>什么情况下会出现没有切分点的场景呢？<br>最常见的就是一个文件只有一个block，执行split的时候就会发现无法切分。很多在测试split的时候都是往新表中插入几条数据并执行一下flush，再执行split，却发现&gt; 数据表并没有真正执行切分。</p>
 </blockquote>
 <h3 id="读工作流程："><a href="#读工作流程：" class="headerlink" title="读工作流程："></a>读工作流程：</h3><p>连接过程和写相同，不同的是，读通过缓存来读取记录，使用LRU算法将HFile中热点数据缓存到内存，另外从HFile中读取一行，还要检查MemStore中未持久化到HFile的数据是否有该行的修改记录！</p>
-<h2 id="3，HFile文件格式"><a href="#3，HFile文件格式" class="headerlink" title="3，HFile文件格式"></a>3，HFile文件格式</h2><p>HFile数据组织形式：<br><img src="./images/hfile.png" alt=""></p>
+<h2 id="3，HFile文件格式"><a href="#3，HFile文件格式" class="headerlink" title="3，HFile文件格式"></a>3，HFile文件格式</h2><p>HFile数据组织形式：<br><img src="/images/hfile.png" alt=""></p>
 <p>一个HFile中有多个Data数据块，数据块中有一个header和多个k-v组成，默认64KB，HFile文件尾部有一个Trailer，其中包含数据相关的索引信息，Hbase也是通过Trailer的索引来检索数据。有没有发现，这样的组织非常类似B树！</p>
 <h2 id="4，Hbase一些术语理解"><a href="#4，Hbase一些术语理解" class="headerlink" title="4，Hbase一些术语理解"></a>4，Hbase一些术语理解</h2><ol>
 <li><code>Row Key</code>:按照字典顺序排序，最多只能存储64k的字节数据。通俗理解，用作数据分块的依据。比如：<code>row设置为20170505</code>，表示将数据按天切分开！</li>
@@ -323,15 +323,15 @@
 			
 		
 			
-				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
 			
 		
 			

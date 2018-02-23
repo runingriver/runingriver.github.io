@@ -19,14 +19,14 @@
 <meta property="og:site_name" content="running river">
 <meta property="og:description" content="1. Region的rowkey范围是开区间还是闭区间？答：region的rowkey是前闭后开([start,end))，从下面这张图可以看出来：  Tip：Name列都是以Start Key开始，但不是以End Key结尾，而是一串很长的数字，可以想象，应该是无限接近End Key的！ 再看下面这个：预分区10个，以一位作为分区标记（hash%10），插入一条数据，且row是0开头，可以看出仅">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://huzongzhe.cn/2017/06/06/【HBase】一些有必要知道的知识点1/images/hbase-1.png">
-<meta property="og:image" content="http://huzongzhe.cn/2017/06/06/【HBase】一些有必要知道的知识点1/images/hbase-2.png">
-<meta property="og:image" content="http://huzongzhe.cn/2017/06/06/【HBase】一些有必要知道的知识点1/images/hbase-3.png">
-<meta property="og:updated_time" content="2018-02-09T06:45:41.818Z">
+<meta property="og:image" content="http://huzongzhe.cn/images/hbase-1.png">
+<meta property="og:image" content="http://huzongzhe.cn/images/hbase-2.png">
+<meta property="og:image" content="http://huzongzhe.cn/images/hbase-3.png">
+<meta property="og:updated_time" content="2018-02-23T08:37:12.713Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【HBase】一些有必要知道的知识点（一）">
 <meta name="twitter:description" content="1. Region的rowkey范围是开区间还是闭区间？答：region的rowkey是前闭后开([start,end))，从下面这张图可以看出来：  Tip：Name列都是以Start Key开始，但不是以End Key结尾，而是一串很长的数字，可以想象，应该是无限接近End Key的！ 再看下面这个：预分区10个，以一位作为分区标记（hash%10），插入一条数据，且row是0开头，可以看出仅">
-<meta name="twitter:image" content="http://huzongzhe.cn/2017/06/06/【HBase】一些有必要知道的知识点1/images/hbase-1.png">
+<meta name="twitter:image" content="http://huzongzhe.cn/images/hbase-1.png">
 
     
     <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
@@ -100,13 +100,13 @@
 	<div class="article-content">
 		
 		<h3 id="1-Region的rowkey范围是开区间还是闭区间？"><a href="#1-Region的rowkey范围是开区间还是闭区间？" class="headerlink" title="1. Region的rowkey范围是开区间还是闭区间？"></a>1. Region的rowkey范围是开区间还是闭区间？</h3><p>答：region的rowkey是前闭后开(<code>[start,end)</code>)，从下面这张图可以看出来：</p>
-<p><img src="./images/hbase-1.png" alt=""></p>
+<p><img src="/images/hbase-1.png" alt=""></p>
 <p>Tip：Name列都是以<code>Start Key</code>开始，但不是以<code>End Key</code>结尾，而是一串很长的数字，可以想象，应该是无限接近<code>End Key</code>的！</p>
 <p>再看下面这个：预分区10个，以一位作为分区标记（<code>hash%10</code>），插入一条数据，且row是0开头，可以看出仅第一个region有31次请求！<br>建表语句：<code>create &#39;xx:xxx&#39;,{SPLITS =&gt; [&#39;1&#39;,&#39;2&#39;,&#39;3&#39;,&#39;4&#39;,&#39;5&#39;,&#39;6&#39;,&#39;7&#39;,&#39;8&#39;,&#39;9&#39;]},{NAME =&gt; &#39;c&#39;, COMPRESSION=&gt;&#39;SNAPPY&#39;, VERSIONS =&gt; 1}</code>，</p>
-<p><img src="./images/hbase-2.png" alt=""></p>
+<p><img src="/images/hbase-2.png" alt=""></p>
 <p>再次证明region区间是前闭后开！</p>
 <h3 id="2-Scan的rowkey范围是开区间还是闭区间？"><a href="#2-Scan的rowkey范围是开区间还是闭区间？" class="headerlink" title="2. Scan的rowkey范围是开区间还是闭区间？"></a>2. Scan的rowkey范围是开区间还是闭区间？</h3><p>答：scan是前闭后开，[startKey,endKey),如我们做分页的时候通常会拿前一页的最后一行数据的row，并在该row上面加一个byte，以跳过本行，实现快速分页查询的效果！<br>以上只证明了是前闭，前闭后开可以在shell中证明：<code>scan &#39;xxx&#39;, {STARTROW=&gt;&#39;qb_car_pc2017092811451858&#39;, STOPROW=&gt;&#39;qb_car_pc2017092812330135&#39;}</code>执行结果：</p>
-<p><img src="./images/hbase-3.png" alt=""></p>
+<p><img src="/images/hbase-3.png" alt=""></p>
 <p>Tip：这条语句中的<code>STARTROW</code>和<code>STOPROW</code>是两个相邻的Row，从结果中可以看出查询中包含了<code>STARTROW</code>，但是结尾是小于<code>STOPROW</code>的row。</p>
 <h3 id="3-HTablePool线程安全么？如果线程安全，为什么？如果线程不安全，有什么影响？"><a href="#3-HTablePool线程安全么？如果线程安全，为什么？如果线程不安全，有什么影响？" class="headerlink" title="3. HTablePool线程安全么？如果线程安全，为什么？如果线程不安全，有什么影响？"></a>3. HTablePool线程安全么？如果线程安全，为什么？如果线程不安全，有什么影响？</h3><p>答：HTablePool好像官方提供了后又删了，不过有人实现了个类似HTablePool的连接池。<br>谈线程安全，我想应该是谈HTable，Htable是一个非线程安全的方法，每次操作都需要重新new一个HTable实例，频繁的创建性能开销也不大，<br>其底层是使用一个线程池来与Hbase service做交互！<br>但是高qps下，还是可以做一个HTable的对象池，（。。。）我这里基于<code>0.98.6-hadoop2</code>版的client实现了一个HTable的线程池！<br>如果多线程下使用同一个HTable实例，最直观的结果是数据不完整或丢失（- -我这里踩过一个大坑），这个好像跟Htable在本地的cache相关！</p>
 <h3 id="4-根据row的查询方法：Regex，Substring，Prefix，Rang查询怎样"><a href="#4-根据row的查询方法：Regex，Substring，Prefix，Rang查询怎样" class="headerlink" title="4. 根据row的查询方法：Regex，Substring，Prefix，Rang查询怎样"></a>4. 根据row的查询方法：Regex，Substring，Prefix，Rang查询怎样</h3><p>答：结论：<code>Rang &gt;= Prefix &gt; Substring &gt;=Regex</code>，上述结论基于约12亿数据，8个RS，预分区10个，每个100G，版本<code>HBase client 0.96</code>下统计；<br>row格式如下：<code>xx + 20171108 + mobile + onlyBunch</code>，相同条件下scan的范围查询和前缀查询效率相当，正则和sustring的方式查询非常慢，基本不可用。<br><strong>所以</strong>，数据了较大的情况下，row的设计最多能包含两个条件（一般是<code>xxId+时间</code>），更多条件推荐新建一张保存原表rowKey的HBase索引表。<br><strong>也即</strong>，类似<code>UserId + Mobile + 时间戳</code>的rowkey设计是不可取的！<br><strong>另外</strong>，查询效率差别原因：rang和prefix可以通过前缀确定一个比较小的范围，而substring 和regex则是全表扫描row，在加上字符串匹配，所以效率会非常低！</p>
@@ -301,15 +301,15 @@
 			
 		
 			
-				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
 			
 		
 			
