@@ -79,16 +79,15 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/11/12/【Linux】文本操作/" title="【Linux】文本操作命令" itemprop="url">
+    <a href="/2016/11/12/【Linux】cron，at，batch(任务调度)/" title="【Linux】cron，at，batch(任务调度)" itemprop="url">
   
-    <h1 itemprop="name">【Linux】文本操作命令</h1>
+    <h1 itemprop="name">【Linux】cron，at，batch(任务调度)</h1>
     
      
-           <p itemprop="description" >1. tr 按列替换
-echo &amp;quot;{123}&amp;quot; | tr -d &amp;#39;{}&amp;#39; 删除输入中的 “{“ 和 “}”
-cat testfile |tr a-z A-Z  将文件testfile中的小写字母全部转换成大写字母
-
-2. cut : cut [</p>
+           <p itemprop="description" >一，基础知识
+corntab周期执行任务,anacron调度每日、每周或每月执行的作业,at调度只运行一次的作业.
+batch 命令被用来在系统平均负载达到 0.8% 以下时执行一次性的任务，通俗的所就是系统空闲时执行任务。
+crontab调度的任务是不会加载任何环境变量的,这就</p>
         
     
     <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
@@ -188,15 +187,15 @@ locate a.txt 搜索文件,其中 updatedb 强制更新locate数据库，默认�
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/08/13/【Guava】AbstractScheduleService源码分析和使用/" title="【Guava】AbstractScheduleService源码分析和使用" itemprop="url">
+    <a href="/2016/08/13/【Linux】常用命令（一）/" title="【Linux】常用命令（一）" itemprop="url">
   
-    <h1 itemprop="name">【Guava】AbstractScheduleService源码分析和使用</h1>
+    <h1 itemprop="name">【Linux】常用命令（一）</h1>
     
      
-           <p itemprop="description" >前言： AbstractScheduledService是guava提供的一个定时任务的实现，提供更简便的使用，并提供任务生命周期的监听。
-AbstractScheduledService和Listener的生命周期
-AbstractScheduledService概述
-Abst</p>
+           <p itemprop="description" >前言：下面总结使用Linux类系统的一些总结。
+vim1. 模式切换(1) 普通模式其他模式2次ESC即可进入普通模式
+
+删除：x 删除光标位置字符dd删除当前行（以后按.就可以直接删）d)删除从光标开始到句末，d(删除当前光标到句首，d{段落后删除，d}段落前删除dw，db也是</p>
         
     
     <time datetime="2016-08-13T11:22:11.000Z" itemprop="datePublished">2016-08-13</time>
@@ -211,15 +210,14 @@ Abst</p>
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/08/13/【Linux】常用命令（一）/" title="【Linux】常用命令（一）" itemprop="url">
+    <a href="/2016/08/13/Ubuntu分区删除后恢复/" title="Ubuntu分区删除后恢复" itemprop="url">
   
-    <h1 itemprop="name">【Linux】常用命令（一）</h1>
+    <h1 itemprop="name">Ubuntu分区删除后恢复</h1>
     
      
-           <p itemprop="description" >前言：下面总结使用Linux类系统的一些总结。
-vim1. 模式切换(1) 普通模式其他模式2次ESC即可进入普通模式
+           <p itemprop="description" >前言由于一次手误，在Windows中把Ubuntu的系统分区和swap分区删除了，导致不能进系统。开机直接error no such partition和grub rescue mode。下面讲述一下系统恢复过程！
 
-删除：x 删除光标位置字符dd删除当前行（以后按.就可以直接删）d)删除从光标开始到句末，d(删除当前光标到句首，d{段落后删除，d}段落前删除dw，db也是</p>
+系统是Windows7和Ubuntu14.04双系统。DELL</p>
         
     
     <time datetime="2016-08-13T11:22:11.000Z" itemprop="datePublished">2016-08-13</time>
@@ -255,14 +253,15 @@ vim1. 模式切换(1) 普通模式其他模式2次ESC即可进入普通模式
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/08/13/Ubuntu分区删除后恢复/" title="Ubuntu分区删除后恢复" itemprop="url">
+    <a href="/2016/08/13/【Guava】AbstractScheduleService源码分析和使用/" title="【Guava】AbstractScheduleService源码分析和使用" itemprop="url">
   
-    <h1 itemprop="name">Ubuntu分区删除后恢复</h1>
+    <h1 itemprop="name">【Guava】AbstractScheduleService源码分析和使用</h1>
     
      
-           <p itemprop="description" >前言由于一次手误，在Windows中把Ubuntu的系统分区和swap分区删除了，导致不能进系统。开机直接error no such partition和grub rescue mode。下面讲述一下系统恢复过程！
-
-系统是Windows7和Ubuntu14.04双系统。DELL</p>
+           <p itemprop="description" >前言： AbstractScheduledService是guava提供的一个定时任务的实现，提供更简便的使用，并提供任务生命周期的监听。
+AbstractScheduledService和Listener的生命周期
+AbstractScheduledService概述
+Abst</p>
         
     
     <time datetime="2016-08-13T11:22:11.000Z" itemprop="datePublished">2016-08-13</time>
@@ -427,15 +426,15 @@ vim1. 模式切换(1) 普通模式其他模式2次ESC即可进入普通模式
 			
 		
 			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
 			
 		
 			
