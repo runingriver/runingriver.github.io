@@ -188,13 +188,15 @@ Syn</p>
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/03/08/JVM实用参数整理/" title="JVM实用参数整理" itemprop="url">
+    <a href="/2017/03/08/Java排查利器之BTrace，Greys/" title="Java排查利器之BTrace，Greys" itemprop="url">
   
-    <h1 itemprop="name">JVM实用参数整理</h1>
+    <h1 itemprop="name">Java排查利器之BTrace，Greys</h1>
     
      
-           <p itemprop="description" >前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看《深入理解Java虚拟机》这本书，正好配合日常所需好好地整理下。
-一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不</p>
+           <p itemprop="description" >前言： 关于btrace和greys的使用方法，网上不计其数。这里根据我的使用整理了个精简版，零复制纯手打，高度概括，适用快速入门。萝卜青菜各有所爱，greys好用太多有木有！
+一. Greys安装安装非常简单
+
+直接安装：mkdir greys;cd greys，curl -s</p>
         
     
     <time datetime="2017-03-08T03:12:22.000Z" itemprop="datePublished">2017-03-08</time>
@@ -209,15 +211,13 @@ Syn</p>
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/03/08/Java排查利器之BTrace，Greys/" title="Java排查利器之BTrace，Greys" itemprop="url">
+    <a href="/2017/03/08/JVM实用参数整理/" title="JVM实用参数整理" itemprop="url">
   
-    <h1 itemprop="name">Java排查利器之BTrace，Greys</h1>
+    <h1 itemprop="name">JVM实用参数整理</h1>
     
      
-           <p itemprop="description" >前言： 关于btrace和greys的使用方法，网上不计其数。这里根据我的使用整理了个精简版，零复制纯手打，高度概括，适用快速入门。萝卜青菜各有所爱，greys好用太多有木有！
-一. Greys安装安装非常简单
-
-直接安装：mkdir greys;cd greys，curl -s</p>
+           <p itemprop="description" >前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看《深入理解Java虚拟机》这本书，正好配合日常所需好好地整理下。
+一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不</p>
         
     
     <time datetime="2017-03-08T03:12:22.000Z" itemprop="datePublished">2017-03-08</time>
@@ -274,15 +274,16 @@ Syn</p>
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/11/12/【Linux】cron，at，batch(任务调度)/" title="【Linux】cron，at，batch(任务调度)" itemprop="url">
+    <a href="/2016/11/12/【Linux】文本操作/" title="【Linux】文本操作命令" itemprop="url">
   
-    <h1 itemprop="name">【Linux】cron，at，batch(任务调度)</h1>
+    <h1 itemprop="name">【Linux】文本操作命令</h1>
     
      
-           <p itemprop="description" >一，基础知识
-corntab周期执行任务,anacron调度每日、每周或每月执行的作业,at调度只运行一次的作业.
-batch 命令被用来在系统平均负载达到 0.8% 以下时执行一次性的任务，通俗的所就是系统空闲时执行任务。
-crontab调度的任务是不会加载任何环境变量的,这就</p>
+           <p itemprop="description" >1. tr 按列替换
+echo &amp;quot;{123}&amp;quot; | tr -d &amp;#39;{}&amp;#39; 删除输入中的 “{“ 和 “}”
+cat testfile |tr a-z A-Z  将文件testfile中的小写字母全部转换成大写字母
+
+2. cut : cut [</p>
         
     
     <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
