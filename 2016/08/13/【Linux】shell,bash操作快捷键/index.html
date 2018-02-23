@@ -4,25 +4,25 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>【扒一扒】synchronized | running river</title>
+    <title>【Linux】shell,bash操作快捷键 | running river</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="奔跑的小河">
     
 
     
-    <meta name="description" content="前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。 synchronized1. Lock和Synchronized区别 Synchronized同步代码块，不能保证等待线程进入同步块的顺序。 Synchronized 不接受超时，不能被中">
-<meta name="keywords" content="synchronized">
+    <meta name="description" content="前言： 在命令行(CLI)或者bash中编辑命令的时候，了解一些基本的快捷键，和编辑技巧，会让你效率更高，节约更多的时间 - -。下面是我的总结： 1. 编辑命令Ctrl + xx：在命令行首和光标之间移动,比较特殊！Ctrl + a ：移到命令行首Ctrl + e ：移到命令行尾Ctrl + f ：按单词前移（右向）">
+<meta name="keywords" content="Linux">
 <meta property="og:type" content="article">
-<meta property="og:title" content="【扒一扒】synchronized">
-<meta property="og:url" content="http://huzongzhe.cn/2017/05/03/【扒一扒】synchronized/index.html">
+<meta property="og:title" content="【Linux】shell,bash操作快捷键">
+<meta property="og:url" content="http://huzongzhe.cn/2016/08/13/【Linux】shell,bash操作快捷键/index.html">
 <meta property="og:site_name" content="running river">
-<meta property="og:description" content="前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。 synchronized1. Lock和Synchronized区别 Synchronized同步代码块，不能保证等待线程进入同步块的顺序。 Synchronized 不接受超时，不能被中断！ Lock中unLock()必须放到finally{}中，需要收到释放锁，S">
+<meta property="og:description" content="前言： 在命令行(CLI)或者bash中编辑命令的时候，了解一些基本的快捷键，和编辑技巧，会让你效率更高，节约更多的时间 - -。下面是我的总结： 1. 编辑命令Ctrl + xx：在命令行首和光标之间移动,比较特殊！Ctrl + a ：移到命令行首Ctrl + e ：移到命令行尾Ctrl + f ：按单词前移（右向）Ctrl + b ：按单词后移（左向）Ctrl + u ：从光标处删除至命令行首">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-02-09T06:44:31.874Z">
+<meta property="og:updated_time" content="2018-02-23T07:39:56.036Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="【扒一扒】synchronized">
-<meta name="twitter:description" content="前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。 synchronized1. Lock和Synchronized区别 Synchronized同步代码块，不能保证等待线程进入同步块的顺序。 Synchronized 不接受超时，不能被中断！ Lock中unLock()必须放到finally{}中，需要收到释放锁，S">
+<meta name="twitter:title" content="【Linux】shell,bash操作快捷键">
+<meta name="twitter:description" content="前言： 在命令行(CLI)或者bash中编辑命令的时候，了解一些基本的快捷键，和编辑技巧，会让你效率更高，节约更多的时间 - -。下面是我的总结： 1. 编辑命令Ctrl + xx：在命令行首和光标之间移动,比较特殊！Ctrl + a ：移到命令行首Ctrl + e ：移到命令行尾Ctrl + f ：按单词前移（右向）Ctrl + b ：按单词后移（左向）Ctrl + u ：从光标处删除至命令行首">
 
     
     <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
@@ -82,55 +82,26 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2017/05/03/【扒一扒】synchronized/" title="【扒一扒】synchronized" itemprop="url">【扒一扒】synchronized</a>
+      <a href="/2016/08/13/【Linux】shell,bash操作快捷键/" title="【Linux】shell,bash操作快捷键" itemprop="url">【Linux】shell,bash操作快捷键</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
 		
   <p class="article-time">
-    <time datetime="2017-05-03T03:12:22.000Z" itemprop="datePublished"> 发表于 2017-05-03</time>
+    <time datetime="2016-08-13T11:22:11.000Z" itemprop="datePublished"> 发表于 2016-08-13</time>
     
   </p>
 </header>
 	<div class="article-content">
 		
-		<p><strong>前言：</strong>最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。</p>
-<h2 id="synchronized"><a href="#synchronized" class="headerlink" title="synchronized"></a>synchronized</h2><h3 id="1-Lock和Synchronized区别"><a href="#1-Lock和Synchronized区别" class="headerlink" title="1. Lock和Synchronized区别"></a>1. Lock和Synchronized区别</h3><ol>
-<li><code>Synchronized</code>同步代码块，不能保证等待线程进入同步块的顺序。</li>
-<li><code>Synchronized</code> 不接受超时，不能被中断！</li>
-<li><code>Lock</code>中<code>unLock()</code>必须放到<code>finally{}</code>中，需要收到释放锁，<code>Synchronized</code>自动释放锁。</li>
-<li>锁竞争小时的性能：<code>Synchronized &gt;= atom &gt;= Lock</code>，竞争激烈时： <code>atom &gt; Lock &gt; Synchronized</code></li>
-</ol>
-<h3 id="2-Synchronized的理解"><a href="#2-Synchronized的理解" class="headerlink" title="2. Synchronized的理解"></a>2. Synchronized的理解</h3><p>synchronized加锁的类型</p>
-<ol>
-<li>对象锁: <code>synchronized (this)</code>或<code>synchronized (personObject)</code> ,<code>synchronized</code>修饰的成员方法，都是对象锁；</li>
-<li>类锁: <code>synchronized (A.class)</code> 和 <code>synchronized</code>修饰的静态方法，都是类锁；</li>
-<li><code>synchronized</code>包含的代码块。<code>synchronized (A.class){}</code>是类锁, <code>synchronized (this){}</code>是对象锁.</li>
-</ol>
-<h4 id="synchronized特点"><a href="#synchronized特点" class="headerlink" title="synchronized特点"></a>synchronized特点</h4><ol>
-<li>不论锁的是什么, 并不影响<code>类</code>或<code>对象</code>中没有用<code>synchronized</code>修饰的<code>方法</code>,<code>变量</code>被其他线程<code>访问</code>和<code>修改</code>.</li>
-<li><code>synchronized</code>锁住的<code>方法,代码块,对象</code>中的<code>变量</code>不会受到 <code>synchronized</code>的控制, 可以被其他线程随意读写.</li>
-<li><strong>当一个线程获得了对象锁(类锁)，其他线程不能访问其他需要对象锁(类锁)的方法或代码块</strong></li>
-<li><strong>对象锁和类锁，二者不冲突，当一个线程获得了A的对象锁，其他线程可以访问A中需要类锁的方法或代码块</strong></li>
-<li><code>synchronized (this){}</code>不能用于静态方法中, 但是<code>synchronized (A.class)</code>却能用于成员方法中,加的是类锁.</li>
-</ol>
-<h3 id="3-锁的实现"><a href="#3-锁的实现" class="headerlink" title="3. 锁的实现"></a>3. 锁的实现</h3><p>对象锁和类锁有两种实现方式：方法上的synchronized是基于方法区中<code>ACC_SYNCHRONIZED</code>标志位实现，synchronized修饰的方法块基于<code>monitorenter</code>,<code>monitorexit</code>语义实现！<br>这两种实现方式，在重量级锁上，都依赖于操作系统提供的实现（管程(monitor)底层数据结构维护着请求该锁的线程的队列，及相关信息）。</p>
-<blockquote>
-<p>重量级锁依赖于操作系统实现，加锁需要从用户态转换到内核态加锁，这就需要操作系统进行一次上下文切换，另外加锁、释放锁会导致比较多的上下文切换和调度延时，等待锁的线程会被挂起直至锁释放。在上下文切换的时候，cpu之前缓存的指令和数据都将失效，对性能有很大的损失。</p>
-</blockquote>
-<h4 id="synchronized修饰的成员方法和静态方法"><a href="#synchronized修饰的成员方法和静态方法" class="headerlink" title="synchronized修饰的成员方法和静态方法"></a>synchronized修饰的成员方法和静态方法</h4><p>成员方法： </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public synchronized void method(int, java.lang.String);</span><br><span class="line">    flags: ACC_PUBLIC, ACC_SYNCHRONIZED</span><br><span class="line">    Code:</span><br><span class="line">      stack=2, locals=4, args_size=3</span><br><span class="line">        0: aload_2       </span><br><span class="line">        ...</span><br><span class="line">        10: return</span><br></pre></td></tr></table></figure>
-<p>静态方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public static synchronized int method2(int);</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC, ACC_SYNCHRONIZED</span><br><span class="line">    Code:</span><br><span class="line">      stack=2, locals=1, args_size=1</span><br><span class="line">         0: iload_0       </span><br><span class="line">         ...</span><br><span class="line">         4: return</span><br></pre></td></tr></table></figure></p>
-<p>获取锁和释放锁是在方法调用和方法返回的时候执行的，方法执行中如果抛出异常，那么锁会在抛出异常时释放。<br>JVM可以从方法常量池中的方法表结构(method_info Structure) 中的 ACC_SYNCHRONIZED 访问标志区分一个方法是否同步方法。</p>
-<h4 id="synchronized修饰的成员方法代码块和静态方法代码块"><a href="#synchronized修饰的成员方法代码块和静态方法代码块" class="headerlink" title="synchronized修饰的成员方法代码块和静态方法代码块"></a>synchronized修饰的成员方法代码块和静态方法代码块</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">5: monitorenter  </span><br><span class="line">...</span><br><span class="line">12: monitorexit   </span><br><span class="line">13: goto          21</span><br><span class="line">...     </span><br><span class="line">17: aload_1       </span><br><span class="line">18: monitorexit   </span><br><span class="line">...     </span><br><span class="line">20: athrow        </span><br><span class="line">21: return</span><br></pre></td></tr></table></figure>
-<p><code>monitorenter</code>,<code>monitorexit</code>语义是基于堆中实例化对象的对象头中的锁标志位实现。</p>
-<p>其中，<code>ACC_SYNCHRONIZED</code>和<code>monitorenter，monitorexit</code>，在JVM上的语义不同但是在底层锁实现是一样的，因为<code>Class</code>被ClassLoader加载到内存中也是一个对象，也有对象头！<br>实例对象由：<code>对象头</code>，<code>实例变量</code>，<code>填充对齐数据</code>组成。<br>对象头由：<code>MarkWord</code>（存储对象的hashCode、锁信息或分代年龄或GC标志等信息），<code>Class Metadata Address</code>（指向方法区class的指针）</p>
-<h4 id="锁原理锁优化"><a href="#锁原理锁优化" class="headerlink" title="锁原理锁优化"></a>锁原理锁优化</h4><p>jdk1.6之前synchronized属于重量级锁，效率低下，因为监视器锁（monitor）是依赖于底层的操作系统的Mutex Lock来实现的，而操作系统实现线程之间的切换时需要从用户态转换到核心态，<br>这个状态之间的转换需要相对比较长的时间，时间成本相对较高。<br>重量级锁的实现是借助操作系统实现的，多种叫法：监视器/管程/monitor。<br> 如果被<code>Synchronized</code>修饰的方法或代码块，JVM探测出其没有竞争，会进行锁消除，即不使用锁！<br>jdk1.6之后JVM对synchronized的锁实现优化，首先在没有锁竞争的情况下加<strong>偏向锁</strong>，当另一个线程申请该锁时升级为<strong>轻量级锁</strong>，当同一时刻多个线程申请同一个锁时，JVM将该锁升级为<strong>自旋锁</strong>，当自旋一定次数后，升级为<strong>重量级锁</strong>，也就是依赖操作系统的<code>Mutex Lock</code>来实现。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><a href="http://blog.csdn.net/javazejian/article/details/72828483" target="_blank" rel="noopener">http://blog.csdn.net/javazejian/article/details/72828483</a></li>
-<li><a href="http://blog.csdn.net/javazejian/article/details/72772461" target="_blank" rel="noopener">http://blog.csdn.net/javazejian/article/details/72772461</a></li>
-</ol>
+		<p>前言： 在命令行(CLI)或者bash中编辑命令的时候，了解一些基本的快捷键，和编辑技巧，会让你效率更高，节约更多的时间 - -。下面是我的总结：</p>
+<h3 id="1-编辑命令"><a href="#1-编辑命令" class="headerlink" title="1. 编辑命令"></a>1. 编辑命令</h3><p><code>Ctrl + xx</code>：在命令行首和光标之间移动,比较特殊！<br><code>Ctrl + a</code> ：移到命令行首<br><code>Ctrl + e</code> ：移到命令行尾<br><strong><code>Ctrl + f</code> </strong>：按单词前移（右向）<br><strong><code>Ctrl + b</code> </strong>：按单词后移（左向）<br><strong><code>Ctrl + u</code> </strong>：从光标处删除至命令行首<br><strong><code>Ctrl + k</code> </strong>：从光标处删除至命令行尾<br><strong><code>Ctrl + w</code></strong>：从光标处删除至字首，》<strong>以空格为分隔符</strong><br><strong><code>Alt + Backspace</code></strong>：与 Ctrl + w 类似，以各种标点为分隔符<br><strong><code>Alt + d</code> </strong>：从光标处删除至字尾<br><code>Ctrl + d</code> ：删除光标处的字符<br><code>Ctrl + h</code> ：删除光标前的字符<br><strong><code>Ctrl + y</code> </strong>：粘贴至光标后（粘贴刚才所删除的字符）<br><code>Alt + c</code> ：从光标处更改为首字母大写的单词<br><code>Alt + u</code> ：从光标处更改为全部大写的单词<br><code>Alt + l</code>：从光标处更改为全部小写的单词<br><code>Ctrl + t</code>：交换光标处和之前的字符<br><code>Alt + t</code> ：交换光标处和之前的单词</p>
+<h3 id="2-重新执行命令"><a href="#2-重新执行命令" class="headerlink" title="2. 重新执行命令"></a>2. 重新执行命令</h3><p><strong><code>Ctrl + r</code></strong>：逆向搜索命令历史（多次按表示下一个）<br><strong><code>Ctrl + g</code></strong>：从历史搜索模式退出<br><code>Ctrl + p</code>：历史中的上一条命令<br><code>Ctrl + n</code>：历史中的下一条命令<br><strong><code>Alt + .</code></strong>：使用上一条命令的最后一个参数,多次按<code>.</code>会向上选择.<br>命令前加空格，这个命令不会被history记录！<br><code>ctrl+x+e</code>，打开编辑器(bash是emacs模式)<br><code>mtr &lt;ip/url&gt;</code>：ping和traceroute两个命令的合体</p>
+<h3 id="3-控制命令"><a href="#3-控制命令" class="headerlink" title="3. 控制命令"></a>3. 控制命令</h3><p><strong><code>Alt+Esc</code>或<code>tab+tab</code></strong>: 查找可输入的命令,第一次按两下esc<br><code>Ctrl + l</code>：清屏<br><code>Ctrl + o</code>：执行当前命令，并选择上一条命令<br><strong><code>Ctrl + s</code></strong>：阻止屏幕输出<br><strong><code>Ctrl + q</code></strong>：允许屏幕输出<br><code>Ctrl + c</code>：终止命令<br><code>Ctrl + z</code>：挂起命令</p>
+<h3 id="4-Bang-命令"><a href="#4-Bang-命令" class="headerlink" title="4. Bang (!) 命令"></a>4. Bang (!) 命令</h3><p><code>!!</code>：执行上一条命令<br><code>!cmd</code>：执行最近的以 blah 开头的命令，如 !ls<br><code>!$</code>：上一条命令的最后一个参数，与 Alt + . 相同<br><code>!*</code>：上一条命令的所有参数<br>!blah:p：仅打印输出，而不执行<br>!$:p：打印输出 !$ 的内容<br>!<em>:p：打印输出 !</em> 的内容<br>^content：删除上一条命令中的 content<br>^content^foo：将上一条命令中的 content 替换为 foo<br>^content^foo^：将上一条命令中所有的 content 都替换为 foo</p>
+<h3 id="5-特殊字符的含义"><a href="#5-特殊字符的含义" class="headerlink" title="5. 特殊字符的含义"></a>5. 特殊字符的含义</h3><p><code>&amp;</code>  在运行的指令末尾添加”&amp;“符号可以让命令在后台运行<br><code>&amp;&amp;</code>  命令执行与关系,表示前面命令执行成功后,执行后面的命令. eg: <code>ls &amp;&amp; ll</code><br><code>||</code> 表示命令执行的或关系, 前面命令正确执行,后面命令不执行,前面命令执行错误,则执行后面命令.<br><code>()</code> 命令组合执行,多个命令为一个整体,<strong>且不会被切换当前工作目录</strong>,即使有切换目录操作.<br><code>;</code> 表示不管前面命令是否执行成功,都执行后面的命令.多条命令语句放于一行执行.<br><code>cd -</code> 表示返回刚刚的目录<br><code>cd ~</code> 表示回用户目录; ~代表用户目录,eg:<code>~/Downloads</code><br><code>sudo！！</code> 执行上一个需要sudo权限的命令.<br><code>!$</code> 一个特殊的环境变量，代表了上一个命令的最后一个字符串</p>
+<h3 id="提示"><a href="#提示" class="headerlink" title="提示"></a>提示</h3><p>Bash 默认为 emacs 编辑模式，但有的bash使用vi的快捷键，如果你的 Bash 不在 emacs 编辑模式，可通过在<code>.bashrc</code>里面 <code>set -o emacs</code> 设置。<code>set -o vi</code>设置成vi编辑模式。</p>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -138,13 +109,13 @@
 
 <div class="article-categories">
   <span></span>
-  <a class="article-category-link" href="/categories/java/">java</a>
+  <a class="article-category-link" href="/categories/Linux/">Linux</a>
 </div>
 
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/synchronized/">synchronized</a>
+  <span></span> <a href="/tags/Linux/">Linux</a>
   </div>
 
 </div>
@@ -153,7 +124,7 @@
 
 	<div class="article-share" id="share">
 	
-	  <div data-url="http://huzongzhe.cn/2017/05/03/【扒一扒】synchronized/" data-title="【扒一扒】synchronized | running river" data-tsina="" class="share clearfix">
+	  <div data-url="http://huzongzhe.cn/2016/08/13/【Linux】shell,bash操作快捷键/" data-title="【Linux】shell,bash操作快捷键 | running river" data-tsina="" class="share clearfix">
 	  </div>
 	
 	</div>
@@ -167,18 +138,18 @@
 <nav class="article-nav clearfix">
  
  <div class="prev" >
- <a href="/2017/05/04/【扒一扒】volatile/" title="【扒一扒】volatile">
+ <a href="/2016/08/13/Ubuntu分区删除后恢复/" title="Ubuntu分区删除后恢复">
   <strong>上一篇：</strong><br/>
   <span>
-  【扒一扒】volatile</span>
+  Ubuntu分区删除后恢复</span>
 </a>
 </div>
 
 
 <div class="next">
-<a href="/2017/04/13/记一次蛋疼的mongo to hive导数过程/"  title="记一次蛋疼的mongo to hive导数过程">
+<a href="/2016/06/23/使用hexo和jacman搭建博客简记/"  title="使用hexo和jacman搭建博客简记">
  <strong>下一篇：</strong><br/> 
- <span>记一次蛋疼的mongo to hive导数过程
+ <span>使用hexo和jacman搭建博客简记
 </span>
 </a>
 </div>

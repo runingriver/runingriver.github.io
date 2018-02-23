@@ -1,0 +1,677 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【Linux】文本操作命令 | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="1. tr 按列替换 echo &amp;quot;{123}&amp;quot; | tr -d &amp;#39;{}&amp;#39; 删除输入中的 “{“ 和 “}” cat testfile |tr a-z A-Z  将文件testfile中的小写字母全部转换成大写字母  2. cut : cut [-b] ">
+<meta name="keywords" content="Linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【Linux】文本操作命令">
+<meta property="og:url" content="http://huzongzhe.cn/2016/11/12/【Linux】文本操作/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="1. tr 按列替换 echo &amp;quot;{123}&amp;quot; | tr -d &amp;#39;{}&amp;#39; 删除输入中的 “{“ 和 “}” cat testfile |tr a-z A-Z  将文件testfile中的小写字母全部转换成大写字母  2. cut : cut [-b] [file] 列切分cut 命令从文件的每一行剪切字节、字符和字段并将这些字节、字符和字段写至标准输出。如果不指">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-02-23T08:00:37.425Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【Linux】文本操作命令">
+<meta name="twitter:description" content="1. tr 按列替换 echo &amp;quot;{123}&amp;quot; | tr -d &amp;#39;{}&amp;#39; 删除输入中的 “{“ 和 “}” cat testfile |tr a-z A-Z  将文件testfile中的小写字母全部转换成大写字母  2. cut : cut [-b] [file] 列切分cut 命令从文件的每一行剪切字节、字符和字段并将这些字节、字符和字段写至标准输出。如果不指">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/11/12/【Linux】文本操作/" title="【Linux】文本操作命令" itemprop="url">【Linux】文本操作命令</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished"> 发表于 2016-11-12</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-tr-按列替换"><span class="toc-text">1. tr 按列替换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-cut-cut-b-file-列切分"><span class="toc-text">2. cut : cut [-b] [file] 列切分</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#join"><span class="toc-text">join</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-chown-chgrp-chmod-权限"><span class="toc-text">3. chown, chgrp, chmod 权限</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-sudo"><span class="toc-text">4. sudo</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-uniq-去重"><span class="toc-text">5. uniq 去重</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-nl-输出前加行号"><span class="toc-text">6. nl 输出前加行号</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-shuf-打乱文件顺序，取随机行"><span class="toc-text">7. shuf 打乱文件顺序，取随机行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-split-将文件切分"><span class="toc-text">8. split 将文件切分</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#合并文件"><span class="toc-text">合并文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#模式切分csplit"><span class="toc-text">模式切分csplit</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#文件求交，差，补"><span class="toc-text">文件求交，差，补</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#paste拼接文件"><span class="toc-text">paste拼接文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#10-sed按行操作文本（大文本操作）"><span class="toc-text">10. sed按行操作文本（大文本操作）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#详解"><span class="toc-text">详解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#使用"><span class="toc-text">使用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#注意"><span class="toc-text">注意</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#11-只输出一行中匹配的字符串"><span class="toc-text">11. 只输出一行中匹配的字符串.</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="1-tr-按列替换"><a href="#1-tr-按列替换" class="headerlink" title="1. tr 按列替换"></a>1. tr 按列替换</h2><ul>
+<li><code>echo &quot;{123}&quot; | tr -d &#39;{}&#39;</code> 删除输入中的 “{“ 和 “}”</li>
+<li><code>cat testfile |tr a-z A-Z</code>  将文件testfile中的小写字母全部转换成大写字母</li>
+</ul>
+<h2 id="2-cut-cut-b-file-列切分"><a href="#2-cut-cut-b-file-列切分" class="headerlink" title="2. cut : cut [-b] [file] 列切分"></a>2. cut : cut [-b] [file] 列切分</h2><p>cut 命令从文件的每一行剪切字节、字符和字段并将这些字节、字符和字段写至标准输出。<br>如果不指定 File 参数，cut 命令将读取标准输入。必须指定 -b、-c 或 -f 标志之一。</p>
+<ul>
+<li><code>echo &quot;123,456&quot; | cut -d &quot;,&quot; -f 1</code> 以”,”分隔截取输入中的每行的第一部分内容输出.</li>
+<li><code>who | cut -b 3</code> 以字节为分隔, 输出每行的第三个字节. <code>-c</code> 是以字符为分隔</li>
+<li><code>count=$(echo -e &quot;${line}&quot; | cut -f 2)</code> 其中,<code>line</code>中字符是以tab作为分隔符!</li>
+<li><code>echo $RANDOM | cut -c1-4</code>，取随机数的前4位，一个生产随机数的方法。<h3 id="join"><a href="#join" class="headerlink" title="join"></a>join</h3></li>
+</ul>
+<p>将两个文件中相同行的内容连接起来<br><code>file1</code>文件内容：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">qwe 123</span><br><span class="line">asd 456</span><br></pre></td></tr></table></figure></p>
+<p><code>file2</code>文件内容：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">qwe 111</span><br><span class="line">asd 222</span><br></pre></td></tr></table></figure></p>
+<p><code>join file1 file2</code> 输出：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">qwe 123 111</span><br><span class="line">asd 456 222</span><br></pre></td></tr></table></figure></p>
+<ol>
+<li><code>join -e HHH file1 file2</code> ：如果file1或file2中找不到指定栏位，则填入<code>HHH</code></li>
+<li><code>join -i -t | HHH file1 file2</code>：匹配相同栏位时忽略大小写，并以<code>|</code>作为分隔符。</li>
+<li><code>-a</code>,<code>-v</code>,<code>-1</code>,<code>-2</code>：都是用来决定没有匹配行时，是否输出不匹配的行！</li>
+</ol>
+<h2 id="3-chown-chgrp-chmod-权限"><a href="#3-chown-chgrp-chmod-权限" class="headerlink" title="3. chown, chgrp, chmod 权限"></a>3. chown, chgrp, chmod 权限</h2><p><code>sudo chgrp root *</code> 修改当前目录下所有文件为root组<br><code>sudo chown root *</code> 修改当前目录下所有文件的owner为root<br><code>sudo chmod 777 -R dir</code> 递归修改dir的权限为777<br><code>sudo chmod 755  file.sh</code> 修改file.sh为任何人可执行权限</p>
+<h2 id="4-sudo"><a href="#4-sudo" class="headerlink" title="4. sudo"></a>4. sudo</h2><ul>
+<li><code>sudo -l</code> 查看当前用户运行命令权限</li>
+<li><code>sudo -u &lt;user&gt; command</code> 使用user用户执行命令command</li>
+</ul>
+<h2 id="5-uniq-去重"><a href="#5-uniq-去重" class="headerlink" title="5. uniq 去重"></a>5. uniq 去重</h2><p><code>uniq -c file</code> 在每行的旁边增加重复的数量。</p>
+<h2 id="6-nl-输出前加行号"><a href="#6-nl-输出前加行号" class="headerlink" title="6. nl 输出前加行号"></a>6. nl 输出前加行号</h2><ul>
+<li><code>nl file</code>在输出的内容前加行号</li>
+<li><code>nl -b a file</code> 遇到空行，也加行号。</li>
+<li><code>nl -n rz -w 3 file</code> 行号3位对其，前面补0.<h2 id="7-shuf-打乱文件顺序，取随机行"><a href="#7-shuf-打乱文件顺序，取随机行" class="headerlink" title="7. shuf 打乱文件顺序，取随机行"></a>7. shuf 打乱文件顺序，取随机行</h2></li>
+<li><code>shuf sort_file -o rsort_file</code>  打乱文件顺序</li>
+<li><code>shuf -n 1 file.txt</code> 的含义是从file.txt 文件中随机取出一行数据，如果是<code>-n 2</code>就是取出两行数据<h2 id="8-split-将文件切分"><a href="#8-split-将文件切分" class="headerlink" title="8. split 将文件切分"></a>8. split 将文件切分</h2></li>
+<li><code>split -5000 file</code>或<code>split -l 5000 file</code> 将file按行切分成多个文件, 文件最大行为5000</li>
+<li><code>split -5000 -d file</code> 以数字作为后缀,默认:<code>xaa,xab,xac</code>, 现在<code>x00,x01,x02</code></li>
+<li><code>split file.txt -b 10M</code> 将文件file.txt平均切分成10M<h3 id="合并文件"><a href="#合并文件" class="headerlink" title="合并文件"></a>合并文件</h3></li>
+<li><code>cat x* &gt; file.txt</code> 将以<code>x</code>开头的所有文件合并到file.txt`中</li>
+<li><code>cat file1 file2 &gt; file3</code> 将file1和file2合并保存到file3中.<br><strong>文件内容顺序, 按照file1+file2的顺序保存到file3</strong><h3 id="模式切分csplit"><a href="#模式切分csplit" class="headerlink" title="模式切分csplit"></a>模式切分<code>csplit</code></h3>将文本文件file以第 2 行为分界点切割成两份，命令： <code>csplit testfile 2</code><h3 id="文件求交，差，补"><a href="#文件求交，差，补" class="headerlink" title="文件求交，差，补"></a>文件求交，差，补</h3><code>cat a b | sort | uniq &gt; c</code>   # c 是 a 并 b<br><code>cat a b | sort | uniq -d &gt; c</code>   # c 是 a 交 b<br><code>cat a b b | sort | uniq -u &gt; c</code>   # c 是 a - b</li>
+</ul>
+<h2 id="paste拼接文件"><a href="#paste拼接文件" class="headerlink" title="paste拼接文件"></a>paste拼接文件</h2><p>file1：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">111 aaa</span><br><span class="line">222 bbb</span><br></pre></td></tr></table></figure></p>
+<p>file2:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">333 ccc</span><br><span class="line">444 ddd</span><br></pre></td></tr></table></figure></p>
+<p>file3:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">555 eee</span><br><span class="line">666 fff</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><code>paste file1 file2 file3</code>结果：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">111 aaa	333 ccc	555 eee</span><br><span class="line">222 bbb	444 ddd	666 fff</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>默认按照tab连接，加上<code>-d &#39;-&#39;</code>按照<code>-</code>连接！</p>
+<ul>
+<li><code>paste -s file1 file2 file3</code>结果：把单个文件粘贴为一列，每个文件一行！<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">111 aaa	222 bbb</span><br><span class="line">333 ccc	444 ddd</span><br><span class="line">555 eee	666 fff</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>Tip：与join的区别：join把具有相同列的行拼接为一行，paste按照行顺序放到文件末尾列</p>
+<h2 id="10-sed按行操作文本（大文本操作）"><a href="#10-sed按行操作文本（大文本操作）" class="headerlink" title="10. sed按行操作文本（大文本操作）"></a>10. <code>sed</code>按行操作文本（大文本操作）</h2><p><strong>大文本数据修改，编辑，保存，不能用编辑器打开，可以借助<code>sed</code>对大文件进行修改</strong><br>sed编辑行以1为起始index！</p>
+<h2 id="详解"><a href="#详解" class="headerlink" title="详解"></a>详解</h2><ul>
+<li><code>-e</code> 多次编辑<br>eg：<code>nl file | sed -e &#39;3,$d&#39; -e &#39;s/bash/blueshell/&#39;</code> 删除第三行到最后一行，然后将1-2行中匹配<code>bash</code>的字符串替换成<code>blueshell</code>字符串<br>eg：<code>sed -e 4a\newLineContent file</code> 在第四行后天添加一行内容<code>newLineContent</code></li>
+<li><code>-n</code> 仅显示script处理后的结果。<br>eg：<code>nl /etc/passwd | sed -n &#39;5,7p&#39;</code> 仅列出文件的5-7行。<br>eg：<code>nl /etc/passwd | sed -n &#39;/root/p&#39;</code> 仅列出匹配root的行</li>
+<li><code>-i</code>  直接编辑源文件<strong>危险动作</strong><ul>
+<li>替换：<code>sed -i &#39;s/\.$/\!/g&#39; file</code>  将file的最后一行中的<code>.</code>替换成<code>!</code></li>
+<li>最后一行插入：<code>sed -i &#39;$ a\This is a test&#39; file</code> 在最后一行，再添加一行内容：<code>This is a test&#39; file</code> <code>$</code>表示最后一行，<code>a</code>表示在后面添加。</li>
+<li>第一行插入：<code>sed -i &#39;1 i\This is a test&#39; file</code>   其中<code>1</code>表示第一行，<code>i</code>表示在第一行的前面添加。</li>
+<li>删除多行：<code>sed -i &#39;1,4564d&#39; file</code> 删除从1～4564行，包括第4564行，index从1开始。</li>
+</ul>
+</li>
+</ul>
+<p><code>-e</code> 接的动作：</p>
+<ul>
+<li><code>a</code> ：新增， 在当前行的下一行添加，是新的一行</li>
+<li><code>i</code> ：插入， 在当前行的上一行插入，是新的一行</li>
+<li><code>c</code> ：取代 </li>
+<li><code>d</code> ：删除， 后面没有内容；<br>eg：<code>nl file | sed &#39;2,5d&#39;</code> 删除第二到五行！<br>eg：<code>sed &#39;2d&#39; file</code> 删除第二行<br>eg：<code>sed &#39;/My/,/You/d&#39; datafile</code> 删除包含”My”的行到包含”You”的行之间的行<br>eg：<code>sed &#39;/My/,10d&#39; datafile</code> 删除包含”My”的行到第十行的内容<br>eg：<code>nl file | sed -n &#39;/root/p&#39;</code> 删除所有行中包含root的行！</li>
+<li><code>p</code> ：打印列。通常 p 与参数 sed -n 一起用<br>eg：只查看文件的第100行到第200行 <code>sed -n &#39;100,200p&#39; a.log</code></li>
+<li><code>s</code> ：替换，/要被取代的字串/新的字串/g</li>
+</ul>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><ol>
+<li>查找行号  <code>grep -n --color &#39;您的司机账户已被冻结&#39; outbox.csv</code></li>
+<li>删除对应行号保存： <code>sed -e 5d file1 &gt; ./file2</code> 删除第五行 并保存到当前目录下的file2文件中。</li>
+<li>删除匹配项： <code>cat file1 | sed &#39;/hello/d&#39; &gt; ./file2</code> 删除所有行中包含<code>hello</code>字符串的行保存。<br><code>nl file1 | sed &#39;/hello/d&#39; &gt; ./file2</code> 在每行内容前加一个行号，保存到文件中！</li>
+<li><code>nl /etc/passwd | sed -n &#39;/bash/{s/bash/blueshell/;p;q}&#39;</code> 首先匹配所有<code>bash</code>行，然后执行<code>{}</code>里面的一组动作，替换bash为blueshell，p打印，q退出！</li>
+</ol>
+<h3 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h3><p><code>sed -i</code>操作是删除原文件,并将内容写入一个新的文件，如果这个文件正在被其他程序使用并写入内容，由于原文件被删，导致程序无法再继续写入！因为删除后创建的同名文件的Inode不同了。<br>解决：用<code>sed -ic xxx.log</code>，其中 <code>-c</code>选项可以不用破坏文件的软硬链接，修改之后inode不会变，但前提是确保 sed 版本支持<code>-c</code> 功能；</p>
+<h2 id="11-只输出一行中匹配的字符串"><a href="#11-只输出一行中匹配的字符串" class="headerlink" title="11. 只输出一行中匹配的字符串."></a>11. 只输出一行中匹配的字符串.</h2><p>语法: <code>grep -o &#39;regex&#39;</code></p>
+<ul>
+<li><code>less file* | grep type | grep -o &#39;user\[.*\]user_id&#39; | grep -o &#39;\[.*\]&#39; | sort | uniq</code> 以<code>file</code>开头的所有文件中,每行包含<code>type</code>的字符串,提取字符串中以<code>user[.*]user_id</code>形式存在<code>[]</code>中的内容!</li>
+</ul>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Linux/">Linux</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Linux/">Linux</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2016/11/12/【Linux】文本操作/" data-title="【Linux】文本操作命令 | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/11/12/【Linux】cron，at，batch(任务调度)/" title="【Linux】cron，at，batch(任务调度)">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【Linux】cron，at，batch(任务调度)</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/11/12/【Mysql】主从复制原理整理/"  title="【Mysql】主从复制原理整理">
+ <strong>下一篇：</strong><br/> 
+ <span>【Mysql】主从复制原理整理
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-tr-按列替换"><span class="toc-text">1. tr 按列替换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-cut-cut-b-file-列切分"><span class="toc-text">2. cut : cut [-b] [file] 列切分</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#join"><span class="toc-text">join</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-chown-chgrp-chmod-权限"><span class="toc-text">3. chown, chgrp, chmod 权限</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-sudo"><span class="toc-text">4. sudo</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-uniq-去重"><span class="toc-text">5. uniq 去重</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-nl-输出前加行号"><span class="toc-text">6. nl 输出前加行号</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-shuf-打乱文件顺序，取随机行"><span class="toc-text">7. shuf 打乱文件顺序，取随机行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-split-将文件切分"><span class="toc-text">8. split 将文件切分</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#合并文件"><span class="toc-text">合并文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#模式切分csplit"><span class="toc-text">模式切分csplit</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#文件求交，差，补"><span class="toc-text">文件求交，差，补</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#paste拼接文件"><span class="toc-text">paste拼接文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#10-sed按行操作文本（大文本操作）"><span class="toc-text">10. sed按行操作文本（大文本操作）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#详解"><span class="toc-text">详解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#使用"><span class="toc-text">使用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#注意"><span class="toc-text">注意</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#11-只输出一行中匹配的字符串"><span class="toc-text">11. 只输出一行中匹配的字符串.</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

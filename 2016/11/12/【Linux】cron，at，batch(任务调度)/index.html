@@ -4,25 +4,25 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>【扒一扒】synchronized | running river</title>
+    <title>【Linux】cron，at，batch(任务调度) | running river</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="奔跑的小河">
     
 
     
-    <meta name="description" content="前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。 synchronized1. Lock和Synchronized区别 Synchronized同步代码块，不能保证等待线程进入同步块的顺序。 Synchronized 不接受超时，不能被中">
-<meta name="keywords" content="synchronized">
+    <meta name="description" content="一，基础知识 corntab周期执行任务,anacron调度每日、每周或每月执行的作业,at调度只运行一次的作业. batch 命令被用来在系统平均负载达到 0.8% 以下时执行一次性的任务，通俗的所就是系统空闲时执行任务。 crontab调度的任务是不会加载任何环境变量的,这就是为什么shell中可以执行,cron中">
+<meta name="keywords" content="Linux">
 <meta property="og:type" content="article">
-<meta property="og:title" content="【扒一扒】synchronized">
-<meta property="og:url" content="http://huzongzhe.cn/2017/05/03/【扒一扒】synchronized/index.html">
+<meta property="og:title" content="【Linux】cron，at，batch(任务调度)">
+<meta property="og:url" content="http://huzongzhe.cn/2016/11/12/【Linux】cron，at，batch(任务调度)/index.html">
 <meta property="og:site_name" content="running river">
-<meta property="og:description" content="前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。 synchronized1. Lock和Synchronized区别 Synchronized同步代码块，不能保证等待线程进入同步块的顺序。 Synchronized 不接受超时，不能被中断！ Lock中unLock()必须放到finally{}中，需要收到释放锁，S">
+<meta property="og:description" content="一，基础知识 corntab周期执行任务,anacron调度每日、每周或每月执行的作业,at调度只运行一次的作业. batch 命令被用来在系统平均负载达到 0.8% 以下时执行一次性的任务，通俗的所就是系统空闲时执行任务。 crontab调度的任务是不会加载任何环境变量的,这就是为什么shell中可以执行,cron中不行的原因. crond守护进程每分钟唤醒一次，并检查 crontab 判断需要">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-02-09T06:44:31.874Z">
+<meta property="og:updated_time" content="2018-02-23T07:40:32.449Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="【扒一扒】synchronized">
-<meta name="twitter:description" content="前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。 synchronized1. Lock和Synchronized区别 Synchronized同步代码块，不能保证等待线程进入同步块的顺序。 Synchronized 不接受超时，不能被中断！ Lock中unLock()必须放到finally{}中，需要收到释放锁，S">
+<meta name="twitter:title" content="【Linux】cron，at，batch(任务调度)">
+<meta name="twitter:description" content="一，基础知识 corntab周期执行任务,anacron调度每日、每周或每月执行的作业,at调度只运行一次的作业. batch 命令被用来在系统平均负载达到 0.8% 以下时执行一次性的任务，通俗的所就是系统空闲时执行任务。 crontab调度的任务是不会加载任何环境变量的,这就是为什么shell中可以执行,cron中不行的原因. crond守护进程每分钟唤醒一次，并检查 crontab 判断需要">
 
     
     <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
@@ -82,55 +82,69 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2017/05/03/【扒一扒】synchronized/" title="【扒一扒】synchronized" itemprop="url">【扒一扒】synchronized</a>
+      <a href="/2016/11/12/【Linux】cron，at，batch(任务调度)/" title="【Linux】cron，at，batch(任务调度)" itemprop="url">【Linux】cron，at，batch(任务调度)</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
 		
   <p class="article-time">
-    <time datetime="2017-05-03T03:12:22.000Z" itemprop="datePublished"> 发表于 2017-05-03</time>
+    <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished"> 发表于 2016-11-12</time>
     
   </p>
 </header>
 	<div class="article-content">
 		
-		<p><strong>前言：</strong>最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。</p>
-<h2 id="synchronized"><a href="#synchronized" class="headerlink" title="synchronized"></a>synchronized</h2><h3 id="1-Lock和Synchronized区别"><a href="#1-Lock和Synchronized区别" class="headerlink" title="1. Lock和Synchronized区别"></a>1. Lock和Synchronized区别</h3><ol>
-<li><code>Synchronized</code>同步代码块，不能保证等待线程进入同步块的顺序。</li>
-<li><code>Synchronized</code> 不接受超时，不能被中断！</li>
-<li><code>Lock</code>中<code>unLock()</code>必须放到<code>finally{}</code>中，需要收到释放锁，<code>Synchronized</code>自动释放锁。</li>
-<li>锁竞争小时的性能：<code>Synchronized &gt;= atom &gt;= Lock</code>，竞争激烈时： <code>atom &gt; Lock &gt; Synchronized</code></li>
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#一，基础知识"><span class="toc-text">一，基础知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#二，命令"><span class="toc-text">二，命令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-常用crontab命令"><span class="toc-text">1. 常用crontab命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-ubuntu下启动、停止与重启cron"><span class="toc-text">2. ubuntu下启动、停止与重启cron:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-表达式"><span class="toc-text">3. 表达式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-知识点"><span class="toc-text">4. 知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-示例"><span class="toc-text">5. 示例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#指定用户执行"><span class="toc-text">指定用户执行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#注意"><span class="toc-text">注意</span></a></li></ol></li></ol></li></ol>
+		
+		</div>
+		
+		<h2 id="一，基础知识"><a href="#一，基础知识" class="headerlink" title="一，基础知识"></a>一，基础知识</h2><ol>
+<li><strong>corntab</strong>周期执行任务,<strong>anacron</strong>调度每日、每周或每月执行的作业,<strong>at</strong>调度只运行一次的作业.</li>
+<li>batch 命令被用来在系统平均负载达到 0.8% 以下时执行一次性的任务，通俗的所就是系统空闲时执行任务。</li>
+<li>crontab调度的任务是不会加载任何环境变量的,这就是为什么shell中可以执行,cron中不行的原因.</li>
+<li>crond守护进程每分钟唤醒一次，并检查 crontab 判断需要执行什么任务.<br> crond守护进程是在系统启动时由 init 进程启动的(重启不影响任务的运行)。</li>
 </ol>
-<h3 id="2-Synchronized的理解"><a href="#2-Synchronized的理解" class="headerlink" title="2. Synchronized的理解"></a>2. Synchronized的理解</h3><p>synchronized加锁的类型</p>
+<h2 id="二，命令"><a href="#二，命令" class="headerlink" title="二，命令"></a>二，命令</h2><h3 id="1-常用crontab命令"><a href="#1-常用crontab命令" class="headerlink" title="1. 常用crontab命令"></a>1. 常用crontab命令</h3><p>-u: 只有root 才能执行这个任务，也即帮其他用户新建/删除 crontab 工作调度: <code>sudo crontab -e -u zongzhe.hu</code><br>-e: 编辑crontab 的工作内容<br>-l : 查阅crontab的工作内容<br>-r: 删除所有的crontab的工作内容，若仅要删除一项，请用 -e 去编辑</p>
+<h3 id="2-ubuntu下启动、停止与重启cron"><a href="#2-ubuntu下启动、停止与重启cron" class="headerlink" title="2. ubuntu下启动、停止与重启cron:"></a>2. ubuntu下启动、停止与重启cron:</h3><p><code>$sudo /etc/init.d/cron start</code><br><code>$sudo /etc/init.d/cron stop</code><br><code>$sudo /etc/init.d/cron restart</code> 当任务失效时可以通过restart解决</p>
+<h3 id="3-表达式"><a href="#3-表达式" class="headerlink" title="3. 表达式"></a>3. 表达式</h3><p><code>* * * * * command</code> 分 小时 几号 月份 星期几<br>在以上各个字段中，还可以使用以下特殊字符：</p>
+<ul>
+<li>星号<code>*</code>：代表所有可能的值</li>
+<li>逗号<code>,</code>：可以用逗号隔开的值指定一个列表范围，例如，“1,2,5,7,8,9”</li>
+<li>中杠<code>-</code>：可以用整数之间的中杠表示一个整数范围，例如“2-6”表示“2,3,4,5,6”</li>
+<li>正斜线<code>/</code>：可以用正斜线指定时间的间隔频率，例如“0-23/2”表示每两小时执行一次。<br>   同时正斜线可以和星号一起使用，例如*/10，如果用在minute字段，表示每十分钟执行一次。</li>
+</ul>
+<h3 id="4-知识点"><a href="#4-知识点" class="headerlink" title="4. 知识点"></a>4. 知识点</h3><ul>
+<li>crond检测的时间周期是“分钟”， 每分钟会读取一次<code>/etc/crontab</code>， 以及 /var/spool/cron 里面的用户crontab记录并执行。</li>
+<li>用户执行计划保存在: <code>/var/spool/cron/username</code>中,username是cron的用户名</li>
+<li>系统执行计划保存在: <code>/etc/crontab</code></li>
+<li><code>/var/log/cron</code>中保存这cron的执行日志<h3 id="5-示例"><a href="#5-示例" class="headerlink" title="5. 示例"></a>5. 示例</h3><code>3,15 8-11 * * * command</code>  在上午8点到11点的第3和第15分钟执行<br><code>3,15 8-11 */2 * * command</code>  每隔两天的上午8点到11点的第3和第15分钟执行<br><code>10 1 * * 6,0 /etc/init.d/smb restart</code>  每周六、周日的1 : 10重启smb<br><code>45 4 1,10,22 * * /etc/init.d/smb restart</code> 每月1、10、22日的4 : 45重启smb<br><code>0 10 10 ? * 2</code>    每个星期一，10点10分 执行</li>
+</ul>
+<h4 id="指定用户执行"><a href="#指定用户执行" class="headerlink" title="指定用户执行"></a>指定用户执行</h4><ul>
+<li>命令:<br>  查看test用户下的cron任务: <code>sudo crontab -l -u test</code><br>  编辑test用户下的crontab任务: <code>sudo crontab -e -u test</code></li>
+<li>执行hive导数为示例:<ol>
+<li>将shell设置为test用户文件: <code>sudo chown test run.sh</code> , <code>sudo chgrp test run.sh</code> </li>
+<li>添加任务: <code>sudo crontab -e -u test</code> , <code>10 6 * * * /bin/bash /home/q/xxx/run.sh &gt; /home/q/xxx/log2 2&gt;&amp;1 &amp;</code><h4 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h4></li>
+</ol>
+</li>
+</ul>
 <ol>
-<li>对象锁: <code>synchronized (this)</code>或<code>synchronized (personObject)</code> ,<code>synchronized</code>修饰的成员方法，都是对象锁；</li>
-<li>类锁: <code>synchronized (A.class)</code> 和 <code>synchronized</code>修饰的静态方法，都是类锁；</li>
-<li><code>synchronized</code>包含的代码块。<code>synchronized (A.class){}</code>是类锁, <code>synchronized (this){}</code>是对象锁.</li>
+<li>脚本中涉及文件路径时写全局路径(因为cron执行shell的当前目录不是shell文件所在目录)；</li>
+<li>每条cron之前可以加一个注释,功能,时间,用户!</li>
+<li><strong>执行脚本前一定要检查脚本的woner和执行权限</strong> ,  确保crontab创建者有<strong>访问目录</strong>和<strong>执行shell</strong>的权限</li>
+<li>脚本执行要用到java或其他环境变量时，通过source命令引入环境变量，如:<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">!/bin/sh</span><br><span class="line">source /etc/profile #只要是cron任务,都加上吧</span><br><span class="line">export RUN_CONF=/home/d139/conf/platform/cbp/cbp_jboss.conf</span><br><span class="line">/usr/local/jboss-4.0.5/bin/run.sh -c mev &amp;</span><br></pre></td></tr></table></figure>
+</li>
 </ol>
-<h4 id="synchronized特点"><a href="#synchronized特点" class="headerlink" title="synchronized特点"></a>synchronized特点</h4><ol>
-<li>不论锁的是什么, 并不影响<code>类</code>或<code>对象</code>中没有用<code>synchronized</code>修饰的<code>方法</code>,<code>变量</code>被其他线程<code>访问</code>和<code>修改</code>.</li>
-<li><code>synchronized</code>锁住的<code>方法,代码块,对象</code>中的<code>变量</code>不会受到 <code>synchronized</code>的控制, 可以被其他线程随意读写.</li>
-<li><strong>当一个线程获得了对象锁(类锁)，其他线程不能访问其他需要对象锁(类锁)的方法或代码块</strong></li>
-<li><strong>对象锁和类锁，二者不冲突，当一个线程获得了A的对象锁，其他线程可以访问A中需要类锁的方法或代码块</strong></li>
-<li><code>synchronized (this){}</code>不能用于静态方法中, 但是<code>synchronized (A.class)</code>却能用于成员方法中,加的是类锁.</li>
+<p>或 <code>0 * * * * . /etc/profile;/bin/sh /var/bin/restart_audit.sh</code></p>
+<ol>
+<li>多个脚本互斥执行,可以用进程锁<code>flock</code>解决<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">*/1 * * * * /usr/bin/flock -xn /var/run/test.lock -c /home/q/test/test.sh &gt;&gt;/home/q/test/test.log 2&gt;&amp;1</span><br></pre></td></tr></table></figure>
+</li>
 </ol>
-<h3 id="3-锁的实现"><a href="#3-锁的实现" class="headerlink" title="3. 锁的实现"></a>3. 锁的实现</h3><p>对象锁和类锁有两种实现方式：方法上的synchronized是基于方法区中<code>ACC_SYNCHRONIZED</code>标志位实现，synchronized修饰的方法块基于<code>monitorenter</code>,<code>monitorexit</code>语义实现！<br>这两种实现方式，在重量级锁上，都依赖于操作系统提供的实现（管程(monitor)底层数据结构维护着请求该锁的线程的队列，及相关信息）。</p>
-<blockquote>
-<p>重量级锁依赖于操作系统实现，加锁需要从用户态转换到内核态加锁，这就需要操作系统进行一次上下文切换，另外加锁、释放锁会导致比较多的上下文切换和调度延时，等待锁的线程会被挂起直至锁释放。在上下文切换的时候，cpu之前缓存的指令和数据都将失效，对性能有很大的损失。</p>
-</blockquote>
-<h4 id="synchronized修饰的成员方法和静态方法"><a href="#synchronized修饰的成员方法和静态方法" class="headerlink" title="synchronized修饰的成员方法和静态方法"></a>synchronized修饰的成员方法和静态方法</h4><p>成员方法： </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public synchronized void method(int, java.lang.String);</span><br><span class="line">    flags: ACC_PUBLIC, ACC_SYNCHRONIZED</span><br><span class="line">    Code:</span><br><span class="line">      stack=2, locals=4, args_size=3</span><br><span class="line">        0: aload_2       </span><br><span class="line">        ...</span><br><span class="line">        10: return</span><br></pre></td></tr></table></figure>
-<p>静态方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public static synchronized int method2(int);</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC, ACC_SYNCHRONIZED</span><br><span class="line">    Code:</span><br><span class="line">      stack=2, locals=1, args_size=1</span><br><span class="line">         0: iload_0       </span><br><span class="line">         ...</span><br><span class="line">         4: return</span><br></pre></td></tr></table></figure></p>
-<p>获取锁和释放锁是在方法调用和方法返回的时候执行的，方法执行中如果抛出异常，那么锁会在抛出异常时释放。<br>JVM可以从方法常量池中的方法表结构(method_info Structure) 中的 ACC_SYNCHRONIZED 访问标志区分一个方法是否同步方法。</p>
-<h4 id="synchronized修饰的成员方法代码块和静态方法代码块"><a href="#synchronized修饰的成员方法代码块和静态方法代码块" class="headerlink" title="synchronized修饰的成员方法代码块和静态方法代码块"></a>synchronized修饰的成员方法代码块和静态方法代码块</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">5: monitorenter  </span><br><span class="line">...</span><br><span class="line">12: monitorexit   </span><br><span class="line">13: goto          21</span><br><span class="line">...     </span><br><span class="line">17: aload_1       </span><br><span class="line">18: monitorexit   </span><br><span class="line">...     </span><br><span class="line">20: athrow        </span><br><span class="line">21: return</span><br></pre></td></tr></table></figure>
-<p><code>monitorenter</code>,<code>monitorexit</code>语义是基于堆中实例化对象的对象头中的锁标志位实现。</p>
-<p>其中，<code>ACC_SYNCHRONIZED</code>和<code>monitorenter，monitorexit</code>，在JVM上的语义不同但是在底层锁实现是一样的，因为<code>Class</code>被ClassLoader加载到内存中也是一个对象，也有对象头！<br>实例对象由：<code>对象头</code>，<code>实例变量</code>，<code>填充对齐数据</code>组成。<br>对象头由：<code>MarkWord</code>（存储对象的hashCode、锁信息或分代年龄或GC标志等信息），<code>Class Metadata Address</code>（指向方法区class的指针）</p>
-<h4 id="锁原理锁优化"><a href="#锁原理锁优化" class="headerlink" title="锁原理锁优化"></a>锁原理锁优化</h4><p>jdk1.6之前synchronized属于重量级锁，效率低下，因为监视器锁（monitor）是依赖于底层的操作系统的Mutex Lock来实现的，而操作系统实现线程之间的切换时需要从用户态转换到核心态，<br>这个状态之间的转换需要相对比较长的时间，时间成本相对较高。<br>重量级锁的实现是借助操作系统实现的，多种叫法：监视器/管程/monitor。<br> 如果被<code>Synchronized</code>修饰的方法或代码块，JVM探测出其没有竞争，会进行锁消除，即不使用锁！<br>jdk1.6之后JVM对synchronized的锁实现优化，首先在没有锁竞争的情况下加<strong>偏向锁</strong>，当另一个线程申请该锁时升级为<strong>轻量级锁</strong>，当同一时刻多个线程申请同一个锁时，JVM将该锁升级为<strong>自旋锁</strong>，当自旋一定次数后，升级为<strong>重量级锁</strong>，也就是依赖操作系统的<code>Mutex Lock</code>来实现。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><a href="http://blog.csdn.net/javazejian/article/details/72828483" target="_blank" rel="noopener">http://blog.csdn.net/javazejian/article/details/72828483</a></li>
-<li><a href="http://blog.csdn.net/javazejian/article/details/72772461" target="_blank" rel="noopener">http://blog.csdn.net/javazejian/article/details/72772461</a></li>
-</ol>
+<p>注: <code>test.lock</code>文件需要自己手动创建并给予权限.还要注意锁的抢占，可能某个shell总是拿到锁的控制权.</p>
+<p><strong>问题:</strong><br>如果在crontab里有个定时任务设置为一分钟执行一次，但是它执行的时间可能会超过一分钟，此时crontab一分钟后会再次运行该脚本，这样就会出现冲突，<br>如果程序不做容错处理，可能会导致出现一些问题。如果想解决这个问题，可以用Linux中的进程锁控制crontab执行的并发问题。<br>解决：在crontab设置lock<br><code>*/5 * * * * /usr/bin/flock -xn /var/run/test.lock -c &#39;/scripts/test.sh &gt;/dev/null 2&gt;&amp;1&#39;</code><br>Tip：<code>flock -h</code> 查看使用,<code>test.lock</code>文件需要手动创建并给予权限,多个cron任务,注意锁的抢占!</p>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -138,13 +152,13 @@
 
 <div class="article-categories">
   <span></span>
-  <a class="article-category-link" href="/categories/java/">java</a>
+  <a class="article-category-link" href="/categories/Linux/">Linux</a>
 </div>
 
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/synchronized/">synchronized</a>
+  <span></span> <a href="/tags/Linux/">Linux</a>
   </div>
 
 </div>
@@ -153,7 +167,7 @@
 
 	<div class="article-share" id="share">
 	
-	  <div data-url="http://huzongzhe.cn/2017/05/03/【扒一扒】synchronized/" data-title="【扒一扒】synchronized | running river" data-tsina="" class="share clearfix">
+	  <div data-url="http://huzongzhe.cn/2016/11/12/【Linux】cron，at，batch(任务调度)/" data-title="【Linux】cron，at，batch(任务调度) | running river" data-tsina="" class="share clearfix">
 	  </div>
 	
 	</div>
@@ -167,18 +181,18 @@
 <nav class="article-nav clearfix">
  
  <div class="prev" >
- <a href="/2017/05/04/【扒一扒】volatile/" title="【扒一扒】volatile">
+ <a href="/2016/11/12/【Mysql】日志备忘/" title="【Mysql】日志备忘">
   <strong>上一篇：</strong><br/>
   <span>
-  【扒一扒】volatile</span>
+  【Mysql】日志备忘</span>
 </a>
 </div>
 
 
 <div class="next">
-<a href="/2017/04/13/记一次蛋疼的mongo to hive导数过程/"  title="记一次蛋疼的mongo to hive导数过程">
+<a href="/2016/11/12/【Linux】文本操作/"  title="【Linux】文本操作命令">
  <strong>下一篇：</strong><br/> 
- <span>记一次蛋疼的mongo to hive导数过程
+ <span>【Linux】文本操作命令
 </span>
 </a>
 </div>
@@ -191,6 +205,13 @@
 
 </div>  
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#一，基础知识"><span class="toc-text">一，基础知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#二，命令"><span class="toc-text">二，命令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-常用crontab命令"><span class="toc-text">1. 常用crontab命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-ubuntu下启动、停止与重启cron"><span class="toc-text">2. ubuntu下启动、停止与重启cron:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-表达式"><span class="toc-text">3. 表达式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-知识点"><span class="toc-text">4. 知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-示例"><span class="toc-text">5. 示例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#指定用户执行"><span class="toc-text">指定用户执行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#注意"><span class="toc-text">注意</span></a></li></ol></li></ol></li></ol>
+ 
+  </div>
 
 <div id="asidepart">
 <div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
@@ -469,6 +490,8 @@ $(document).ready(function(){
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
         
     }
   });

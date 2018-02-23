@@ -1,0 +1,662 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【Linux】常用命令（三） | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="知识点 locate a.txt 搜索文件,其中 updatedb 强制更新locate数据库，默认一天更新一次 命令前面添加time 可以监控命令运行时间,eg:sudo time lsof -i:9090  常用命令 查看cpu核心数：grep &amp;#39;model name&amp;#39; /proc/">
+<meta name="keywords" content="Linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【Linux】常用命令（三）">
+<meta property="og:url" content="http://huzongzhe.cn/2016/08/14/【Linux】常用命令（三）/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="知识点 locate a.txt 搜索文件,其中 updatedb 强制更新locate数据库，默认一天更新一次 命令前面添加time 可以监控命令运行时间,eg:sudo time lsof -i:9090  常用命令 查看cpu核心数：grep &amp;#39;model name&amp;#39; /proc/cpuinfo | wc -l 查看所有用户：cat /etc/passwd |cut -f 1">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-02-23T07:49:37.537Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【Linux】常用命令（三）">
+<meta name="twitter:description" content="知识点 locate a.txt 搜索文件,其中 updatedb 强制更新locate数据库，默认一天更新一次 命令前面添加time 可以监控命令运行时间,eg:sudo time lsof -i:9090  常用命令 查看cpu核心数：grep &amp;#39;model name&amp;#39; /proc/cpuinfo | wc -l 查看所有用户：cat /etc/passwd |cut -f 1">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/08/14/【Linux】常用命令（三）/" title="【Linux】常用命令（三）" itemprop="url">【Linux】常用命令（三）</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2016-08-14T04:12:11.000Z" itemprop="datePublished"> 发表于 2016-08-14</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<h1 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h1><ul>
+<li><code>locate a.txt</code> 搜索文件,其中 <code>updatedb</code> 强制更新locate数据库，默认一天更新一次</li>
+<li>命令前面添加<code>time</code> 可以监控命令运行时间,eg:<code>sudo time lsof -i:9090</code></li>
+</ul>
+<h3 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h3><ul>
+<li>查看cpu核心数：<code>grep &#39;model name&#39; /proc/cpuinfo | wc -l</code></li>
+<li>查看所有用户：<code>cat /etc/passwd |cut -f 1 -d :</code><h4 id="查看文件夹大小"><a href="#查看文件夹大小" class="headerlink" title="查看文件夹大小"></a>查看文件夹大小</h4></li>
+<li><code>du -sh *</code>   查看当前目录下的文件夹大小</li>
+<li><code>du -sh .</code>  查看当前目录大小<h4 id="删除swap空间内容"><a href="#删除swap空间内容" class="headerlink" title="删除swap空间内容"></a>删除swap空间内容</h4></li>
+</ul>
+<ol>
+<li><code>swapoff -a</code>  关闭swap<code>/etc/fstab</code>中设置为swap的分区</li>
+<li><code>swapon -a</code>  打开<code>/etc/fstab</code>中设置为swap的分区<br>-a  将/etc/fstab文件中所有设置为swap的设备关闭</li>
+</ol>
+<p>注：所有的分区记录在： <code>/etc/fstab</code>文件中<br><code>swapon -s</code> 显示交换分区的信息<br><code>mkswap</code> 创建swap分区</p>
+<h3 id="根据access-计算QPS"><a href="#根据access-计算QPS" class="headerlink" title="根据access 计算QPS"></a>根据access 计算QPS</h3><p>设access日志格式：<code>[26/Sep/2017:14:59:17 +0800] 10.88.65.39 &quot;POST /shell/hive HTTP/1.1&quot; 200 (6 ms)</code>，其中<code>/shell/hive</code>是接口。<br><strong>按分钟统计平均qps：<code>grep &#39;/shell/hive&#39; access_log.2017-09-26.log | cut -d &quot;:&quot; -f 2,3 |sort|uniq -c| awk &#39;{qps=$1/60;print $2,$1,qps}&#39;</code></strong><br>按小时统计：<code>grep &#39;/shell/hive&#39; access_log.2017-09-26.log | cut -d &quot;:&quot; -f 2 |sort|uniq -c| awk &#39;{qps=$1/3600;print $2,$1,qps}&#39;</code><br>按秒统计：<code>grep &#39;/shell/hive&#39; access_log.2017-09-26.log | cut -d &quot;:&quot; -f 2,3,4 |sort|uniq -c| awk &#39;{print $2,$1}&#39;</code><br><strong>Tip：如果是<code>tar.gz</code>压缩文件，使用<code>zgrep</code></strong></p>
+<h3 id="根据access-计算PV"><a href="#根据access-计算PV" class="headerlink" title="根据access 计算PV"></a>根据access 计算PV</h3><p>按小时统计PV：<code>grep &#39;/shell/hive&#39; access_log.2017-09-26.log | cut -d &quot;:&quot; -f 2 |sort|uniq -c| awk &#39;{print $2,$1}&#39;</code></p>
+<h3 id="atnodes，fornodes，tonodes多服务器操作"><a href="#atnodes，fornodes，tonodes多服务器操作" class="headerlink" title="atnodes，fornodes，tonodes多服务器操作"></a>atnodes，fornodes，tonodes多服务器操作</h3><ol>
+<li><code>fornodes</code> 主要提供域名缩写，一般不单独使用，<code>atnodes</code>和<code>tonodes</code>默认调用！</li>
+<li>一般需要在跳板机上执行！如没安装：<code>sudo cpan SSH::Batch</code>安装</li>
+<li>使用：<code>atnodes ‘ls’ ‘l-xxx[5-6].wap.cn6’</code></li>
+<li>配置别名使用：<br><code>cat &gt; ~/.fornodesrc</code> 输入 <code>abc=l-xxx[5-6].xx.xx.xxx.com</code><br><code>atnodes &#39;ls&#39; &#39;{abc}&#39;</code></li>
+</ol>
+<h1 id="文件查看，编辑"><a href="#文件查看，编辑" class="headerlink" title="文件查看，编辑"></a>文件查看，编辑</h1><p><strong>压缩文件对应：zless、zmore、zcat 和 zgrep </strong></p>
+<h2 id="1-linux中查看文件的命令如下："><a href="#1-linux中查看文件的命令如下：" class="headerlink" title="1. linux中查看文件的命令如下："></a>1. linux中查看文件的命令如下：</h2><ul>
+<li><code>cat</code>： 由第一行开始显示档案内容</li>
+<li><code>tac</code>： 从最后一行开始显示，可以看出 tac 是 cat 的反向显示！</li>
+<li><code>nl</code>： 显示的时候，随便输出行号！</li>
+<li><code>more</code>： 一页一页的显示档案内容less 与 more 类似，按h可以在输出文件内容的时候查看帮助</li>
+<li><code>head</code>： 查看头几行</li>
+<li><code>tail</code>： 查看尾几行</li>
+<li><code>od</code>： 以二进制的方式读取档案内容</li>
+</ul>
+<h2 id="2-more的动作指令："><a href="#2-more的动作指令：" class="headerlink" title="2. more的动作指令："></a>2. more的动作指令：</h2><ul>
+<li><code>Enter</code>            向下n行，需要定义，默认为1行；</li>
+<li><code>Ctrl+f</code>            向下滚动一屏；</li>
+<li><code>空格键</code>         向下滚动一屏；</li>
+<li><code>Ctrl+b</code>           返回上一屏；</li>
+<li><code>=</code>                   输出当前行的行号；</li>
+</ul>
+<h2 id="3-less动作指令：less比more更强大，命令类似于vi"><a href="#3-less动作指令：less比more更强大，命令类似于vi" class="headerlink" title="3. less动作指令：less比more更强大，命令类似于vi"></a>3. less动作指令：less比more更强大，命令类似于vi</h2><p>空格键 向下滚动一屏；<br><code>f</code> 向下滚动一屏；前移<br><code>b</code> 向上滚动一屏；后移<br><code>d</code> 向下滚动半屏；<br><code>u</code> 向上洋动半屏；<br>(也可以在<code>fbdu</code>前面按<code>ctrl</code>)<br>在显示内容的时候可以输入：-N显示行号；/或者？向前或者向后搜索（按n搜索下一个，N上一个）！<br><code>G</code>文件末尾（shift+g），<code>gg</code>文件开头<br><strong>注: </strong> less在查看一些不规律文件时可能会提示<code>may be a binary file.  See it anyway</code>, 比如,<code>gc.log</code>, <code>xx.gz</code>等. 可以<strong><code>less -f -r file</code></strong>来查看!</p>
+<h1 id="wget-scp-nc"><a href="#wget-scp-nc" class="headerlink" title="wget,scp,nc,"></a>wget,scp,nc,</h1><h2 id="1-wget"><a href="#1-wget" class="headerlink" title="1. wget"></a>1. wget</h2><p>wget默认占用全部可能的带宽下载！</p>
+<ul>
+<li><code>wget -b [url]</code>  后台下载</li>
+<li><code>wget -c [url]</code> 断点续传，继续一个终止的文件下载。</li>
+<li><code>wget --limit-rate=300k [url]</code> 限速下载 ，<code>--limit-rate=10M</code></li>
+</ul>
+<p>实例：</p>
+<ol>
+<li><code>wget http://path.to.the/file -O newname</code> 下载file用newname命名</li>
+<li><code>wget -P path/to/directory http://path.to.the/file</code> 将文件下载到指定目录</li>
+</ol>
+<h3 id="wget下载整个目录"><a href="#wget下载整个目录" class="headerlink" title="wget下载整个目录"></a>wget下载整个目录</h3><ul>
+<li>下载整个目录：<code>wget -c -r -np -k -L -p www.xxx.com/pub/path/</code></li>
+<li>下载包含外部域名的资源：<code>wget -np -nH -r –span-hosts www.xxx.com/pub/path/</code><br>参数：<br><code>-c</code> 断点续传<br><code>-r</code> 递归下载，下载指定网页某一目录下（包括子目录）的所有文件<br><code>-nd</code> 递归下载时不创建一层一层的目录，把所有的文件下载到当前目录<br><code>-np</code> 递归下载时不搜索上层目录，如wget -c -r www.xxx.com/pub/path/ ，如不加参数-np，就会同时下载path的上一级目录pub下的其它文件<br><code>-k</code> 将绝对链接转为相对链接，下载整个站点后脱机浏览网页，最好加上这个参数<br><code>-L</code> 递归时不进入其它主机，如wget -c -r www.xxx.com/ 会递归下载所有相关主机资源！<br><code>-p</code> 下载网页所需的所有文件，如图片等<br><code>-A</code> 指定要下载的文件样式列表，多个样式用逗号分隔<br><code>-i</code> 后面跟一个文件，文件内指明要下载的URL<h3 id="wget-下载指定格式的文件"><a href="#wget-下载指定格式的文件" class="headerlink" title="wget 下载指定格式的文件"></a>wget 下载指定格式的文件</h3><code>wget -r -np -nd --accept=txt http://example.com/dir/</code> 下载<code>dir</code>目录下所有以<code>txt</code>结尾的文件，多个后缀用逗号分割！<h3 id="wget镜像网站"><a href="#wget镜像网站" class="headerlink" title="wget镜像网站"></a>wget镜像网站</h3><code>wget -m -k (-H) http://www.example.com/</code>， 如果网站中的图像是放在另外的站点，那么可以使用<code>-H</code> 选项。<h3 id="wget使用代理下载"><a href="#wget使用代理下载" class="headerlink" title="wget使用代理下载"></a>wget使用代理下载</h3><code>wget -Y on -p -k https://xxx.net/projects/wvware/</code><br><strong>代理可以在<code>环境变量</code>或<code>wgetrc</code>文件中设定:</strong> </li>
+</ul>
+<ol>
+<li>在环境变量中设定代理<br><code>export PROXY=http://211.90.168.94:8080/</code></li>
+<li>在~/.wgetrc中设定代理<br><code>http_proxy = http://proxy.xxx.com:18023/</code><br><code>ftp_proxy = http://proxy.xxx.com:18023/</code></li>
+</ol>
+<h2 id="2-scp"><a href="#2-scp" class="headerlink" title="2. scp"></a>2. scp</h2><p>语法：<code>scp [参数] [被传输的文件地址路径] [文件传输目的地路径]</code><br>参数:<br><code>-v</code>:详细方式显示输出<br><code>-r</code>:递归复制整个目录</p>
+<ol>
+<li>上传，本地上传远程:<br>格式： <code>scp foo.txt user@example.com:remote/dir</code>，其中user@example.com可以改为IP<br>例：<code>scp -v ./file.txt xxusername@l-xxx.xxx.xx.xx.com:/home/xxusername</code> 其中，<code>/home/xxusername</code>表示远程路径</li>
+<li>下载，远程下载本地:<br>格式： <code>scp user@example.com:remote/dir/foo.txt local/dir</code>，其中user@example.com可以改为IP<br>例： <code>scp -v ./file.txt xxusername@100.80.xx8.xx7:/tmp</code>，在服务器上操作，将文件传到本地主机</li>
+</ol>
+<h2 id="3-nc"><a href="#3-nc" class="headerlink" title="3. nc"></a>3. nc</h2><p>前言：nc是一个可以通过TCP或UDP进行数据传输，可用来<strong>传输文件</strong>，<strong>聊天</strong>，<strong>端口扫描</strong>，<strong>远程执行命令</strong>。</p>
+<h3 id="nc基本参数"><a href="#nc基本参数" class="headerlink" title="nc基本参数"></a>nc基本参数</h3><p><code>-l</code> 使用监听模式，管控传入的资料。<br><code>-n</code> 直接使用IP地址，而不通过域名服务器。<br><code>-p&lt;local port&gt;</code> 设置本地主机使用的通信端口，通常可以这样<code>nc -l 1234</code>直接指定<br><code>-s&lt;destination port&gt;</code> 设置本地主机送出数据包的IP地址，可以<code>nc 10.86.219.204 1234</code>直接指定IP。<br><code>-u</code> 使用UDP传输协议。<br><code>-v</code> 显示指令执行过程。<br><code>-w&lt;timeout seconds&gt;</code> 设置等待连线的时间。</p>
+<h3 id="文件传输"><a href="#文件传输" class="headerlink" title="文件传输"></a>文件传输</h3><p>机器A(Ip:<code>192.90.123.112</code>)向机器B(IP:<code>192.90.123.110</code>)传输文件<code>file.txt</code></p>
+<ol>
+<li>B: <code>nc -l 1567 &gt;file.txt</code>，<code>-l</code>开启监听模式，<code>1567</code> Tcp端口号，输出到<code>file.txt</code></li>
+<li>A: <code>nc 192.90.123.110 1567 &lt; file.txt</code>。</li>
+</ol>
+<p>Tip：A，B两个机器任何一个监听都可以，保证流向即可！</p>
+<p><strong>等价：</strong></p>
+<ol>
+<li>B: <code>nc 192.90.123.112 1567 &gt;file.txt</code></li>
+<li>A：<code>nc -l 1567 &lt;file.txt</code></li>
+</ol>
+<h3 id="其他作用"><a href="#其他作用" class="headerlink" title="其他作用"></a>其他作用</h3><ol>
+<li>端口扫描：<code>nc -vv &lt;ip&gt; 1025-65535</code>，扫描对应ip的端口是否开放！</li>
+<li>执行远程命令： <code>echo stat | nc &lt;ip&gt; 2181</code>,远程执行zk命令。</li>
+<li>聊天：A：<code>nc -l 1567</code>，B：<code>nc &lt;A ip&gt; 1567</code></li>
+</ol>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Linux/">Linux</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Linux/">Linux</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2016/08/14/【Linux】常用命令（三）/" data-title="【Linux】常用命令（三） | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/08/14/【Guava】几个常用的方法整理/" title="【Guava】几个常用的方法整理">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【Guava】几个常用的方法整理</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/08/13/【Linux】常用命令（二）/"  title="【Linux】常用命令（二）">
+ <strong>下一篇：</strong><br/> 
+ <span>【Linux】常用命令（二）
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

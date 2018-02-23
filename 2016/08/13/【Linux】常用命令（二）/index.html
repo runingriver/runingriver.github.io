@@ -1,0 +1,667 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【Linux】常用命令（二） | running river</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="奔跑的小河">
+    
+
+    
+    <meta name="description" content="find,grep1. find 最常见和最强大的查找命令，你可以用它找到任何你想找的文件find &amp;lt;指定目录&amp;gt; &amp;lt;指定条件&amp;gt; &amp;lt;指定动作&amp;gt;最常使用：12345678910111213141516171819#语法find &amp;l">
+<meta name="keywords" content="Linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【Linux】常用命令（二）">
+<meta property="og:url" content="http://huzongzhe.cn/2016/08/13/【Linux】常用命令（二）/index.html">
+<meta property="og:site_name" content="running river">
+<meta property="og:description" content="find,grep1. find 最常见和最强大的查找命令，你可以用它找到任何你想找的文件find &amp;lt;指定目录&amp;gt; &amp;lt;指定条件&amp;gt; &amp;lt;指定动作&amp;gt;最常使用：12345678910111213141516171819#语法find &amp;lt;指令目录&amp;gt; &amp;lt;指令条件&amp;gt; &amp;lt;指定动作&amp;gt;#搜索当前目录中，所有文件名以my开头的文件，并显示它们的详细信">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-02-23T07:44:37.869Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【Linux】常用命令（二）">
+<meta name="twitter:description" content="find,grep1. find 最常见和最强大的查找命令，你可以用它找到任何你想找的文件find &amp;lt;指定目录&amp;gt; &amp;lt;指定条件&amp;gt; &amp;lt;指定动作&amp;gt;最常使用：12345678910111213141516171819#语法find &amp;lt;指令目录&amp;gt; &amp;lt;指令条件&amp;gt; &amp;lt;指定动作&amp;gt;#搜索当前目录中，所有文件名以my开头的文件，并显示它们的详细信">
+
+    
+    <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="running river" title="running river"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="running river">running river</a></h1>
+				<h2 class="blog-motto">生命不止，奔跑不息</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页|Home</a></li>
+					
+						<li><a href="/archives">归档|Archives</a></li>
+					
+						<li><a href="/about">关于|About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:huzongzhe.cn">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/08/13/【Linux】常用命令（二）/" title="【Linux】常用命令（二）" itemprop="url">【Linux】常用命令（二）</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
+		
+  <p class="article-time">
+    <time datetime="2016-08-13T14:12:11.000Z" itemprop="datePublished"> 发表于 2016-08-13</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<h1 id="find-grep"><a href="#find-grep" class="headerlink" title="find,grep"></a>find,grep</h1><h2 id="1-find-最常见和最强大的查找命令，你可以用它找到任何你想找的文件"><a href="#1-find-最常见和最强大的查找命令，你可以用它找到任何你想找的文件" class="headerlink" title="1. find 最常见和最强大的查找命令，你可以用它找到任何你想找的文件"></a>1. find 最常见和最强大的查找命令，你可以用它找到任何你想找的文件</h2><p><code>find &lt;指定目录&gt; &lt;指定条件&gt; &lt;指定动作&gt;</code><br>最常使用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#语法</span><br><span class="line">find &lt;指令目录&gt; &lt;指令条件&gt; &lt;指定动作&gt;</span><br><span class="line"></span><br><span class="line">#搜索当前目录中，所有文件名以my开头的文件，并显示它们的详细信息</span><br><span class="line">find . -name &apos;my*&apos; -ls</span><br><span class="line"></span><br><span class="line">#当前目录及其子目录下查找lee.log这支文件</span><br><span class="line">find . -name &apos;lee.log&apos;</span><br><span class="line"></span><br><span class="line">#将build.log中所有包含error字段的行列出来并显示行号</span><br><span class="line">grep -n &apos;error&apos; build.log</span><br><span class="line"></span><br><span class="line">find /home/admin -size +250000k(超过250000k的文件，当然+改成-就是小于了)</span><br><span class="line">find /home/admin -atime -1  1天内访问过的文件</span><br><span class="line">find /home/admin -ctime -1  1天内状态改变过的文件 </span><br><span class="line">find /home/admin -mtime -1  1天内修改过的文件</span><br><span class="line">find /home/admin -amin -1  1分钟内访问过的文件</span><br><span class="line">find /home/admin -cmin -1  1分钟内状态改变过的文件   </span><br><span class="line">find /home/admin -mmin -1  1分钟内修改过的文件</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><p><code>find /home/q/www/ -maxdepth 2 -name logs</code> 文件名，深度查找</p>
+</li>
+<li><p>find 常用参数<br><code>-print</code>，find命令将匹配的文件输出到标准输出<br><code>-exec/-ok</code>，find命令对匹配的文件执行该参数所给出的shell命令。相应命令的形式为<code>&#39;command&#39; {} \;</code>，注意<code>{}</code>和<code>\;</code>之间的空<br><code>-ok</code>删除文件前,要询问是否删除!, 用<code>-exec</code> 执行指令是每次操作生产一个线程, 用<code>xargs</code>只在一个shell中处理.<br>eg: 删除文件大小为零的文件 方法一: <code>find ./ -size 0 -exec rm {} \;</code> 方法二: <code>rm -i $(find ./ -size 0)</code>  方法三: <code>find ./ -size 0 | xargs rm -f &amp;</code><br><code>find /etc -type d –print</code> 在/etc目录下查找所有的目录<br><code>find . ! -type d –print</code> 在当前目录下查找除目录以外的所有类型的文件<br><code>find ./ -mtime +3 -print|xargs rm -f –r</code> 删除3天以前的所有东西 （<code>find . -ctime +3 -exec rm -rf {} \;</code>）<br><code>find . -type f -mtime +7 -name &quot;*.log&quot; -exec mv {} /tmp \;</code> 将7天前的<code>log</code>文件移动到<code>/tmp</code>目录下，<code>\;</code>表示命令结束。<br><code>find ./ -size 0 | xargs rm -f &amp;</code> 删除文件大小为零的文件</p>
+</li>
+</ul>
+<h2 id="2-grep"><a href="#2-grep" class="headerlink" title="2. grep"></a>2. grep</h2><ul>
+<li>查找当前目录下所有文件包含’text’的文件及行数： <code>grep -rn &#39;text&#39; .</code> 其中<code>r</code>表示递归, <code>n</code>表示显示匹配字符在文件中的行!</li>
+<li>只显示匹配的字符：<code>grep -o &#39;type.*groupid&#39;</code> 只显示以<code>type</code>开头，以<code>groupid</code>结尾，中间任意个字符的这部分。</li>
+<li>AND与：grep ‘parttern1’ | grep ‘parttern2’</li>
+<li>OR或：<code>egrep &#39;pattern1|pattern2&#39; filename</code> 等价于  <code>grep -E &#39;pattern1|pattern2&#39; filename</code>，也可以： <code>grep -e pattern1 -e pattern2 filename</code></li>
+<li>NOT非：<code>grep -v &#39;parttern&#39;</code>，即不包含。</li>
+<li>范围输出：<code>grep -A 5</code>，<code>grep -B 5</code>，<code>grep -C 5</code>分别是匹配行的后5行，前5行，前后各5行。</li>
+<li><code>egrep</code> 正则匹配，<code>zgrep</code> 查看压缩文件</li>
+</ul>
+<h3 id="find与grep，sed组合，查询文件中的内容"><a href="#find与grep，sed组合，查询文件中的内容" class="headerlink" title="find与grep，sed组合，查询文件中的内容"></a>find与grep，sed组合，查询文件中的内容</h3><ul>
+<li><code>find . | xargs grep &#39;pattern&#39;</code> 查找当前目录及子目录下所有文件中包含<code>pattern</code>的字符行。</li>
+<li><code>find . -name &#39;abc*&#39; | xargs grep &#39;pattern&#39;</code> 查找当前目录及子目录中文件名以<code>abc</code>开头的，文件中包含<code>pattern</code>的字符行。<br><strong>Tip:压缩文件<code>tar.gz</code>请用<code>zgrep</code></strong></li>
+<li><code>find . -name &#39;*.txt&#39; | xargs sed -i &quot;s/233/666/g;s/235/626/g;s/333/616/g;s/233/664/g&quot;</code> 查找当前及子目录所有txt文件，并全文替换，多种类型字符串替换！</li>
+</ul>
+<h1 id="Top-pmap-iostat-dstat-sar-pidstat-vmstat"><a href="#Top-pmap-iostat-dstat-sar-pidstat-vmstat" class="headerlink" title="Top,pmap,iostat,dstat,sar,pidstat,vmstat"></a>Top,pmap,iostat,dstat,sar,pidstat,vmstat</h1><h3 id="1-top系统监控"><a href="#1-top系统监控" class="headerlink" title="1. top系统监控"></a>1. top系统监控</h3><p><strong>列含义：</strong></p>
+<blockquote>
+<p><strong>VIRT:</strong> 虚拟内存中含有共享库、共享内存、栈、堆，所有已申请的总内存空间。(进程地址空间没有映射之前的内存)<br><strong>RES: </strong> 是进程正在使用的内存空间(栈、堆)，申请内存后该内存段已被重新赋值。<br><strong>SHR: </strong> 是共享内存正在使用的空间。<br><strong>SWAP:</strong> 交换的是已经申请，但没有使用的空间，包括(栈、堆、共享内存)。<br><strong>DATA:</strong> 是进程栈、堆申请的总空间。<br><strong>CODE:</strong>    可执行代码占用的物理内存大小，单位kb<br><strong>PR:    </strong>优先级<br><strong>NI:</strong>    nice值。负值表示高优先级，正值表示低优先级</p>
+</blockquote>
+<p><strong>交互：</strong></p>
+<ul>
+<li><code>c</code> 或<code>top -c</code>：显示启动参数</li>
+<li><code>z</code>：高亮显示，再按<code>x</code>高亮当前排序的列，继续<code>shift + &lt;</code>或<code>shift + &gt;</code> 左右选择排序的列。</li>
+<li><code>1</code> ： 展开显示CPU每个核的使用情况。</li>
+<li><code>shift + p</code>即<code>P</code>：按CPU排序</li>
+<li><code>shift + m</code>即<code>M</code>：按内存排序</li>
+<li><strong>f</strong> 键可以选择显示的内容</li>
+<li><strong>h</strong> 查看帮助</li>
+<li><strong>k</strong> 再输入pid，kill一个进程</li>
+<li><strong><code>top -p pid</code></strong> 只监控一个进程 <code>top -bH -d 3 -p  &lt;pid&gt;</code> 监控进程的线程运行, 或者按H，也可<code>top -Hp &lt;pid&gt;</code> 查看PID下最耗CPU的线程pid.</li>
+</ul>
+<p><strong>字段含义：</strong><br><code>uptime</code>：系统负载；先看15分钟的。1.7表示有70%的进程在等待。<br><code>进程统计</code>：Tasks: 215 total,   1 running, 213 sleeping,   0 stopped,   1 zombie：zombie表示僵尸进程。<br><code>cpu使用率</code>：%Cpu(s): 27.9 us使用率,  4.4 sy内核使用率,  0.0 ni, 67.8 id空闲,  0.0 wa等待IOcpu占比，比较高，则表示cpu多半在等待IO,  0.0 hi,  0.0 si,  0.0 st</p>
+<h3 id="2-pmap-查看进程空间"><a href="#2-pmap-查看进程空间" class="headerlink" title="2. pmap 查看进程空间"></a>2. pmap 查看进程空间</h3><p><code>sudo pmap -x pid</code>  <code>sudo pmap -q pid</code> 简略方式查看进程空间<br><strong>列含义：</strong></p>
+<blockquote>
+<p><strong>Address</strong>:  start address of map  映像起始地址<br><strong>Kbytes: </strong> size of map in kilobytes  映像大小<br><strong>RSS</strong>:  resident set size in kilobytes  驻留集大小<strong>(真是存在与RAM中的部分),其他分布与swap或文件系统,或可执行部分没有加载</strong><br><strong>Dirty:</strong>  dirty pages (both shared and private) in kilobytes  脏页大小<br><strong>Mode:</strong>  permissions on map 映像权限: r=read, w=write, x=execute, s=shared, p=private (copy on write)<br><strong>Mapping:</strong>  file backing the map , or ‘[ anon ]’ for allocated memory, or ‘[ stack ]’ for the program stack.  映像支持文件,[anon]为已分配内存 [stack]为程序堆栈<br><strong>Offset:</strong>  offset into the file  文件偏移<br><strong>Device:</strong>  device name (major:minor)  设备名</p>
+</blockquote>
+<h3 id="3-iostat-磁盘IO和CPU监控统计"><a href="#3-iostat-磁盘IO和CPU监控统计" class="headerlink" title="3. iostat 磁盘IO和CPU监控统计"></a>3. iostat 磁盘IO和CPU监控统计</h3><ul>
+<li><p><strong><code>iostat -c 2 5</code>（等价于<code>sar -u 2 5</code>），统计cpu使用情况</strong><br><code>%user</code>：CPU处在用户模式下的时间百分比。<br><code>%nice</code>：CPU处在带NICE值的用户模式下的时间百分比。<br><code>%system</code>：CPU处在系统模式下的时间百分比。<br><code>%iowait</code>：CPU等待输入输出完成时间的百分比。<br><code>%steal</code>：管理程序维护另一个虚拟处理器时，虚拟CPU的无意识等待时间百分比。<br><code>%idle</code>：CPU空闲时间百分比。<br>备注：如果<code>%iowait</code>的值过高，表示硬盘存在I/O瓶颈，<code>%idle</code>值高，表示CPU较空闲，如果<code>%idle</code>值高但系统响应慢时，有可能是CPU等待分配内存，此时应加大内存容量。<br><code>%idle</code>值如果持续低于10，那么系统的CPU处理能力相对较低，表明系统中最需要解决的资源是CPU。</p>
+</li>
+<li><p><strong><code>iostat -x 2 5</code> （等价于<code>sar -d 2 5</code>）或<code>iostat -x -k 2 5</code> 统计磁盘IO情况</strong><br><code>rrqm/s</code>: 每秒对该设备的读请求被合并次数，文件系统会对读取同块(block)的请求进行合并<br><code>wrqm/s</code>: 每秒对该设备的写请求被合并次数<br><code>r/s</code>:  每秒完成的读 I/O 次数。即 rio/s<br><code>w/s</code>:  每秒完成的写 I/O 次数。即 wio/s<br><code>rsec/s</code>:  每秒读扇区数。即 rsect/s<br><code>wsec/s</code>:  每秒写扇区数。即 wsect/s<br><code>rkB/s</code>:  每秒读K字节数。是 rsect/s 的一半，因为每扇区大小为512字节。<br><code>wkB/s</code>:  每秒写K字节数。是 wsect/s 的一半。<br><code>avgrq-sz</code>:  平均每次IO操作的数据大小(扇区数为单位)<br><code>avgqu-sz</code>:  平均等待处理的IO请求队列长度<br><code>await</code>:  平均每次设备I/O操作的等待时间 (包括等待时间和处理时间，毫秒为单位)。<br><code>svctm</code>: 平均每次IO请求的处理时间(毫秒)，已不具备参考价值<br><code>%util</code>:  一秒中有百分之多少的时间用于 I/O 操作，即被io消耗的cpu百分比<br>备注：如果 <code>%util</code> 接近 100%，说明产生的I/O请求太多，I/O系统已经满负荷，该磁盘可能存在瓶颈。</p>
+</li>
+</ul>
+<p>上述指令：<code>iostat -x -k 2 5</code>，<code>-k</code>表示将按扇区统计，改为可读的方式：按KB统计。</p>
+<ol>
+<li>每秒44次读IO，1次写IO。</li>
+<li>每秒读1MB左右数据，写入6kb数据。</li>
+<li>等到IO队列<code>avgqu-sz</code>，中每秒有0.26请求驻留，说明IO较快。</li>
+<li>每次IO平均处理时间是5.48ms。</li>
+</ol>
+<ul>
+<li><code>iostat -d -k 2 5</code>，<code>-k</code>可换成<code>-m</code>，分别表示IO的KB，MB；统计磁盘IO</li>
+</ul>
+<h4 id="vmstat系统监控"><a href="#vmstat系统监控" class="headerlink" title="vmstat系统监控"></a>vmstat系统监控</h4><ul>
+<li><code>vmstat 2</code> 每隔2秒采集一次数据。</li>
+<li><code>vmstat 2 5</code> 每隔2秒采集一次数据，总共采样5次。</li>
+</ul>
+<p><strong>列含义：</strong><br><strong>free</strong>   空闲的物理内存的大小<br><strong>cache</strong> 用来记忆我们打开的文件,给文件做缓冲<br><strong>in</strong> 每秒CPU的中断次数，包括时间中断<br><strong>cs</strong> 每秒上下文切换次数<br><strong>us</strong> 用户CPU时间<br><strong>sy</strong> 系统CPU时间</p>
+<h3 id="4-dstat系统监控"><a href="#4-dstat系统监控" class="headerlink" title="4. dstat系统监控"></a>4. dstat系统监控</h3><p>该命令和<code>vmstat</code>相同，提供更直观的彩色输出，但是需要我们先安装：<code>sudo yum install dstat</code>；<code>sudo apt-get install dstat</code></p>
+<ul>
+<li><code>dstat -dnyc -N eth0 -C total -f 5</code></li>
+<li><code>dstat -taf --debug</code></li>
+<li><code>dstat -tcndylp --top-cpu</code></li>
+<li><code>dstat --time --cpu --net --disk --sys --load --proc --top-cpu</code></li>
+<li><code>dstat -tcyif</code></li>
+<li><strong><code>dstat -tvn 5</code>，使用最多！！！</strong><br>显示信息说明:<br>cpu：hiq、siq分别为硬中断和软中断次数。<br>system：int、csw分别为系统的中断次数（interrupt）和上下文切换（context switch）。</li>
+</ul>
+<h3 id="5-pidstat-（用于监控全部或指定进程占用系统资源的情况）"><a href="#5-pidstat-（用于监控全部或指定进程占用系统资源的情况）" class="headerlink" title="5. pidstat （用于监控全部或指定进程占用系统资源的情况）"></a>5. pidstat （用于监控全部或指定进程占用系统资源的情况）</h3><ul>
+<li><code>pidstat -w 1 2</code> 每1秒采样一次，共采样2次，获取进程上下文切换情况：<br>cswch 自愿的上下文切换，当某一任务处于阻塞等待时，将主动让出自己的CPU资源。<br>nvcswch 非自愿的上下文切换，时间片到，更高优先级抢占！<br><code>pidstat -w -p &lt;pid&gt; 1</code> 每秒采样一次，统计指定进程上下文切换情况！</li>
+<li><code>pidstat -d 1</code>  每1秒采样一次，统计IO使用情况</li>
+<li><code>pidstat -l</code> 列出所有进程名和它的启动参数！</li>
+<li><code>pidstat -u -p &lt;pid&gt; 2</code> 2秒采样一次，查看指定进程CPU使用情况。</li>
+</ul>
+<h3 id="6-sar-系统历史情况统计"><a href="#6-sar-系统历史情况统计" class="headerlink" title="6. sar 系统历史情况统计"></a>6. sar 系统历史情况统计</h3><ol>
+<li><p><code>sar -q</code> 查看运行队列中的进程数、系统上的进程大小、平均负载<br><code>runq-sz</code>：运行队列的长度（等待运行的进程数）<br><code>plist-sz</code>：进程列表中进程（processes）和线程（threads）的数量<br><code>ldavg-1</code>：最后1分钟的系统平均负载 ldavg-5：过去5分钟的系统平均负载<br><code>ldavg-15</code>：过去15分钟的系统平均负载</p>
+</li>
+<li><p><code>sar -r</code> 查看内存使用状况<br><code>kbmemfree</code>：这个值和free命令中的free值基本一致,所以它不包括buffer和cache的空间.<br><code>kbmemused</code>：这个值和free命令中的used值基本一致,所以它包括buffer和cache的空间.<br><strong><code>%memused</code>：物理内存使用率，这个值是kbmemused和内存总量(不包括swap)的一个百分比.</strong><br><code>kbbuffers和kbcached</code>：这两个值就是free命令中的buffer和cache.<br><code>kbcommit</code>：保证当前系统所需要的内存,即为了确保不溢出而需要的内存(RAM+swap).<br><code>%commit</code>：这个值是kbcommit与内存总量(包括swap)的一个百分比.</p>
+</li>
+<li><p><code>sar -W</code>查看页面交换发生状况<br>页面发生交换时，服务器的吞吐量会大幅下降；服务器状况不良时，如果怀疑因为内存不足而导致了页面交换的发生，可以使用这个命令来确认是否发生了大量的交换；<br><code>pswpin/s</code>：每秒系统换入的交换页面（swap page）数量<br><code>pswpout/s</code>：每秒系统换出的交换页面（swap page）数量</p>
+</li>
+<li><code>sar -u</code> 查看CPU使用率<br><code>%user</code> 用户模式下消耗的CPU时间的比例；<br><code>%nice</code> 通过nice改变了进程调度优先级的进程，在用户模式下消耗的CPU时间的比例<br><code>%system</code> 系统模式下消耗的CPU时间的比例；<br><strong><code>%iowait</code> CPU等待磁盘I/O导致空闲状态消耗的时间比例；iowait比例太高说明性能瓶颈在IO上</strong><br><code>%steal</code> 利用Xen等操作系统虚拟化技术，等待其它虚拟CPU计算占用的时间比例；<br><code>%idle</code> CPU空闲时间比例；</li>
+</ol>
+<p><strong>Tip：要判断系统瓶颈问题，有时需几个 sar 命令选项结合起来：</strong><br>怀疑CPU存在瓶颈，可用 <code>sar -u</code> 和 <code>sar -q</code> 等来查看<br>怀疑内存存在瓶颈，可用<code>sar -B</code>、<code>sar -r</code> 和 <code>sar -W</code> 等来查看<br>怀疑I/O存在瓶颈，可用 <code>sar -b</code>、<code>sar -u</code> 和 <code>sar -d</code> 等来查看</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Linux/">Linux</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Linux/">Linux</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://huzongzhe.cn/2016/08/13/【Linux】常用命令（二）/" data-title="【Linux】常用命令（二） | running river" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/08/14/【Linux】常用命令（三）/" title="【Linux】常用命令（三）">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【Linux】常用命令（三）</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/08/13/【Linux】常用命令（一）/"  title="【Linux】常用命令（一）">
+ <strong>下一篇：</strong><br/> 
+ <span>【Linux】常用命令（一）
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/shell/" title="shell">shell<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/教程/" title="教程">教程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/ActiveMQ/" title="ActiveMQ">ActiveMQ<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zookeeper/" title="zookeeper">zookeeper<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bitMap/" title="bitMap">bitMap<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bloomFilter/" title="bloomFilter">bloomFilter<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/runingriver" target="_blank" title="Github你值得拥有">github</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/z702143700" target="_blank" title="国内常用博客平台">CSDN</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://ifeve.com" target="_blank" title="并发编程网">并发编程网</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.tuicool.com/a/" target="_blank" title="推酷">推酷</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.v2ex.com/" target="_blank" title="V2ex">V2ex</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Talk is cheap,show me your code.  <br/>
+			life is like running river.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/runingriver" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:huzongzhe@126.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018 
+		
+		<a href="/about" target="_blank" title="奔跑的小河">奔跑的小河</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
