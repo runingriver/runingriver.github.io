@@ -79,6 +79,26 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
+    <a href="/2017/05/13/【ZooKeeper】集群搭建(二)/" title="【ZooKeeper】集群搭建(二)" itemprop="url">
+  
+    <h1 itemprop="name">【ZooKeeper】集群搭建(二)</h1>
+    
+     
+           <p itemprop="description" >前言：在实际搭建zk集群过程中遇到不少困难,简单配置可以google到,但是想深入一点,对zk的配置做更为深入自定义配置,就有点力不从心了,而且很多的配置都没有做深入的研究.记录此博客,一方面整理记录一下zk常用操作,将网上人云亦云的杂乱中整理成可用的部分,另一方面,根据zk启动</p>
+        
+    
+    <time datetime="2017-05-13T03:12:22.000Z" itemprop="datePublished">2017-05-13</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
     <a href="/2017/05/12/【ZooKeeper】我认识的zk(一)/" title="【ZooKeeper】我认识的zk(一)" itemprop="url">
   
     <h1 itemprop="name">【ZooKeeper】我认识的zk(一)</h1>
@@ -188,15 +208,13 @@ Syn</p>
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/03/08/Java排查利器之BTrace，Greys/" title="Java排查利器之BTrace，Greys" itemprop="url">
+    <a href="/2017/03/08/Java排查工具之jvisualvm,jps,jmap,jstack/" title="Java排查工具之jvisualvm,jps,jmap,jstack" itemprop="url">
   
-    <h1 itemprop="name">Java排查利器之BTrace，Greys</h1>
+    <h1 itemprop="name">Java排查工具之jvisualvm,jps,jmap,jstack</h1>
     
      
-           <p itemprop="description" >前言： 关于btrace和greys的使用方法，网上不计其数。这里根据我的使用整理了个精简版，零复制纯手打，高度概括，适用快速入门。萝卜青菜各有所爱，greys好用太多有木有！
-一. Greys安装安装非常简单
-
-直接安装：mkdir greys;cd greys，curl -s</p>
+           <p itemprop="description" >前言：总结java开发中常用到的一些工具，这里都是实际操作命令，很多时候在服务器上操作需要注意的地方，如果有疑问建议加google来看，这里精简描述。
+1. jps 查看jvm中运行的Java进程参数说明:-q 不输出类名、Jar名和传入main方法的参数-m 输出传入main方</p>
         
     
     <time datetime="2017-03-08T03:12:22.000Z" itemprop="datePublished">2017-03-08</time>
@@ -232,13 +250,15 @@ Syn</p>
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/03/08/Java排查工具之jvisualvm,jps,jmap,jstack/" title="Java排查工具之jvisualvm,jps,jmap,jstack" itemprop="url">
+    <a href="/2017/03/08/Java排查利器之BTrace，Greys/" title="Java排查利器之BTrace，Greys" itemprop="url">
   
-    <h1 itemprop="name">Java排查工具之jvisualvm,jps,jmap,jstack</h1>
+    <h1 itemprop="name">Java排查利器之BTrace，Greys</h1>
     
      
-           <p itemprop="description" >前言：总结java开发中常用到的一些工具，这里都是实际操作命令，很多时候在服务器上操作需要注意的地方，如果有疑问建议加google来看，这里精简描述。
-1. jps 查看jvm中运行的Java进程参数说明:-q 不输出类名、Jar名和传入main方法的参数-m 输出传入main方</p>
+           <p itemprop="description" >前言： 关于btrace和greys的使用方法，网上不计其数。这里根据我的使用整理了个精简版，零复制纯手打，高度概括，适用快速入门。萝卜青菜各有所爱，greys好用太多有木有！
+一. Greys安装安装非常简单
+
+直接安装：mkdir greys;cd greys，curl -s</p>
         
     
     <time datetime="2017-03-08T03:12:22.000Z" itemprop="datePublished">2017-03-08</time>
@@ -253,37 +273,12 @@ Syn</p>
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/11/12/【Mysql】日志备忘/" title="【Mysql】日志备忘" itemprop="url">
+    <a href="/2016/11/12/【Mysql】主从复制原理整理/" title="【Mysql】主从复制原理整理" itemprop="url">
   
-    <h1 itemprop="name">【Mysql】日志备忘</h1>
+    <h1 itemprop="name">【Mysql】主从复制原理整理</h1>
     
      
-           <p itemprop="description" >1. 介绍mysql常用日志有 错误日志，binlog日志(二进制日志)，慢查询日志，查询日志等。当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。
-2. 相关命令mysql 配置文件一般是：/etc/my.cnf（目录位置可能</p>
-        
-    
-    <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2016/11/12/【Linux】文本操作/" title="【Linux】文本操作命令" itemprop="url">
-  
-    <h1 itemprop="name">【Linux】文本操作命令</h1>
-    
-     
-           <p itemprop="description" >1. tr 按列替换
-echo &amp;quot;{123}&amp;quot; | tr -d &amp;#39;{}&amp;#39; 删除输入中的 “{“ 和 “}”
-cat testfile |tr a-z A-Z  将文件testfile中的小写字母全部转换成大写字母
-
-2. cut : cut [</p>
+           <p itemprop="description" >1. 介绍当前用的比较多的mysql高可用架构一般是HA或MMM,Master-Slaver之间通过binlog实现主从数据一致性,有必要理解一下主从复制的基本原理。首先从理解数据的日志类型入手，数据库提供了以下几种日志： 错误日志、binlog日志(二进制日志)、查询日志、慢查</p>
         
     
     <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
@@ -297,7 +292,7 @@ cat testfile |tr a-z A-Z  将文件testfile中的小写字母全部转换成大�
 
 
   <nav id="page-nav" class="clearfix unexpand">
-    <a class="extend prev" rel="prev" href="/page/2/"><span></span>Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/4/">Next<span></span></a>
+    <a class="extend prev" rel="prev" href="/page/2/"><span></span>Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/4/">Next<span></span></a>
   </nav>
 
 </div>
@@ -322,6 +317,10 @@ cat testfile |tr a-z A-Z  将文件testfile中的小写字母全部转换成大�
 		
 		  
 			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HttpClient/" title="HttpClient">HttpClient<sup>1</sup></a></li>
 		  
 		
 		  
@@ -406,7 +405,7 @@ cat testfile |tr a-z A-Z  将文件testfile中的小写字母全部转换成大�
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/HttpClient/" title="HttpClient">HttpClient<sup>1</sup></a></li>
 			
 		
 			
@@ -435,6 +434,10 @@ cat testfile |tr a-z A-Z  将文件testfile中的小写字母全部转换成大�
 		
 			
 				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 			

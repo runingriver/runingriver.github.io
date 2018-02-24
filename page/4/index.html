@@ -79,15 +79,16 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/11/12/【Linux】cron，at，batch(任务调度)/" title="【Linux】cron，at，batch(任务调度)" itemprop="url">
+    <a href="/2016/11/12/【Linux】文本操作/" title="【Linux】文本操作命令" itemprop="url">
   
-    <h1 itemprop="name">【Linux】cron，at，batch(任务调度)</h1>
+    <h1 itemprop="name">【Linux】文本操作命令</h1>
     
      
-           <p itemprop="description" >一，基础知识
-corntab周期执行任务,anacron调度每日、每周或每月执行的作业,at调度只运行一次的作业.
-batch 命令被用来在系统平均负载达到 0.8% 以下时执行一次性的任务，通俗的所就是系统空闲时执行任务。
-crontab调度的任务是不会加载任何环境变量的,这就</p>
+           <p itemprop="description" >1. tr 按列替换
+echo &amp;quot;{123}&amp;quot; | tr -d &amp;#39;{}&amp;#39; 删除输入中的 “{“ 和 “}”
+cat testfile |tr a-z A-Z  将文件testfile中的小写字母全部转换成大写字母
+
+2. cut : cut [</p>
         
     
     <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
@@ -102,12 +103,36 @@ crontab调度的任务是不会加载任何环境变量的,这就</p>
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/11/12/【Mysql】主从复制原理整理/" title="【Mysql】主从复制原理整理" itemprop="url">
+    <a href="/2016/11/12/【Mysql】日志备忘/" title="【Mysql】日志备忘" itemprop="url">
   
-    <h1 itemprop="name">【Mysql】主从复制原理整理</h1>
+    <h1 itemprop="name">【Mysql】日志备忘</h1>
     
      
-           <p itemprop="description" >1. 介绍当前用的比较多的mysql高可用架构一般是HA或MMM,Master-Slaver之间通过binlog实现主从数据一致性,有必要理解一下主从复制的基本原理。首先从理解数据的日志类型入手，数据库提供了以下几种日志： 错误日志、binlog日志(二进制日志)、查询日志、慢查</p>
+           <p itemprop="description" >1. 介绍mysql常用日志有 错误日志，binlog日志(二进制日志)，慢查询日志，查询日志等。当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。
+2. 相关命令mysql 配置文件一般是：/etc/my.cnf（目录位置可能</p>
+        
+    
+    <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2016/11/12/【Linux】cron，at，batch(任务调度)/" title="【Linux】cron，at，batch(任务调度)" itemprop="url">
+  
+    <h1 itemprop="name">【Linux】cron，at，batch(任务调度)</h1>
+    
+     
+           <p itemprop="description" >一，基础知识
+corntab周期执行任务,anacron调度每日、每周或每月执行的作业,at调度只运行一次的作业.
+batch 命令被用来在系统平均负载达到 0.8% 以下时执行一次性的任务，通俗的所就是系统空闲时执行任务。
+crontab调度的任务是不会加载任何环境变量的,这就</p>
         
     
     <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
@@ -187,15 +212,15 @@ locate a.txt 搜索文件,其中 updatedb 强制更新locate数据库，默认�
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/08/13/【Linux】常用命令（一）/" title="【Linux】常用命令（一）" itemprop="url">
+    <a href="/2016/08/13/【Guava】AbstractScheduleService源码分析和使用/" title="【Guava】AbstractScheduleService源码分析和使用" itemprop="url">
   
-    <h1 itemprop="name">【Linux】常用命令（一）</h1>
+    <h1 itemprop="name">【Guava】AbstractScheduleService源码分析和使用</h1>
     
      
-           <p itemprop="description" >前言：下面总结使用Linux类系统的一些总结。
-vim1. 模式切换(1) 普通模式其他模式2次ESC即可进入普通模式
-
-删除：x 删除光标位置字符dd删除当前行（以后按.就可以直接删）d)删除从光标开始到句末，d(删除当前光标到句首，d{段落后删除，d}段落前删除dw，db也是</p>
+           <p itemprop="description" >前言： AbstractScheduledService是guava提供的一个定时任务的实现，提供更简便的使用，并提供任务生命周期的监听。
+AbstractScheduledService和Listener的生命周期
+AbstractScheduledService概述
+Abst</p>
         
     
     <time datetime="2016-08-13T11:22:11.000Z" itemprop="datePublished">2016-08-13</time>
@@ -253,15 +278,15 @@ vim1. 模式切换(1) 普通模式其他模式2次ESC即可进入普通模式
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/08/13/【Guava】AbstractScheduleService源码分析和使用/" title="【Guava】AbstractScheduleService源码分析和使用" itemprop="url">
+    <a href="/2016/08/13/【Linux】常用命令（一）/" title="【Linux】常用命令（一）" itemprop="url">
   
-    <h1 itemprop="name">【Guava】AbstractScheduleService源码分析和使用</h1>
+    <h1 itemprop="name">【Linux】常用命令（一）</h1>
     
      
-           <p itemprop="description" >前言： AbstractScheduledService是guava提供的一个定时任务的实现，提供更简便的使用，并提供任务生命周期的监听。
-AbstractScheduledService和Listener的生命周期
-AbstractScheduledService概述
-Abst</p>
+           <p itemprop="description" >前言：下面总结使用Linux类系统的一些总结。
+vim1. 模式切换(1) 普通模式其他模式2次ESC即可进入普通模式
+
+删除：x 删除光标位置字符dd删除当前行（以后按.就可以直接删）d)删除从光标开始到句末，d(删除当前光标到句首，d{段落后删除，d}段落前删除dw，db也是</p>
         
     
     <time datetime="2016-08-13T11:22:11.000Z" itemprop="datePublished">2016-08-13</time>
@@ -273,31 +298,9 @@ Abst</p>
 
 
 
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2016/06/23/使用hexo和jacman搭建博客简记/" title="使用hexo和jacman搭建博客简记" itemprop="url">
-  
-    <h1 itemprop="name">使用hexo和jacman搭建博客简记</h1>
-    
-     
-           <p itemprop="description" >写一篇博客
-在创建博客目录的.blog/source/_posts文件夹中创建一个md文件.
-支持markdown写博客, 不同之处在于文件开头需要添加一个描述:123456789101112---title: 记一次22亿大数据分析处理踩坑经历date: 2017/3/23 2</p>
-        
-    
-    <time datetime="2016-06-23T13:12:22.000Z" itemprop="datePublished">2016-06-23</time>
-  </a>
-</section>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix unexpand">
-    <a class="extend prev" rel="prev" href="/page/3/"><span></span>Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span>
+    <a class="extend prev" rel="prev" href="/page/3/"><span></span>Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/5/">Next<span></span></a>
   </nav>
 
 </div>
@@ -322,6 +325,10 @@ Abst</p>
 		
 		  
 			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HttpClient/" title="HttpClient">HttpClient<sup>1</sup></a></li>
 		  
 		
 		  
@@ -406,7 +413,7 @@ Abst</p>
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/HttpClient/" title="HttpClient">HttpClient<sup>1</sup></a></li>
 			
 		
 			
@@ -435,6 +442,10 @@ Abst</p>
 		
 			
 				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 			

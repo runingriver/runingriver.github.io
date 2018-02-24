@@ -22,7 +22,7 @@
 <meta property="og:image" content="http://huzongzhe.cn/images/hbase-1.png">
 <meta property="og:image" content="http://huzongzhe.cn/images/hbase-2.png">
 <meta property="og:image" content="http://huzongzhe.cn/images/hbase-3.png">
-<meta property="og:updated_time" content="2018-02-23T09:20:25.644Z">
+<meta property="og:updated_time" content="2018-02-23T09:27:05.704Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【HBase】一些有必要知道的知识点（一）">
 <meta name="twitter:description" content="1. Region的rowkey范围是开区间还是闭区间？答：region的rowkey是前闭后开([start,end))，从下面这张图可以看出来：  Tip：Name列都是以Start Key开始，但不是以End Key结尾，而是一串很长的数字，可以想象，应该是无限接近End Key的！ 再看下面这个：预分区10个，以一位作为分区标记（hash%10），插入一条数据，且row是0开头，可以看出仅">
@@ -113,9 +113,9 @@
 <h3 id="5-Filter的实现原理"><a href="#5-Filter的实现原理" class="headerlink" title="5. Filter的实现原理"></a>5. Filter的实现原理</h3><p>答：所有的Filter都是基于<code>Filter</code>和<code>FilterBase</code>的，自定义一个Filter，需要将其编译成jar包，然后放到集群上然后重启集群。<br>其中最重要的两个需要实现的方法就是：<code>boolean filterRowKey(byte[] buffer, int offset, int length)</code><br>和<code>ReturnCode filterKeyValue(Cell ignored)</code>，前者决定是否过滤掉这个rowkey，后者决定列的问题：<code>INCLUDE,INCLUDE_AND_NEXT_COL,SKIP,...</code>等等。<br>Filter是在RegionServer上中读取数据时使用，将过滤操作放到RS上可以减少网络开销，每次scan，其携带的每个Filter都会在每个RegionServer上实例化一个，并按照Filter加入List的顺序执行。<br>Tip：详情可参考《HBase实战》中的4.8节，关于过滤数据的阐述。</p>
 <h3 id="6-scan中的setCaching-int-setBatch-int-setMaxResultSize-long-setCacheBlocks-boolean-方法的含义？"><a href="#6-scan中的setCaching-int-setBatch-int-setMaxResultSize-long-setCacheBlocks-boolean-方法的含义？" class="headerlink" title="6. scan中的setCaching(int),setBatch(int),setMaxResultSize(long),setCacheBlocks(boolean)方法的含义？"></a>6. scan中的<code>setCaching(int)</code>,<code>setBatch(int)</code>,<code>setMaxResultSize(long)</code>,<code>setCacheBlocks(boolean)</code>方法的含义？</h3><p><code>setCaching(int)</code>设置每次rpc请求缓存在client的行数（rows），ResultScanner每次next()调用从client的Caching中拿数据。默认是<code>-1</code>即不设置，此时会使用<code>HTable.setScannerCaching(int)</code>中的设置值（默认每次rpc返回100条结果）；<br>设置cache大可以优化性能，但是太大了会花费很长的时间进行一次传输，且需要更多的client内存。</p>
 <p>每次rpc返回的结果还受<code>setMaxResultSize(long)</code>参数影响，<code>setMaxResultSize(long)</code>表示每次rpc返回的最大数据量。</p>
-<p><code>setBatch(int)</code>用于限制每次ResultScanner的next()调用返回的column size（个人理解为限制返回一行row中列的数量）有些row特别大，所以需要分开传给client，就是一次传一个row的几个column。</p>
+<p><code>setBatch(int)</code>用于限制每次ResultScanner的next()调用返回的column size（个人理解为限制返回一行row中列的数量）有些row特别大，所以需要分开传给client，就是一次传一个row的几个column。默认<code>-1</code>即不限制。</p>
 <p>batch和caching，MaxResultSize和hbase table column size共同决定了rpc的次数。</p>
-<p><code>setCacheBlocks(boolean)</code>指定本次scan请求是否禁止server端的block caching</p>
+<p><code>setCacheBlocks(boolean)</code>：指定本次scan请求是否禁止server端的<code>block caching</code></p>
 <blockquote>
 <p> To explicitly disable server-side block caching for this scan</p>
 </blockquote>
@@ -209,6 +209,10 @@
 		  
 		
 		  
+			<li><a href="/categories/HttpClient/" title="HttpClient">HttpClient<sup>1</sup></a></li>
+		  
+		
+		  
 			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
 		  
 		
@@ -290,7 +294,7 @@
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/HttpClient/" title="HttpClient">HttpClient<sup>1</sup></a></li>
 			
 		
 			
@@ -319,6 +323,10 @@
 		
 			
 				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 			

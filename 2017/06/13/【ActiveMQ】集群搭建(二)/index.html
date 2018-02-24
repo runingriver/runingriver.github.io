@@ -11,18 +11,18 @@
     
 
     
-    <meta name="description" content="前言：待更新。。。">
+    <meta name="description" content="前言：使用ActiveMq前一般都要读一遍它的官方文档，但是ActiveMq的文档写的相当凌乱（个人观点），然后在搭建ActiveMq高可用集群过程遇到很多疑惑和坑，这里记录下来，以作前车之鉴吧。 基于Master-Slaver+LevelDB的HA集群搭建下面搭建一个Master-Slaver-Slaver的集群，采">
 <meta name="keywords" content="ActiveMQ">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【ActiveMQ】集群搭建(二)">
 <meta property="og:url" content="http://huzongzhe.cn/2017/06/13/【ActiveMQ】集群搭建(二)/index.html">
 <meta property="og:site_name" content="running river">
-<meta property="og:description" content="前言：待更新。。。">
+<meta property="og:description" content="前言：使用ActiveMq前一般都要读一遍它的官方文档，但是ActiveMq的文档写的相当凌乱（个人观点），然后在搭建ActiveMq高可用集群过程遇到很多疑惑和坑，这里记录下来，以作前车之鉴吧。 基于Master-Slaver+LevelDB的HA集群搭建下面搭建一个Master-Slaver-Slaver的集群，采用activemq 5.14.4版本，每个节点目录采用activemq-node">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-02-09T06:42:07.454Z">
+<meta property="og:updated_time" content="2018-02-23T10:19:35.672Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【ActiveMQ】集群搭建(二)">
-<meta name="twitter:description" content="前言：待更新。。。">
+<meta name="twitter:description" content="前言：使用ActiveMq前一般都要读一遍它的官方文档，但是ActiveMq的文档写的相当凌乱（个人观点），然后在搭建ActiveMq高可用集群过程遇到很多疑惑和坑，这里记录下来，以作前车之鉴吧。 基于Master-Slaver+LevelDB的HA集群搭建下面搭建一个Master-Slaver-Slaver的集群，采用activemq 5.14.4版本，每个节点目录采用activemq-node">
 
     
     <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
@@ -95,8 +95,12 @@
 </header>
 	<div class="article-content">
 		
-		<p>前言：待更新。。。</p>
-  
+		<p>前言：使用ActiveMq前一般都要读一遍它的官方文档，但是ActiveMq的文档写的相当凌乱（个人观点），然后在搭建ActiveMq高可用集群过程遇到很多疑惑和坑，这里记录下来，以作前车之鉴吧。</p>
+<h1 id="基于Master-Slaver-LevelDB的HA集群搭建"><a href="#基于Master-Slaver-LevelDB的HA集群搭建" class="headerlink" title="基于Master-Slaver+LevelDB的HA集群搭建"></a>基于Master-Slaver+LevelDB的HA集群搭建</h1><p>下面搭建一个Master-Slaver-Slaver的集群，采用<code>activemq 5.14.4</code>版本，每个节点目录采用<code>activemq-node-%d</code>方式命名。</p>
+<h2 id="1-配置zk"><a href="#1-配置zk" class="headerlink" title="1. 配置zk"></a>1. 配置zk</h2><p>进入：<code>conf</code>目录，编辑<code>activemq.xml</code>文件，在<code>broker</code>节点下，删除默认的持久化方式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;persistenceAdapter&gt;</span><br><span class="line">    &lt;kahaDB directory=&quot;$&#123;activemq.data&#125;/kahadb&quot;/&gt;</span><br><span class="line">&lt;/persistenceAdapter&gt;</span><br></pre></td></tr></table></figure></p>
+<p>然后，改为下面的配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;replicatedLevelDB</span><br><span class="line">        directory=&quot;$&#123;activemq.data&#125;/leveldb&quot;</span><br><span class="line">        replicas=&quot;3&quot;</span><br><span class="line">        bind=&quot;tcp://0.0.0.0:56262&quot;</span><br><span class="line">        zkAddress=&quot;127.0.0.1:8212,127.0.0.1:8213,127.0.0.1:8214&quot;</span><br><span class="line">        zkPath=&quot;/activemq/leveldb-stores&quot;</span><br><span class="line">        zkSessionTimeout=&quot;30s&quot;</span><br><span class="line">        weight=&quot;20&quot;</span><br><span class="line">/&gt;</span><br><span class="line">&lt;/persistenceAdapter&gt;</span><br></pre></td></tr></table></figure></p>
+<p>其中，<code>directory=&quot;${activemq.data}/leveldb&quot;</code>表示持久化目录位置，<code>replicas=&quot;3&quot;</code>表示有三个节点， <code>bind=&quot;tcp://0.0.0.0:62626&quot;</code>设置LevelDB主从复制端口，<code>zkAddress=&quot;127.0.0.1:8212,127.0.0.1:8213,127.0.0.1:8214&quot;</code>表示zk集群地址，<code>zkPath=&quot;/activemq/leveldb-stores&quot;</code>设置activemq在zk集群中的节点路径，<code>zkSessionTimeout=&quot;30s&quot;</code>表示activemq与zk建立连接后session超时时间，<strong>强烈建议设大点，因为如果太短当各种原因（比如节点load高或zk回复较慢）下，可能会导致session超时从而触发failover！</strong>，<code>weight=&quot;20&quot;</code>表示每个节点的权重，failover时安装这个权重进行选举Master，可以把机器性能较好的设置一个较大权重。</p>
+<h2 id="2-配置权限"><a href="#2-配置权限" class="headerlink" title="2. 配置权限"></a>2. 配置权限</h2>  
 	</div>
 		<footer class="article-footer clearfix">
 <div class="article-catetags">
@@ -176,6 +180,10 @@
 		
 		  
 			<li><a href="/categories/HBase/" title="HBase">HBase<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/HttpClient/" title="HttpClient">HttpClient<sup>1</sup></a></li>
 		  
 		
 		  
@@ -260,7 +268,7 @@
 			
 		
 			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
+				<li><a href="/tags/HttpClient/" title="HttpClient">HttpClient<sup>1</sup></a></li>
 			
 		
 			
@@ -289,6 +297,10 @@
 		
 			
 				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 			
