@@ -122,6 +122,43 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
+    <a href="/2017/05/04/【转】JVM-深入理解Java虚拟机/" title="【转】JVM-深入理解Java虚拟机" itemprop="url">
+  
+    <h1 itemprop="name">【转】JVM-深入理解Java虚拟机</h1>
+    
+     
+           <p itemprop="description" >内存模型
+1. 程序计数器
+2. Java 虚拟机栈
+3. 本地方法栈
+4. Java 堆
+5. 方法区
+6. 运行时常量池
+7. 直接内存
+
+
+垃圾收集
+1. 判断一个对象是否可回收
+1.1 引用计数
+1.2 可达性
+1.3 引用类型
+1.3.1 强引用
+1.3.2 软引用
+1</p>
+        
+    
+    <time datetime="2017-05-04T03:12:22.000Z" itemprop="datePublished">2017-05-04</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
     <a href="/2017/05/04/【扒一扒】volatile/" title="【扒一扒】volatile" itemprop="url">
   
     <h1 itemprop="name">【扒一扒】volatile</h1>
@@ -208,13 +245,13 @@ Syn</p>
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/03/08/Java排查工具之jvisualvm,jps,jmap,jstack/" title="Java排查工具之jvisualvm,jps,jmap,jstack" itemprop="url">
+    <a href="/2017/03/08/JVM实用参数整理/" title="JVM实用参数整理" itemprop="url">
   
-    <h1 itemprop="name">Java排查工具之jvisualvm,jps,jmap,jstack</h1>
+    <h1 itemprop="name">JVM实用参数整理</h1>
     
      
-           <p itemprop="description" >前言：总结java开发中常用到的一些工具，这里都是实际操作命令，很多时候在服务器上操作需要注意的地方，如果有疑问建议加google来看，这里精简描述。
-1. jps 查看jvm中运行的Java进程参数说明:-q 不输出类名、Jar名和传入main方法的参数-m 输出传入main方</p>
+           <p itemprop="description" >前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看《深入理解Java虚拟机》这本书，正好配合日常所需好好地整理下。
+一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不</p>
         
     
     <time datetime="2017-03-08T03:12:22.000Z" itemprop="datePublished">2017-03-08</time>
@@ -229,13 +266,13 @@ Syn</p>
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/03/08/JVM实用参数整理/" title="JVM实用参数整理" itemprop="url">
+    <a href="/2017/03/08/Java排查工具之jvisualvm,jps,jmap,jstack/" title="Java排查工具之jvisualvm,jps,jmap,jstack" itemprop="url">
   
-    <h1 itemprop="name">JVM实用参数整理</h1>
+    <h1 itemprop="name">Java排查工具之jvisualvm,jps,jmap,jstack</h1>
     
      
-           <p itemprop="description" >前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看《深入理解Java虚拟机》这本书，正好配合日常所需好好地整理下。
-一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不</p>
+           <p itemprop="description" >前言：总结java开发中常用到的一些工具，这里都是实际操作命令，很多时候在服务器上操作需要注意的地方，如果有疑问建议加google来看，这里精简描述。
+1. jps 查看jvm中运行的Java进程参数说明:-q 不输出类名、Jar名和传入main方法的参数-m 输出传入main方</p>
         
     
     <time datetime="2017-03-08T03:12:22.000Z" itemprop="datePublished">2017-03-08</time>
@@ -262,26 +299,6 @@ Syn</p>
         
     
     <time datetime="2017-03-08T03:12:22.000Z" itemprop="datePublished">2017-03-08</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2016/11/12/【Mysql】主从复制原理整理/" title="【Mysql】主从复制原理整理" itemprop="url">
-  
-    <h1 itemprop="name">【Mysql】主从复制原理整理</h1>
-    
-     
-           <p itemprop="description" >1. 介绍当前用的比较多的mysql高可用架构一般是HA或MMM,Master-Slaver之间通过binlog实现主从数据一致性,有必要理解一下主从复制的基本原理。首先从理解数据的日志类型入手，数据库提供了以下几种日志： 错误日志、binlog日志(二进制日志)、查询日志、慢查</p>
-        
-    
-    <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
   </a>
 </section>
 
@@ -324,7 +341,7 @@ Syn</p>
 		  
 		
 		  
-			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+			<li><a href="/categories/Java/" title="Java">Java<sup>5</sup></a></li>
 		  
 		
 		  
@@ -359,6 +376,10 @@ Syn</p>
 			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
 		  
 		
+		  
+			<li><a href="/categories/计算机操作系统/" title="计算机操作系统">计算机操作系统<sup>1</sup></a></li>
+		  
+		
 		</ul>
 </div>
 
@@ -385,7 +406,7 @@ Syn</p>
 			
 		
 			
-				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>4</sup></a></li>
 			
 		
 			
@@ -393,15 +414,19 @@ Syn</p>
 			
 		
 			
-				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
 			
 		
 			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
 			
 		
 			
@@ -441,7 +466,7 @@ Syn</p>
 			
 		
 			
-				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+				<li><a href="/tags/操作系统/" title="操作系统">操作系统<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -473,6 +498,12 @@ Syn</p>
           <li>
             
             	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://coolshell.cn/" target="_blank" title="酷壳">酷壳</a>
             
           </li>
         

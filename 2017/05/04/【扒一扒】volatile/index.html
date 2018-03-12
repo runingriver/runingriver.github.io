@@ -20,7 +20,7 @@
 <meta property="og:description" content="前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。 基础介绍Java 关键字volatile可以让变量的修改在多个线程之间可见，即cpu核心1对volatile修饰的变量进行修改会立即刷新该变量在RAM中的值！同时，使所有包含该变量的缓存行失效。这里，还一种说法是，volatile修饰的变量不会被缓存，读写直接在RAM">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://huzongzhe.cn/images/command.png">
-<meta property="og:updated_time" content="2018-02-23T08:37:22.817Z">
+<meta property="og:updated_time" content="2018-03-07T09:06:26.874Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【扒一扒】volatile">
 <meta name="twitter:description" content="前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。 基础介绍Java 关键字volatile可以让变量的修改在多个线程之间可见，即cpu核心1对volatile修饰的变量进行修改会立即刷新该变量在RAM中的值！同时，使所有包含该变量的缓存行失效。这里，还一种说法是，volatile修饰的变量不会被缓存，读写直接在RAM">
@@ -100,6 +100,7 @@
 		<p><strong>前言：</strong>最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。</p>
 <h2 id="基础介绍"><a href="#基础介绍" class="headerlink" title="基础介绍"></a>基础介绍</h2><p>Java 关键字<code>volatile</code>可以让变量的修改在多个线程之间可见，即cpu核心1对<code>volatile</code>修饰的变量进行修改会立即刷新该变量在RAM中的值！同时，使所有包含该变量的缓存行失效。<br>这里，还一种说法是，volatile修饰的变量不会被缓存，读写直接在RAM中进行，我认为是错误的理解！</p>
 <h3 id="1-伪共享-or-缓存一致性协议"><a href="#1-伪共享-or-缓存一致性协议" class="headerlink" title="1. 伪共享 or 缓存一致性协议"></a>1. 伪共享 or 缓存一致性协议</h3><p>当多线程修改互相独立的变量时，如果这些变量共享同一个缓存行，即被放到同一个缓存行中，如果其中一个核心1修改了其中一个变量A，那么另一个有相同缓存行的核心2的缓存会失效需要重新加载缓存，即使变量A的修改不影响核心2的正确执行，这就导致了性能损失，这就是伪共享。也称作:缓存一致性协议!<br><img src="/images/command.png" alt="缓存一致性协议"></p>
+<p>Tip : L1缓存是处理器独享的，L2缓存是成对处理器共享的（我理解：4核CPU，相当于双核四门，L1就是一个门的缓存，L2就是一个房间的缓存）。</p>
 <p>一致协议的两种实现（copy自network）：</p>
 <ol>
 <li><p>一种实现：（一种早期奔腾处理器上的实现）<br>一种处理一致性问题的办法是使用Bus Locking（总线锁）。当一个CPU对其缓存中的数据进行操作的时候，往总线中发送一个Lock信号。<br>这时，所有CPU收到这个信号之后就不操作自己<strong>对应</strong>缓存行中的<strong>对应</strong>数据了，当操作结束，释放锁以后，所有的CPU就去内存中获取最新d <strong>对应</strong>数据更新缓存行。<br>但是用锁的方式总是避不开性能问题。总线锁总是会导致CPU的性能下降，总线锁住期间其他CPU可能都会等待总线资源。所以出现另外一种维护CPU缓存一致性的方式，MESI。</p>
@@ -149,6 +150,7 @@
 <li><a href="http://ifeve.com/java-memory-model-5/" target="_blank" rel="noopener">http://ifeve.com/java-memory-model-5/</a></li>
 <li><a href="http://blog.csdn.net/javazejian/article/details/72772461" target="_blank" rel="noopener">http://blog.csdn.net/javazejian/article/details/72772461</a></li>
 <li><a href="https://yq.aliyun.com/articles/46661" target="_blank" rel="noopener">https://yq.aliyun.com/articles/46661</a></li>
+<li><a href="https://coolshell.cn/articles/10249.html" target="_blank" rel="noopener">https://coolshell.cn/articles/10249.html</a></li>
 </ol>
   
 	</div>
@@ -186,10 +188,10 @@
 <nav class="article-nav clearfix">
  
  <div class="prev" >
- <a href="/2017/05/12/【ZooKeeper】我认识的zk(一)/" title="【ZooKeeper】我认识的zk(一)">
+ <a href="/2017/05/04/【转】JVM-深入理解Java虚拟机/" title="【转】JVM-深入理解Java虚拟机">
   <strong>上一篇：</strong><br/>
   <span>
-  【ZooKeeper】我认识的zk(一)</span>
+  【转】JVM-深入理解Java虚拟机</span>
 </a>
 </div>
 
@@ -237,7 +239,7 @@
 		  
 		
 		  
-			<li><a href="/categories/Java/" title="Java">Java<sup>4</sup></a></li>
+			<li><a href="/categories/Java/" title="Java">Java<sup>5</sup></a></li>
 		  
 		
 		  
@@ -272,6 +274,10 @@
 			<li><a href="/categories/数据结构/" title="数据结构">数据结构<sup>1</sup></a></li>
 		  
 		
+		  
+			<li><a href="/categories/计算机操作系统/" title="计算机操作系统">计算机操作系统<sup>1</sup></a></li>
+		  
+		
 		</ul>
 </div>
 
@@ -298,7 +304,7 @@
 			
 		
 			
-				<li><a href="/tags/JVM/" title="JVM">JVM<sup>3</sup></a></li>
+				<li><a href="/tags/JVM/" title="JVM">JVM<sup>4</sup></a></li>
 			
 		
 			
@@ -306,15 +312,19 @@
 			
 		
 			
-				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/开发工具/" title="开发工具">开发工具<sup>2</sup></a></li>
 			
 		
 			
+				<li><a href="/tags/Guava/" title="Guava">Guava<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/shell/" title="shell">shell<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
 			
 		
 			
@@ -354,7 +364,7 @@
 			
 		
 			
-				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
+				<li><a href="/tags/操作系统/" title="操作系统">操作系统<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -386,6 +396,12 @@
           <li>
             
             	<a href="http://www.importnew.com/" target="_blank" title="importnew">importnew</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://coolshell.cn/" target="_blank" title="酷壳">酷壳</a>
             
           </li>
         
