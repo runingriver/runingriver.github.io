@@ -20,7 +20,7 @@
 <meta property="og:description" content="前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看《深入理解Java虚拟机》这本书，正好配合日常所需好好地整理下。 一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不一样。标准参数格式如下：-XX:+&amp;lt;option&amp;gt; 开启option参数-XX:-&amp;lt;option&amp;gt">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://huzongzhe.cn/images/garbage.jpg">
-<meta property="og:updated_time" content="2018-02-23T08:37:26.685Z">
+<meta property="og:updated_time" content="2018-03-27T07:49:25.305Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="JVM实用参数整理">
 <meta name="twitter:description" content="前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看《深入理解Java虚拟机》这本书，正好配合日常所需好好地整理下。 一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不一样。标准参数格式如下：-XX:+&amp;lt;option&amp;gt; 开启option参数-XX:-&amp;lt;option&amp;gt">
@@ -103,91 +103,91 @@
 <h2 id="二，内存分配相关参数"><a href="#二，内存分配相关参数" class="headerlink" title="二，内存分配相关参数"></a>二，内存分配相关参数</h2><table>
 <thead>
 <tr>
-<th>参数名</th>
-<th>简述</th>
-<th>详解</th>
+<th style="text-align:left">参数名</th>
+<th style="text-align:left">简述</th>
+<th style="text-align:left">详解</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>-Xms</code></td>
-<td>JVM启动初始堆大小，如：<code>-Xms4096m</code>，<code>-Xms4g</code></td>
-<td>JVM启动，应用初始堆内存大小。启动后堆的大小调整受<code>MinHeapFreeRatio</code>和<code>MaxHeapFreeRatio</code>控制，最大不超过<code>-Xmx</code>，最小不小于<code>-Xms</code>。</td>
+<td style="text-align:left"><code>-Xms</code></td>
+<td style="text-align:left">JVM启动初始堆大小，如：<code>-Xms4096m</code>，<code>-Xms4g</code></td>
+<td style="text-align:left">JVM启动，应用初始堆内存大小。启动后堆的大小调整受<code>MinHeapFreeRatio</code>和<code>MaxHeapFreeRatio</code>控制，最大不超过<code>-Xmx</code>，最小不小于<code>-Xms</code>。</td>
 </tr>
 <tr>
-<td><code>-Xmx</code></td>
-<td>JVM最大堆大小，如：<code>-Xmx4096m</code>，<code>-Xmx4g</code></td>
-<td>Java程序最大堆内存，默认物理内存的1/4，不设置时默认等于<code>-Xms</code></td>
+<td style="text-align:left"><code>-Xmx</code></td>
+<td style="text-align:left">JVM最大堆大小，如：<code>-Xmx4096m</code>，<code>-Xmx4g</code></td>
+<td style="text-align:left">Java程序最大堆内存，默认物理内存的1/4，不设置时默认等于<code>-Xms</code></td>
 </tr>
 <tr>
-<td><code>-Xmn</code></td>
-<td>年轻代大小，当需将对象留在Eden区设置</td>
-<td>年轻代 = <code>eden+ 2 survivor space</code>，整个堆大小=<code>年轻代大小(Young Generation) + 年老代大小(Old Generation) + 持久代大小(permanent Generation)</code>。增大年轻代后,将会减小年老代大小.此值对系统性能影响较大,Sun官方推荐配置为整个堆的3/8</td>
+<td style="text-align:left"><code>-Xmn</code></td>
+<td style="text-align:left">年轻代大小，当需将对象留在Eden区设置</td>
+<td style="text-align:left">年轻代 = <code>eden+ 2 survivor space</code>，整个堆大小=<code>年轻代大小(Young Generation)</code> + <code>年老代大小(Old Generation)</code> + <code>持久代大小(permanent Generation)</code>。增大年轻代后,将会减小年老代大小.此值对系统性能影响较大,Sun官方推荐配置为整个堆的3/8</td>
 </tr>
 <tr>
-<td><code>-Xss</code></td>
-<td>每个线程栈大小</td>
-<td>JDK5.0后默认1M，以前是256K</td>
+<td style="text-align:left"><code>-Xss</code></td>
+<td style="text-align:left">每个线程栈大小</td>
+<td style="text-align:left">JDK5.0后默认1M，以前是256K</td>
 </tr>
 <tr>
-<td><code>MinHeapFreeRatio</code></td>
-<td>当堆可用内存小于此值时扩展堆大小</td>
-<td>当堆空余内存小于整个堆大小的MinHeapFreeRatio（默认40%）时，JVM会增加堆大小，默认值40，当-Xmx 和-Xms 相等时参数无效。</td>
+<td style="text-align:left"><code>MinHeapFreeRatio</code></td>
+<td style="text-align:left">当堆可用内存小于此值时扩展堆大小</td>
+<td style="text-align:left">当堆空余内存小于整个堆大小的MinHeapFreeRatio（默认40%）时，JVM会增加堆大小，默认值40，当-Xmx 和-Xms 相等时参数无效。</td>
 </tr>
 <tr>
-<td><code>MaxHeapFreeRatio</code></td>
-<td>当堆空闲内存大于此值是缩小堆大小</td>
-<td>当堆空余内存大于整个堆大小的MaxHeapFreeRatio（默认70%）时，JVM会缩小堆大小，默认值70，当-Xmx 和-Xms 相等时参数无效。</td>
+<td style="text-align:left"><code>MaxHeapFreeRatio</code></td>
+<td style="text-align:left">当堆空闲内存大于此值是缩小堆大小</td>
+<td style="text-align:left">当堆空余内存大于整个堆大小的MaxHeapFreeRatio（默认70%）时，JVM会缩小堆大小，默认值70，当-Xmx 和-Xms 相等时参数无效。</td>
 </tr>
 <tr>
-<td><code>-XX:NewSize</code></td>
-<td>年轻代初始大小</td>
-<td>通常我们会设置一个初始大小，如<code>-XX:NewSize=256m</code></td>
+<td style="text-align:left"><code>-XX:NewSize</code></td>
+<td style="text-align:left">年轻代初始大小</td>
+<td style="text-align:left">通常我们会设置一个初始大小，如<code>-XX:NewSize=256m</code></td>
 </tr>
 <tr>
-<td><code>-XX:MaxNewSize</code></td>
-<td>年轻代最大值</td>
-<td></td>
+<td style="text-align:left"><code>-XX:MaxNewSize</code></td>
+<td style="text-align:left">年轻代最大值</td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td><code>-XX:PermSize</code></td>
-<td>永久代初始大小</td>
-<td>通常根据程序会设置一个初始大小，如：<code>-XX:PermSize=256m</code></td>
+<td style="text-align:left"><code>-XX:PermSize</code></td>
+<td style="text-align:left">永久代初始大小</td>
+<td style="text-align:left">通常根据程序会设置一个初始大小，如：<code>-XX:PermSize=256m</code></td>
 </tr>
 <tr>
-<td><code>-XX:MaxPermSize</code></td>
-<td>永久代最大值</td>
-<td>不设置时默认等于<code>-XX:PermSize</code>，大部分情况默认64M，经测试内存8G，perm是82M</td>
+<td style="text-align:left"><code>-XX:MaxPermSize</code></td>
+<td style="text-align:left">永久代最大值</td>
+<td style="text-align:left">不设置时默认等于<code>-XX:PermSize</code>，大部分情况默认64M，经测试内存8G，perm是82M</td>
 </tr>
 <tr>
-<td><code>-XX:NewRatio</code></td>
-<td>Young与Old的大小比例</td>
-<td>默认值为2，即：<code>Young:Old=1:2</code>，Young占整个堆的1/3大小，Old占2/3，这只是一个理论值表示他们能达到的最大大小，计算中这里省略了Perm代，因为二者实际占用物理内存大小是随对象创建，销毁，晋升而改变，当可用内存为0时二者内存也不一定能达到这个阈值。</td>
+<td style="text-align:left"><code>-XX:NewRatio</code></td>
+<td style="text-align:left">Young与Old的大小比例</td>
+<td style="text-align:left">默认值为2，即：<code>Young:Old=1:2</code>，Young占整个堆的1/3大小，Old占2/3，这只是一个理论值表示他们能达到的最大大小，计算中这里省略了Perm代，因为二者实际占用物理内存大小是随对象创建，销毁，晋升而改变，当可用内存为0时二者内存也不一定能达到这个阈值。</td>
 </tr>
 <tr>
-<td><code>-XX:SurvivorRatio</code></td>
-<td>Eden与Survivor的比例</td>
-<td>默认8，即：<code>2 Survivor：Eden=2:8</code>，From或To Survivor占整个Young的1/10，这是理论最大值，并非实际大小</td>
+<td style="text-align:left"><code>-XX:SurvivorRatio</code></td>
+<td style="text-align:left">Eden与Survivor的比例</td>
+<td style="text-align:left">默认8，即：<code>2 Survivor：Eden=2:8</code>，From或To Survivor占整个Young的1/10，这是理论最大值，并非实际大小</td>
 </tr>
 <tr>
-<td><code>-XX:TargetSurvivorRatio</code></td>
-<td>设置Survivor空间使用率</td>
-<td>默认50%，<code>-XX:TargetSurvivorRatio=90</code>设定当Survivor空间使用到达90%时，将Survivor中部分对象送人Old，是否还是在当相同年龄对象(A)总大小大于等于Survivor空间一半时，将年龄大于等于A的所有对象送入Old，有待考证！</td>
+<td style="text-align:left"><code>-XX:TargetSurvivorRatio</code></td>
+<td style="text-align:left">设置Survivor空间使用率</td>
+<td style="text-align:left">默认50%，<code>-XX:TargetSurvivorRatio=90</code>设定当Survivor空间使用到达90%时，将Survivor中部分对象送人Old，是否还是在当相同年龄对象(A)总大小大于等于Survivor空间一半时，将年龄大于等于A的所有对象送入Old，有待考证！</td>
 </tr>
 <tr>
-<td><code>-XX:MaxTenuringThreshold</code></td>
-<td>经过多少次Young GC后晋升到年老代</td>
-<td>默认值15，所有新建对象默认在Eden区分配（容纳不下的对象先Minor GC然后再分配担保机制在Old分配，大对象也有可能直接进入Old，如果启动了本地线程私有分配缓冲区（TLAB Eden区中）可能会在TLAB上分配），经过第一次Minor GC，存活的对象会移到From Survivor，年龄+1，多次GC后存活对象会移到Old区。15是一个最大值，当Survivor区中相同年龄的所有对象大小的总和大于Survivor空间的一半时，年龄大于或等于该年龄的对象可以直接进入老年代；Minor GC后Survivor无法容纳Eden的所有存活对象时，这些无法放入Survivor的对象会直接进入Old。</td>
+<td style="text-align:left"><code>-XX:MaxTenuringThreshold</code></td>
+<td style="text-align:left">经过多少次Young GC后晋升到年老代</td>
+<td style="text-align:left">默认值15，所有新建对象默认在Eden区分配（容纳不下的对象先Minor GC然后再分配担保机制在Old分配，大对象也有可能直接进入Old，如果启动了本地线程私有分配缓冲区（TLAB Eden区中）可能会在TLAB上分配），经过第一次Minor GC，存活的对象会移到From Survivor，年龄+1，多次GC后存活对象会移到Old区。15是一个最大值，当Survivor区中相同年龄的所有对象大小的总和大于Survivor空间的一半时，年龄大于或等于该年龄的对象可以直接进入老年代；Minor GC后Survivor无法容纳Eden的所有存活对象时，这些无法放入Survivor的对象会直接进入Old。</td>
 </tr>
 <tr>
-<td><code>-XX:PretenureSizeThreshold</code></td>
-<td>对象大小超过该值直接在Old分配</td>
-<td>Parallel Scavenge收集器无效，通常那种很长的字符串数组大小超过该值会直接在Old分配，设置可以避免大量的Eden Survivor内存复制。默认0，不开启。</td>
+<td style="text-align:left"><code>-XX:PretenureSizeThreshold</code></td>
+<td style="text-align:left">对象大小超过该值直接在Old分配</td>
+<td style="text-align:left">Parallel Scavenge收集器无效，通常那种很长的字符串数组大小超过该值会直接在Old分配，设置可以避免大量的Eden Survivor内存复制。默认0，不开启。</td>
 </tr>
 <tr>
-<td><code>-XX:+UseAdaptiveSizePolicy</code></td>
-<td>动态调整各区大小</td>
-<td>默认开启，动态调整Java堆中各个区域的大小及进入老年代的年龄。</td>
+<td style="text-align:left"><code>-XX:+UseAdaptiveSizePolicy</code></td>
+<td style="text-align:left">动态调整各区大小</td>
+<td style="text-align:left">默认开启，动态调整Java堆中各个区域的大小及进入老年代的年龄。</td>
 </tr>
 </tbody>
 </table>
@@ -197,38 +197,38 @@
 <h2 id="三，GC收集器参数"><a href="#三，GC收集器参数" class="headerlink" title="三，GC收集器参数"></a>三，GC收集器参数</h2><h3 id="垃圾收集器介绍"><a href="#垃圾收集器介绍" class="headerlink" title="垃圾收集器介绍"></a>垃圾收集器介绍</h3><table>
 <thead>
 <tr>
-<th style="text-align:center">参数名</th>
-<th>详解</th>
+<th style="text-align:left">参数名</th>
+<th style="text-align:left">详解</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center"><code>Serial收集器</code></td>
-<td>单CPU环境简单高效，适用桌面程序。</td>
+<td style="text-align:left"><code>Serial收集器</code></td>
+<td style="text-align:left">单CPU环境简单高效，适用桌面程序。</td>
 </tr>
 <tr>
-<td style="text-align:center"><code>ParNew收集器</code></td>
-<td>是Serial的多线程版，多核下比Serial更能有效利用cpu资源，只能和CMS配合使用！</td>
+<td style="text-align:left"><code>ParNew收集器</code></td>
+<td style="text-align:left">是Serial的多线程版，多核下比Serial更能有效利用cpu资源，只能和CMS配合使用！</td>
 </tr>
 <tr>
-<td style="text-align:center"><code>Parallel Scavenge</code> 收集器</td>
-<td>可控制的吞吐量（吞吐量=运行用户代码时间/(运行用户代码时间+垃圾回收时间)），更高效地利用CPU，适合运算多交互少场景。</td>
+<td style="text-align:left"><code>Parallel Scavenge</code> 收集器</td>
+<td style="text-align:left">可控制的吞吐量（吞吐量=运行用户代码时间/(运行用户代码时间+垃圾回收时间)），更高效地利用CPU，适合运算多交互少场景。</td>
 </tr>
 <tr>
-<td style="text-align:center"><code>Serial Old收集器</code></td>
-<td>单线程的老年代的标记-整理算法的实现。</td>
+<td style="text-align:left"><code>Serial Old收集器</code></td>
+<td style="text-align:left">单线程的老年代的标记-整理算法的实现。</td>
 </tr>
 <tr>
-<td style="text-align:center"><code>Parallel Old 收集器</code></td>
-<td>是Parallel Scavenge 的老年代实现，多线程！</td>
+<td style="text-align:left"><code>Parallel Old 收集器</code></td>
+<td style="text-align:left">是Parallel Scavenge 的老年代实现，多线程！</td>
 </tr>
 <tr>
-<td style="text-align:center"><code>CMS收集器</code></td>
-<td>最短回收停留，更快的服务响应速度，多用于B/S模式！缺点：由于采用与用户线程并发收集策略，可能出现卡顿，可能产生浮动垃圾，基于标记-清除的算法实现，导致Old区碎片，大对象分配找不到空间发生Full GC。 注：默认使用Old空间占68%就开始回收，可以设置内存整理策略<code>UseCMSCompactAtFullCollection</code> FullGC时进行内存整理和<code>CMSFullGCsBeforeCompaction</code>多少次FullGC后进行一次内存整理。默认情况，每次FullGC都进行一次内存整理。</td>
+<td style="text-align:left"><code>CMS收集器</code></td>
+<td style="text-align:left">最短回收停留，更快的服务响应速度，多用于B/S模式！缺点：由于采用与用户线程并发收集策略，可能出现卡顿，可能产生浮动垃圾，基于标记-清除的算法实现，导致Old区碎片，大对象分配找不到空间发生Full GC。 注：默认使用Old空间占68%就开始回收，可以设置内存整理策略<code>UseCMSCompactAtFullCollection</code> FullGC时进行内存整理和<code>CMSFullGCsBeforeCompaction</code>多少次FullGC后进行一次内存整理。默认情况，每次FullGC都进行一次内存整理。</td>
 </tr>
 <tr>
-<td style="text-align:center"><code>G1收集器</code></td>
-<td>JDK7开始支持，不再分代，而是分Region的思想，现商用不多。</td>
+<td style="text-align:left"><code>G1收集器</code></td>
+<td style="text-align:left">JDK7开始支持，不再分代，而是分Region的思想，现商用不多。</td>
 </tr>
 </tbody>
 </table>
@@ -274,46 +274,93 @@
 <h3 id="收集器相关参数"><a href="#收集器相关参数" class="headerlink" title="收集器相关参数"></a>收集器相关参数</h3><table>
 <thead>
 <tr>
-<th>参数名</th>
-<th>简述</th>
-<th>解释</th>
+<th style="text-align:left">参数名</th>
+<th style="text-align:left">简述</th>
+<th style="text-align:left">解释</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>-XX:ParallelGCThreads</code></td>
-<td>并行GC时内存回收的线程数</td>
-<td>当<code>cpu数量&lt;=8</code>时，默认8个，<code>cpu数量&gt;8</code>时，设置小于cpu数量</td>
+<td style="text-align:left"><code>-XX:ParallelGCThreads</code></td>
+<td style="text-align:left">并行GC时内存回收的线程数</td>
+<td style="text-align:left">当<code>cpu数量&lt;=8</code>时，默认8个，<code>cpu数量&gt;8</code>时，设置小于cpu数量</td>
 </tr>
 <tr>
-<td><code>-XX:+ScavengeBeforeFullGC</code></td>
-<td>Full GC前是否先Minor GC</td>
-<td>默认true，Full GC前是否先Minor GC</td>
+<td style="text-align:left"><code>-XX:+ScavengeBeforeFullGC</code></td>
+<td style="text-align:left">Full GC前是否先Minor GC</td>
+<td style="text-align:left">默认true，Full GC前是否先Minor GC</td>
 </tr>
 <tr>
-<td><code>-XX:+UseGCOverheadLimit</code></td>
-<td>默认开启</td>
-<td>禁止GC无限制的执行，如果过于频繁，就直接抛OOM异常</td>
+<td style="text-align:left"><code>-XX:+UseGCOverheadLimit</code></td>
+<td style="text-align:left">默认开启</td>
+<td style="text-align:left">禁止GC无限制的执行，如果过于频繁，就直接抛OOM异常</td>
 </tr>
 <tr>
-<td><code>-XX:+UseTLAB</code></td>
-<td>server模式默认开启</td>
-<td>优先在本地线程缓冲区中分配对象，避免分配内存时的锁定过程，TLAB分配在eden区</td>
+<td style="text-align:left"><code>-XX:+UseTLAB</code></td>
+<td style="text-align:left">server模式默认开启</td>
+<td style="text-align:left">优先在本地线程缓冲区中分配对象，避免分配内存时的锁定过程，TLAB分配在eden区</td>
 </tr>
 <tr>
-<td><code>-XX:+HeapDumpOnOutOfMemoryError</code></td>
-<td></td>
-<td>参数表示当JVM发生OOM时，自动生成DUMP文件。</td>
+<td style="text-align:left"><code>-XX:+HeapDumpOnOutOfMemoryError</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left">参数表示当JVM发生OOM时，自动生成DUMP文件。</td>
 </tr>
 <tr>
-<td><code>-XX:HeapDumpPath</code></td>
-<td><code>-XX:HeapDumpPath=${目录}/java_heapdump.hprof</code></td>
-<td>表示生成DUMP文件的路径，也可以指定文件名称,默认文件名为：<code>java__heapDump.hprof</code></td>
+<td style="text-align:left"><code>-XX:HeapDumpPath</code></td>
+<td style="text-align:left"><code>-XX:HeapDumpPath=${目录}/java_heapdump.hprof</code></td>
+<td style="text-align:left">表示生成DUMP文件的路径，也可以指定文件名称,默认文件名为：<code>java__heapDump.hprof</code></td>
 </tr>
 </tbody>
 </table>
-<p><code>Parallel Scavenge</code>收集器参数：<br>| 参数名 | 简述 | 解释 |<br>| ——- | —— | —— |<br>| -XX:GCTimeRatio | GC时间占总时间比值 | 默认99，即允许1%的GC时间，仅在使用<code>Parallel Scavenge</code>收集器时生效。 |<br>| -XX:MaxGCPauseMillis | GC最大停顿时间 | 仅在使用<code>Parallel Scavenge</code>收集器时生效 |</p>
-<p><code>CMS</code>收集器参数：<br>| 参数名 | 简述 | 解释 |<br>| ——- | —— | —— |<br>| <code>-XX:CMSInitiatingOccupancyFraction</code> | 默认值68 | 设置CMS收集器在Old区使用多少后触发GC，默认Old区使用占总Old的68%时触发。 |<br>| <code>-XX:+UseCMSCompactAtFullCollection</code> | 默认开启 | 设置当CMS GC完后进行内存碎片整理 |<br>| <code>-XX:CMSFullGCsBeforeCompaction</code> | 无默认值  | 设置CMS进行若干次GC后再启动一次内存碎片整理 |</p>
+<p><code>Parallel Scavenge</code>收集器参数：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">参数名</th>
+<th style="text-align:left">简述</th>
+<th style="text-align:left">解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>-XX:GCTimeRatio</code></td>
+<td style="text-align:left">GC时间占总时间比值</td>
+<td style="text-align:left">默认99，即允许1%的GC时间，仅在使用<code>Parallel Scavenge</code>收集器时生效。</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>-XX:MaxGCPauseMillis</code></td>
+<td style="text-align:left">GC最大停顿时间</td>
+<td style="text-align:left">仅在使用<code>Parallel Scavenge</code>收集器时生效</td>
+</tr>
+</tbody>
+</table>
+<p><code>CMS</code>收集器参数：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">参数名</th>
+<th style="text-align:left">简述</th>
+<th style="text-align:left">解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>-XX:CMSInitiatingOccupancyFraction</code></td>
+<td style="text-align:left">默认值68</td>
+<td style="text-align:left">设置CMS收集器在Old区使用多少后触发GC，默认Old区使用占总Old的68%时触发。</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>-XX:+UseCMSCompactAtFullCollection</code></td>
+<td style="text-align:left">默认开启</td>
+<td style="text-align:left">设置当CMS GC完后进行内存碎片整理</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>-XX:CMSFullGCsBeforeCompaction</code></td>
+<td style="text-align:left">无默认值</td>
+<td style="text-align:left">设置CMS进行若干次GC后再启动一次内存碎片整理</td>
+</tr>
+</tbody>
+</table>
 <p> Full GC触发原因：</p>
 <ol>
 <li>Minor GC导致Survivor不能容纳下所有存活对象触发分配担保</li>
@@ -391,18 +438,18 @@
 <nav class="article-nav clearfix">
  
  <div class="prev" >
- <a href="/2017/04/12/记一次22亿大数据分析处理踩坑经历/" title="记一次22亿大数据分析处理踩坑经历">
+ <a href="/2017/03/08/Java排查工具之jvisualvm,jps,jmap,jstack/" title="Java排查工具之jvisualvm,jps,jmap,jstack">
   <strong>上一篇：</strong><br/>
   <span>
-  记一次22亿大数据分析处理踩坑经历</span>
+  Java排查工具之jvisualvm,jps,jmap,jstack</span>
 </a>
 </div>
 
 
 <div class="next">
-<a href="/2017/03/08/Java排查工具之jvisualvm,jps,jmap,jstack/"  title="Java排查工具之jvisualvm,jps,jmap,jstack">
+<a href="/2017/03/01/【转】计算机操作系统/"  title="【转】计算机操作系统">
  <strong>下一篇：</strong><br/> 
- <span>Java排查工具之jvisualvm,jps,jmap,jstack
+ <span>【转】计算机操作系统
 </span>
 </a>
 </div>
@@ -547,6 +594,10 @@
 			
 		
 			
+				<li><a href="/tags/操作系统/" title="操作系统">操作系统<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/hexo-jacman/" title="hexo jacman">hexo jacman<sup>1</sup></a></li>
 			
 		
@@ -564,10 +615,6 @@
 		
 			
 				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/操作系统/" title="操作系统">操作系统<sup>1</sup></a></li>
 			
 		
 		</ul>
