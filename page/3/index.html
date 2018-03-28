@@ -122,6 +122,27 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
+    <a href="/2017/05/04/【扒一扒】volatile/" title="【扒一扒】volatile" itemprop="url">
+  
+    <h1 itemprop="name">【扒一扒】volatile</h1>
+    
+     
+           <p itemprop="description" >前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。
+基础介绍Java 关键字volatile可以让变量的修改在多个线程之间可见，即cpu核心1对volatile修饰的变量进行修改会立即刷新该变量在RA</p>
+        
+    
+    <time datetime="2017-05-04T03:12:22.000Z" itemprop="datePublished">2017-05-04</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
     <a href="/2017/05/04/【转】JVM-深入理解Java虚拟机/" title="【转】JVM-深入理解Java虚拟机" itemprop="url">
   
     <h1 itemprop="name">【转】JVM-深入理解Java虚拟机</h1>
@@ -145,27 +166,6 @@
 1.3.1 强引用
 1.3.2 软引用
 1</p>
-        
-    
-    <time datetime="2017-05-04T03:12:22.000Z" itemprop="datePublished">2017-05-04</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
-    <a href="/2017/05/04/【扒一扒】volatile/" title="【扒一扒】volatile" itemprop="url">
-  
-    <h1 itemprop="name">【扒一扒】volatile</h1>
-    
-     
-           <p itemprop="description" >前言：最近看了很多关于volatile和synchronized的博客，很多说法理解不一，故此，这里整理我对于这两个关键字的理解。
-基础介绍Java 关键字volatile可以让变量的修改在多个线程之间可见，即cpu核心1对volatile修饰的变量进行修改会立即刷新该变量在RA</p>
         
     
     <time datetime="2017-05-04T03:12:22.000Z" itemprop="datePublished">2017-05-04</time>
@@ -245,15 +245,13 @@ Syn</p>
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/03/08/Java排查利器之BTrace，Greys/" title="Java排查利器之BTrace，Greys" itemprop="url">
+    <a href="/2017/03/08/JVM实用参数整理/" title="JVM实用参数整理" itemprop="url">
   
-    <h1 itemprop="name">Java排查利器之BTrace，Greys</h1>
+    <h1 itemprop="name">JVM实用参数整理</h1>
     
      
-           <p itemprop="description" >前言： 关于btrace和greys的使用方法，网上不计其数。这里根据我的使用整理了个精简版，零复制纯手打，高度概括，适用快速入门。萝卜青菜各有所爱，greys好用太多有木有！
-一. Greys安装安装非常简单
-
-直接安装：mkdir greys;cd greys，curl -s</p>
+           <p itemprop="description" >前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看《深入理解Java虚拟机》这本书，正好配合日常所需好好地整理下。
+一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不</p>
         
     
     <time datetime="2017-03-08T03:12:22.000Z" itemprop="datePublished">2017-03-08</time>
@@ -289,13 +287,15 @@ Syn</p>
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2017/03/08/JVM实用参数整理/" title="JVM实用参数整理" itemprop="url">
+    <a href="/2017/03/08/Java排查利器之BTrace，Greys/" title="Java排查利器之BTrace，Greys" itemprop="url">
   
-    <h1 itemprop="name">JVM实用参数整理</h1>
+    <h1 itemprop="name">Java排查利器之BTrace，Greys</h1>
     
      
-           <p itemprop="description" >前言：在配置和优化Java Web应用中经常要去搜索各个启动配置参数，比较麻烦，且少有看见总结很全的，而最近在看《深入理解Java虚拟机》这本书，正好配合日常所需好好地整理下。
-一，说明JVM参数分为标准参数（以-XX:开头）和非标准参数（java -X命令查看），他们之间格式不</p>
+           <p itemprop="description" >前言： 关于btrace和greys的使用方法，网上不计其数。这里根据我的使用整理了个精简版，零复制纯手打，高度概括，适用快速入门。萝卜青菜各有所爱，greys好用太多有木有！
+一. Greys安装安装非常简单
+
+直接安装：mkdir greys;cd greys，curl -s</p>
         
     
     <time datetime="2017-03-08T03:12:22.000Z" itemprop="datePublished">2017-03-08</time>
@@ -346,6 +346,10 @@ Syn</p>
 		
 		  
 			<li><a href="/categories/Linux/" title="Linux">Linux<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/TCP-IP/" title="TCP/IP">TCP/IP<sup>1</sup></a></li>
 		  
 		
 		  
@@ -426,6 +430,10 @@ Syn</p>
 			
 		
 			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
 			
 		
@@ -434,7 +442,11 @@ Syn</p>
 			
 		
 			
-				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+				<li><a href="/tags/滑动窗口/" title="滑动窗口">滑动窗口<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/拥塞控制/" title="拥塞控制">拥塞控制<sup>1</sup></a></li>
 			
 		
 			
@@ -459,14 +471,6 @@ Syn</p>
 		
 			
 				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 		</ul>

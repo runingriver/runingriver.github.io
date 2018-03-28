@@ -128,15 +128,33 @@
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/11/12/【Linux】cron，at，batch(任务调度)/" title="【Linux】cron，at，batch(任务调度)" itemprop="url">
+    <a href="/2016/11/14/【整理】从滑动窗口到拥塞控制/" title="【整理】从滑动窗口到拥塞控制" itemprop="url">
   
-    <h1 itemprop="name">【Linux】cron，at，batch(任务调度)</h1>
+    <h1 itemprop="name">【整理】从滑动窗口到拥塞控制</h1>
     
      
-           <p itemprop="description" >一，基础知识
-corntab周期执行任务,anacron调度每日、每周或每月执行的作业,at调度只运行一次的作业.
-batch 命令被用来在系统平均负载达到 0.8% 以下时执行一次性的任务，通俗的所就是系统空闲时执行任务。
-crontab调度的任务是不会加载任何环境变量的,这就</p>
+           <p itemprop="description" >前言：计算机网络方面看了谢希仁的《计算机网络》和《TCP/IP详解卷一》看完后似懂非懂，直到有一天买了林沛满写的《WireShark网络分析就这么简单》和《WireShark网络分析的艺术》才算真正能把所有的知识点串联起来，写的非常好，非常容易看懂，而且你会发现这两本书很快就看完</p>
+        
+    
+    <time datetime="2016-11-14T03:12:22.000Z" itemprop="datePublished">2016-11-14</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2016/11/12/【Mysql】日志备忘/" title="【Mysql】日志备忘" itemprop="url">
+  
+    <h1 itemprop="name">【Mysql】日志备忘</h1>
+    
+     
+           <p itemprop="description" >1. 介绍mysql常用日志有 错误日志，binlog日志(二进制日志)，慢查询日志，查询日志等。当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。
+2. 相关命令mysql 配置文件一般是：/etc/my.cnf（目录位置可能</p>
         
     
     <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
@@ -171,13 +189,16 @@ crontab调度的任务是不会加载任何环境变量的,这就</p>
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/11/12/【Mysql】日志备忘/" title="【Mysql】日志备忘" itemprop="url">
+    <a href="/2016/11/12/【Linux】文本操作/" title="【Linux】文本操作命令" itemprop="url">
   
-    <h1 itemprop="name">【Mysql】日志备忘</h1>
+    <h1 itemprop="name">【Linux】文本操作命令</h1>
     
      
-           <p itemprop="description" >1. 介绍mysql常用日志有 错误日志，binlog日志(二进制日志)，慢查询日志，查询日志等。当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。
-2. 相关命令mysql 配置文件一般是：/etc/my.cnf（目录位置可能</p>
+           <p itemprop="description" >1. tr 按列替换
+echo &amp;quot;{123}&amp;quot; | tr -d &amp;#39;{}&amp;#39; 删除输入中的 “{“ 和 “}”
+cat testfile |tr a-z A-Z  将文件testfile中的小写字母全部转换成大写字母
+
+2. cut : cut [</p>
         
     
     <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
@@ -192,16 +213,15 @@ crontab调度的任务是不会加载任何环境变量的,这就</p>
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/11/12/【Linux】文本操作/" title="【Linux】文本操作命令" itemprop="url">
+    <a href="/2016/11/12/【Linux】cron，at，batch(任务调度)/" title="【Linux】cron，at，batch(任务调度)" itemprop="url">
   
-    <h1 itemprop="name">【Linux】文本操作命令</h1>
+    <h1 itemprop="name">【Linux】cron，at，batch(任务调度)</h1>
     
      
-           <p itemprop="description" >1. tr 按列替换
-echo &amp;quot;{123}&amp;quot; | tr -d &amp;#39;{}&amp;#39; 删除输入中的 “{“ 和 “}”
-cat testfile |tr a-z A-Z  将文件testfile中的小写字母全部转换成大写字母
-
-2. cut : cut [</p>
+           <p itemprop="description" >一，基础知识
+corntab周期执行任务,anacron调度每日、每周或每月执行的作业,at调度只运行一次的作业.
+batch 命令被用来在系统平均负载达到 0.8% 以下时执行一次性的任务，通俗的所就是系统空闲时执行任务。
+crontab调度的任务是不会加载任何环境变量的,这就</p>
         
     
     <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished">2016-11-12</time>
@@ -281,27 +301,6 @@ locate a.txt 搜索文件,其中 updatedb 强制更新locate数据库，默认�
   
 <section class="post" itemscope itemprop="blogitem">
   
-    <a href="/2016/08/13/【Linux】shell,bash操作快捷键/" title="【Linux】shell,bash操作快捷键" itemprop="url">
-  
-    <h1 itemprop="name">【Linux】shell,bash操作快捷键</h1>
-    
-     
-           <p itemprop="description" >前言： 在命令行(CLI)或者bash中编辑命令的时候，了解一些基本的快捷键，和编辑技巧，会让你效率更高，节约更多的时间 - -。下面是我的总结：
-1. 编辑命令Ctrl + xx：在命令行首和光标之间移动,比较特殊！Ctrl + a ：移到命令行首Ctrl + e ：移到命令行</p>
-        
-    
-    <time datetime="2016-08-13T11:22:11.000Z" itemprop="datePublished">2016-08-13</time>
-  </a>
-</section>
-
-
-
-
-
-
-  
-<section class="post" itemscope itemprop="blogitem">
-  
     <a href="/2016/08/13/Ubuntu分区删除后恢复/" title="Ubuntu分区删除后恢复" itemprop="url">
   
     <h1 itemprop="name">Ubuntu分区删除后恢复</h1>
@@ -360,6 +359,10 @@ locate a.txt 搜索文件,其中 updatedb 强制更新locate数据库，默认�
 		
 		  
 			<li><a href="/categories/Linux/" title="Linux">Linux<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/TCP-IP/" title="TCP/IP">TCP/IP<sup>1</sup></a></li>
 		  
 		
 		  
@@ -440,6 +443,10 @@ locate a.txt 搜索文件,其中 updatedb 强制更新locate数据库，默认�
 			
 		
 			
+				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/synchronized/" title="synchronized">synchronized<sup>1</sup></a></li>
 			
 		
@@ -448,7 +455,11 @@ locate a.txt 搜索文件,其中 updatedb 强制更新locate数据库，默认�
 			
 		
 			
-				<li><a href="/tags/volatile/" title="volatile">volatile<sup>1</sup></a></li>
+				<li><a href="/tags/滑动窗口/" title="滑动窗口">滑动窗口<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/拥塞控制/" title="拥塞控制">拥塞控制<sup>1</sup></a></li>
 			
 		
 			
@@ -473,14 +484,6 @@ locate a.txt 搜索文件,其中 updatedb 强制更新locate数据库，默认�
 		
 			
 				<li><a href="/tags/Ubuntu/" title="Ubuntu">Ubuntu<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/hive/" title="hive">hive<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/mongo/" title="mongo">mongo<sup>1</sup></a></li>
 			
 		
 		</ul>

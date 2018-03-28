@@ -4,25 +4,27 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>【Mysql】日志备忘 | running river</title>
+    <title>【整理】从滑动窗口到拥塞控制 | running river</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="奔跑的小河">
     
 
     
-    <meta name="description" content="1. 介绍mysql常用日志有 错误日志，binlog日志(二进制日志)，慢查询日志，查询日志等。当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。 2. 相关命令mysql 配置文件一般是：/etc/my.cnf（目录位置可能不同但都是my.cnf） 系统变量查看和">
-<meta name="keywords" content="mysql">
+    <meta name="description" content="前言：计算机网络方面看了谢希仁的《计算机网络》和《TCP/IP详解卷一》看完后似懂非懂，直到有一天买了林沛满写的《WireShark网络分析就这么简单》和《WireShark网络分析的艺术》才算真正能把所有的知识点串联起来，写的非常好，非常容易看懂，而且你会发现这两本书很快就看完了。下面是根据我的理解的一个整理： 知识">
+<meta name="keywords" content="滑动窗口,拥塞控制">
 <meta property="og:type" content="article">
-<meta property="og:title" content="【Mysql】日志备忘">
-<meta property="og:url" content="http://huzongzhe.cn/2016/11/12/【Mysql】日志备忘/index.html">
+<meta property="og:title" content="【整理】从滑动窗口到拥塞控制">
+<meta property="og:url" content="http://huzongzhe.cn/2016/11/14/【整理】从滑动窗口到拥塞控制/index.html">
 <meta property="og:site_name" content="running river">
-<meta property="og:description" content="1. 介绍mysql常用日志有 错误日志，binlog日志(二进制日志)，慢查询日志，查询日志等。当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。 2. 相关命令mysql 配置文件一般是：/etc/my.cnf（目录位置可能不同但都是my.cnf） 系统变量查看和设置 显示系统日志开启情况和位置：show variables like &amp;#3">
+<meta property="og:description" content="前言：计算机网络方面看了谢希仁的《计算机网络》和《TCP/IP详解卷一》看完后似懂非懂，直到有一天买了林沛满写的《WireShark网络分析就这么简单》和《WireShark网络分析的艺术》才算真正能把所有的知识点串联起来，写的非常好，非常容易看懂，而且你会发现这两本书很快就看完了。下面是根据我的理解的一个整理： 知识点：RTO，MTU，MSS，发送窗口，接受窗口，慢启动，拥塞避免，超时重传，快速">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-01-03T10:08:52.159Z">
+<meta property="og:image" content="http://huzongzhe.cn/images/tcp-cwnd.jpg">
+<meta property="og:updated_time" content="2018-03-28T12:29:30.265Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="【Mysql】日志备忘">
-<meta name="twitter:description" content="1. 介绍mysql常用日志有 错误日志，binlog日志(二进制日志)，慢查询日志，查询日志等。当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。 2. 相关命令mysql 配置文件一般是：/etc/my.cnf（目录位置可能不同但都是my.cnf） 系统变量查看和设置 显示系统日志开启情况和位置：show variables like &amp;#3">
+<meta name="twitter:title" content="【整理】从滑动窗口到拥塞控制">
+<meta name="twitter:description" content="前言：计算机网络方面看了谢希仁的《计算机网络》和《TCP/IP详解卷一》看完后似懂非懂，直到有一天买了林沛满写的《WireShark网络分析就这么简单》和《WireShark网络分析的艺术》才算真正能把所有的知识点串联起来，写的非常好，非常容易看懂，而且你会发现这两本书很快就看完了。下面是根据我的理解的一个整理： 知识点：RTO，MTU，MSS，发送窗口，接受窗口，慢启动，拥塞避免，超时重传，快速">
+<meta name="twitter:image" content="http://huzongzhe.cn/images/tcp-cwnd.jpg">
 
     
     <link rel="alternative" href="/atom.xml" title="running river" type="application/atom+xml">
@@ -82,46 +84,62 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2016/11/12/【Mysql】日志备忘/" title="【Mysql】日志备忘" itemprop="url">【Mysql】日志备忘</a>
+      <a href="/2016/11/14/【整理】从滑动窗口到拥塞控制/" title="【整理】从滑动窗口到拥塞控制" itemprop="url">【整理】从滑动窗口到拥塞控制</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="奔跑的小河" target="_blank" itemprop="author">奔跑的小河</a>
 		
   <p class="article-time">
-    <time datetime="2016-11-12T03:12:22.000Z" itemprop="datePublished"> 发表于 2016-11-12</time>
+    <time datetime="2016-11-14T03:12:22.000Z" itemprop="datePublished"> 发表于 2016-11-14</time>
     
   </p>
 </header>
 	<div class="article-content">
 		
-		<h2 id="1-介绍"><a href="#1-介绍" class="headerlink" title="1. 介绍"></a>1. 介绍</h2><p>mysql常用日志有<strong> 错误日志</strong>，<strong>binlog日志(二进制日志)</strong>，<strong>慢查询日志</strong>，查询日志等。<br>当日常开发中设计mysql问题的时候，我们可以通过日志来定位和解决问题，这里着重介绍binlog日志。</p>
-<h2 id="2-相关命令"><a href="#2-相关命令" class="headerlink" title="2. 相关命令"></a>2. 相关命令</h2><p>mysql 配置文件一般是：<code>/etc/my.cnf</code>（目录位置可能不同但都是<code>my.cnf</code>）</p>
-<h3 id="系统变量查看和设置"><a href="#系统变量查看和设置" class="headerlink" title="系统变量查看和设置"></a>系统变量查看和设置</h3><ul>
-<li>显示系统日志开启情况和位置：<code>show variables like &#39;log_%&#39;;</code> ，<code>show global variables like &#39;%log%&#39;;</code>（显示全局所有类型日志情况）<h3 id="binlog日志相关命令"><a href="#binlog日志相关命令" class="headerlink" title="binlog日志相关命令"></a>binlog日志相关命令</h3></li>
+		<p>前言：计算机网络方面看了谢希仁的《计算机网络》和《TCP/IP详解卷一》看完后似懂非懂，直到有一天买了林沛满写的《WireShark网络分析就这么简单》和《WireShark网络分析的艺术》才算真正能把所有的知识点串联起来，写的非常好，非常容易看懂，而且你会发现这两本书很快就看完了。下面是根据我的理解的一个整理：</p>
+<p>知识点：RTO，MTU，MSS，发送窗口，接受窗口，慢启动，拥塞避免，超时重传，快速重传，快恢复</p>
+<p>提升发送效率：延迟确认，Nagle，SACK</p>
+<p><strong>前言：</strong> </p>
+<p><strong>MTU（Maximum Transmission Unit）</strong>:最大传输单元，由硬件规定，如以太网的MTU为1500字节。<br><strong>MSS（Maximum Segment Size）</strong>:最大报文长度,<code>MTU=MSS + 20byte(TCP头) + 20byte（IP头）</code><br><strong>RTO（Retransmission TimeOut ）</strong>：超时时间，发出一个报文后，等待RTO时间还未收到其确认报文，则表示超时，进行超时重传。<br><strong>延迟确认</strong>：表示当收到一个报文后，不立即发送一个确认报文，而是等待，一般等到200ms，如果没有数据发送给对方，就把这个确认报文发不出，如果有数据发送给对方时，将这个确认报文一起以一个包的形式发给对方。<br>Nagle：表示当前一个发送的数据报没有收到ACK前，又来了一个要发送的数据，且其大小小于1个MSS时，发送方不直接发送，而是等待更多要发送的数据直到达到1个MSS。<br>SACK：由于触发超时重传和快速重传后，并不知道丢失的包后面的哪些数据收到，哪些没有收到，于是还需要继续通信或重发后面的包，所以为了提高发送效率，采用SACK，可以知道哪些包丢失，哪些没有丢失。</p>
+<h2 id="1-滑动窗口"><a href="#1-滑动窗口" class="headerlink" title="1. 滑动窗口"></a>1. 滑动窗口</h2><p><strong>滑动窗口：</strong>发送方维护一个<code>发送窗口</code>，接收方维护一个<code>接收窗口</code>，发送方通过ACK报文中的<code>16位窗口大小</code>字段控制发送窗口的滑动；<br>接收方通过接收到的数据和缓冲区的大小控制<code>接收窗口</code>的滑动，通过<code>16位窗口大小</code>字段可以控制发送方发送速率，通过<code>ack+seq</code>可以知道接收窗口中哪些数据没收到（丢失）。<br>简言之:<code>发送窗口</code>和<code>接收窗口</code>在数据通信过程中是滑动状态的，故形象理解为滑动窗口。</p>
+<h2 id="2-流量控制"><a href="#2-流量控制" class="headerlink" title="2. 流量控制"></a>2. 流量控制</h2><p><strong>流量控制</strong>是通过接收和发送双方维持一个窗口以控制发送方发送速率，保证接收方来得及接收。接收方回复的确认报文中的窗口字段（<code>16位窗口大小</code>）可以用来控制发送方窗口大小，从而影响发送方的发送速率。</p>
+<h3 id="流量控制与拥塞控制的区别"><a href="#流量控制与拥塞控制的区别" class="headerlink" title="流量控制与拥塞控制的区别"></a>流量控制与拥塞控制的区别</h3><ul>
+<li>流量控制往往是指在发送端和接收端之间的点对点通信量的控制. 流量控制所要做的是抑制发送端发送数据的速率, 以便使接收端来得及接收; </li>
+<li>而拥塞控制必须确保通信子网能够传送待传送的数据, 是一个全局性的问题, 涉及网络中所有的主机、路由器以及导致网络传输能力下降的所有因素.</li>
 </ul>
+<h2 id="3-拥塞控制"><a href="#3-拥塞控制" class="headerlink" title="3. 拥塞控制"></a>3. 拥塞控制</h2><p>TCP 主要通过四种算法来进行<code>拥塞控制</code>：<code>慢开始</code>、<code>拥塞避免</code>、<code>快重传</code>、<code>快恢复</code>。发送方需要维护有一个叫做拥塞窗口（<code>cwnd</code>）的状态变量。<br><strong>注：</strong><code>拥塞窗口</code>与<code>发送方窗口</code>的区别，拥塞窗口只是一个<code>状态变量</code>，实际决定发送方能发送多少数据的是发送方窗口。</p>
+<p>为了便于讨论，做如下假设：</p>
 <ol>
-<li>查看所有binlog日志列表： <code>show master logs;</code></li>
-<li>查看master状态，即最后(最新)一个binlog日志的编号名称，及其最后一个操作事件pos结束点(Position)值<code>show master status;</code></li>
-<li>刷新log日志，自此刻开始产生一个新编号的binlog日志文件：<code>flush logs;</code><br>注：每当mysqld服务重启时，会自动执行此命令，刷新binlog日志；在mysqldump备份数据时加 -F 选项也会刷新binlog日志；</li>
-<li>重置(清空)所有binlog日志：<code>reset master;</code></li>
-<li>显示binlog的模式：<code>show global variables like &#39;binlog_format&#39;;</code></li>
-<li>将binlog转成能看懂的文件形式： <code>sudo ./mysqlbinlog /home/q/data/mysql/mysql-bin.000028 &gt; ~/a.sql</code></li>
+<li>接收方有足够大的接收缓存，因此不会发生流量控制；</li>
+<li>虽然 TCP 的窗口基于字节，但是这里设窗口的大小单位为报文段。</li>
 </ol>
-<h2 id="3-binlog二进制日志"><a href="#3-binlog二进制日志" class="headerlink" title="3. binlog二进制日志"></a>3. binlog二进制日志</h2><h3 id="binlog的三种模式"><a href="#binlog的三种模式" class="headerlink" title="binlog的三种模式"></a>binlog的三种模式</h3><ol>
-<li><code>row</code>：日志中记录的是每一行的数据修改，所以日志会非常大，mysql后面版本做了优化，将改表的语句记录成statement形式（eg：alter），但是update，delete仍是拆分成多条记录形式。<br>eg：<code>update user set age=22 where sex=‘man’</code>，这样一条sql，影响的是多条记录，row模式会记录每行的影响，并作为一条记录和事件。</li>
-<li><code>statement</code>：只记录修改表的sql语句，每条sql语句作为一条事件记录，减少日志大小，减少主从复制的I/O。</li>
-<li><code>mixed</code>：是前两种模式的结合。在 Mixed 模式下，MySQL 会根据执行的每一条具体的 SQL 语句来区分对待记录的日志形式，也就是在 statement 和 row 之间选择一种。</li>
+<p><img src="/images/tcp-cwnd.jpg" alt=""></p>
+<p>图解释：<br>2 超时：表示丢包触发<code>超时重传</code><br>4 3-ACK：表示收到3个相同确认报文，触发<code>快速重传</code></p>
+<h3 id="慢开始与拥塞避免"><a href="#慢开始与拥塞避免" class="headerlink" title="慢开始与拥塞避免"></a>慢开始与拥塞避免</h3><p>三次握手后发送方会知道接收方的窗口大小，设10MSS，但是此时不会立即一次性向网络中推10MSS包，而是执行慢开始。<br>最初执行慢开始时，令 <code>cwnd=1</code>，发送方只能发送 1 个报文段；当收到确认后，将 cwnd 指数加倍，因此之后发送方能够发送的报文段为：<code>2、4、8 ...</code></p>
+<p>注意到慢开始每个轮次都将 cwnd 加倍，这样会让 cwnd 增长速度非常快，从而使得发送方发送的速度增长速度过快，网络拥塞的可能也就更高。设置一个慢开始门限 ssthresh，当 <code>cwnd &gt;= ssthresh</code> 时，进入<code>拥塞避免</code>阶段，每个轮次只将 cwnd 加 1。</p>
+<p>如果出现了<strong><code>超时重传</code></strong>，则令 <code>ssthresh = cwnd / 2</code>，然后重新执行<code>慢开始</code>。</p>
+<p><strong>TIP：</strong>慢开始门限ssthresh的初始值设置是根据网络情况RTT等确定，上图是假设 <code>ssthresh = 16</code>即<code>16个MSS</code>。</p>
+<blockquote>
+<p>当<code>cwnd&lt;ssthresh</code>，慢开始算法<br>当<code>cwnd&gt;ssthresh</code>，停止使用慢开始算法，改用拥塞避免算法。<br>当<code>cwnd=ssthresh</code>，既可以慢开始也可以拥塞避免算法。</p>
+</blockquote>
+<h3 id="快重传与快恢复"><a href="#快重传与快恢复" class="headerlink" title="快重传与快恢复"></a>快重传与快恢复</h3><p>在接收方，要求每次接收到报文段都应该发送对已收到有序报文段的确认，例如已经接收到 M1 和 M2，此时收到 M4，应当发送对 M2 的确认。</p>
+<p>在发送方，如果收到三个重复确认，那么可以确认下一个报文段丢失，例如收到三个 M2 ，则 M3 丢失。此时执行<code>快重传</code>，立即重传下一个报文段。</p>
+<p>在这种情况下，只是丢失个别报文段，而不是网络拥塞，因此执行<code>快恢复</code>，令 <code>ssthresh = cwnd / 2</code> ，<code>cwnd = ssthresh</code>，注意到此时直接进入<code>拥塞避免</code>。</p>
+<p>TIP：关于触发<code>超时重传</code>和<code>快重传</code>后<code>ssthresh</code>值的设置有很多算法，有的认为<code>ssthresh</code>应该为，当前窗口的一半，有的认为应该为，当前已收到报文窗口的一半。算法很多，不深入了。</p>
+<h2 id="4-TCP如何保证可靠性"><a href="#4-TCP如何保证可靠性" class="headerlink" title="4. TCP如何保证可靠性"></a>4. TCP如何保证可靠性</h2><ul>
+<li>序号: TCP连接中传送的数据流中的每一个字节都编上一个序号。序号字段的值则指的是本报文段所发送的数据的第一个字节的序号;</li>
+<li>确认: TCP首部的确认号是期望收到对方的下一个报文段数据的第一个字节的序号。当数据发送出去之后, 发送方缓存区会继续存储那些已经发送但未收到确认的报文段,以便在需要的时候重传。TCP默认使用累计确认,即TCP只确认数据流中至第一个丢失字节为止的字节。</li>
+<li>重传: 有两种事件会导致TCP对报文段进行重传:超时重传超时和快速重传。<ol>
+<li>超时重传: TCP每发送一个报文段,就对这个报文段设置一次计时器。只要计时器设置的重传时间到期但还没有收到确认,就要重传这一报文段。</li>
+<li>快速重传: 重复确认某个报文段的ACK,而发送方先前已经收到过该报文段的确认; TCP规定当发送方收到对同一个报文段的3个冗余ACK时,就可以认为跟在这个被确认报文段之后的报文段已经丢失;</li>
 </ol>
-<h3 id="查看binlog的方法"><a href="#查看binlog的方法" class="headerlink" title="查看binlog的方法"></a>查看binlog的方法</h3><ol>
-<li><code>mysqlbinlog</code> mysql自带工具查看<br>语法：<code>mysqlbinlog [OPTION] [-d db_name] binlog_file</code>，其中OPTION：<code>--start-datetime</code>，<code>--stop-datetime</code>，<code>--start-position</code>，<code>--stop-position</code><br>eg：<code>sudo ./mysqlbinlog --start-datetime=&#39;2017-06-27 15:20:00&#39; -d test /home/q/data/mysql/mysql-bin.000028</code><br>mysqlbinlog 也可以查看远程mysql binlog，更多用法可以<code>./mysqlbinlog --help</code></li>
-<li>在CLI中使用<code>show binlog</code>命令查看<br>语法：show binlog events [in ‘log_name’] [from pos] [limit [offset,] row_count];<br><code>log_name</code>: binlog日志文件名，<code>pos</code>：事件位置，<code>limit</code>和sql中的limit语义相同。<br>eg： <code>show binlog events in &#39;mysql-bin.000028&#39; limit 2,10 \G;</code> 查询<code>mysql-bin.000028</code>日中第2到10条记录;<br>eg：<code>show binlog events in &#39;mysql-bin.000028&#39; from 975 limit 10 \G;</code> 查询从pos为975开始的10条记录</li>
-<li>数据恢复<br>语法：<code>mysqlbinlog -d db_name mysql-bin.0000xx | mysql -u用户名 -p密码 数据库名</code><br>其实就是用mysqlbinlog翻译成sql语句，然后管道传给mysql 客户端执行！<br>所以，可以先<code>./mysqlbinlog /home/q/data/mysql/mysql-bin.000028 &gt; ~/a.sql</code>到出sql，再给mysql执行,注意指定数据库名！。<br>恢复期间，先要<code>flush logs;</code>另启一个日志文件，且需要找到恢复的起始点（找到备份开始点，回滚结束点（记录时间和pos都可以））。</li>
-</ol>
-<p><strong>Tip:上述数据恢复适合离线恢复，对于线上mysql数据还在实时写入的情况，需要闪回，可以使用binlog2sql，但是此时必须是row模式，而且也不能恢复DDL的操作！</strong></p>
-<h2 id="4-错误日志，慢查询日志，查询日志"><a href="#4-错误日志，慢查询日志，查询日志" class="headerlink" title="4. 错误日志，慢查询日志，查询日志"></a>4. 错误日志，慢查询日志，查询日志</h2><p>默认错误日志开启，慢查询日志不开启，查询日志不开启，这几个日志都是以普通文本形式呈现，一般建议不开启，因为有性能丢失，<code>show global variables like &#39;%log%&#39;;</code>命令可以找到日志位置；<br>mysql为慢查询提供了一个命令行工具<code>mysqldumpslow</code>方便我们分析和查找。</p>
-<h3 id="其他日志文件说明"><a href="#其他日志文件说明" class="headerlink" title="其他日志文件说明"></a>其他日志文件说明</h3><p><code>ibdata1</code> ：InnoDB中保存数据的文件，用于存储InnoDB引擎下的数据库实际数据，索引等，库名的文件夹里面的那些表文件只是结构而已！可以配置将实际数据放到库名文件夹下，从而减小ibdata1文件的大小。<br><code>ib_logfile0，ib_logfile1</code>：INNODB的REDO、UNDO日志（也称事务日志），事务执行中暂时保留一些事务信息(记录对数据文件数据修改的物理位置或叫做偏移量)，主要是在事务中起一个前滚或后滚的作用。<br>binlog中的事务日志是已经commit执行成功的事务，只有在事务执行成功才会刷入binlog的事务日志。</p>
-<p>推荐博客：<a href="http://www.penglixun.com/archives" target="_blank" rel="noopener">http://www.penglixun.com/archives</a> 和 <a href="http://hedengcheng.com/?cat=4" target="_blank" rel="noopener">http://hedengcheng.com/?cat=4</a></p>
+</li>
+<li>校验: TCP将保持它首部和数据的校验和。这是一个端到端的校验和,目的是检测数据在传输过程中的任何变化。如果收到段的校验和有差错,TCP将丢弃这个报文段并且不确认(导致对方超时重传);</li>
+<li>重排: TCP承载于IP数据报来传输,而IP数据报的到达可能会失序,因此TCP报文段的到达也可能会失序。TCP将对收到的数据进行重新排序。IP数据报会发生重复,TCP的接收端会丢弃重复的数据。</li>
+<li>流量控制: TCP还能提供流量控制。TCP连接的每一方都有一定大小的缓冲空间。</li>
+<li>分片: 应用数据被分割成TCP认为最适合发送的数据块,称为TCP报文段传递给IP层。</li>
+</ul>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -129,13 +147,13 @@
 
 <div class="article-categories">
   <span></span>
-  <a class="article-category-link" href="/categories/mysql/">mysql</a>
+  <a class="article-category-link" href="/categories/TCP-IP/">TCP/IP</a>
 </div>
 
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/mysql/">mysql</a>
+  <span></span> <a href="/tags/滑动窗口/">滑动窗口</a><a href="/tags/拥塞控制/">拥塞控制</a>
   </div>
 
 </div>
@@ -144,7 +162,7 @@
 
 	<div class="article-share" id="share">
 	
-	  <div data-url="http://huzongzhe.cn/2016/11/12/【Mysql】日志备忘/" data-title="【Mysql】日志备忘 | running river" data-tsina="" class="share clearfix">
+	  <div data-url="http://huzongzhe.cn/2016/11/14/【整理】从滑动窗口到拥塞控制/" data-title="【整理】从滑动窗口到拥塞控制 | running river" data-tsina="" class="share clearfix">
 	  </div>
 	
 	</div>
@@ -158,18 +176,18 @@
 <nav class="article-nav clearfix">
  
  <div class="prev" >
- <a href="/2016/11/14/【整理】从滑动窗口到拥塞控制/" title="【整理】从滑动窗口到拥塞控制">
+ <a href="/2017/03/01/【转】计算机操作系统/" title="【转】计算机操作系统">
   <strong>上一篇：</strong><br/>
   <span>
-  【整理】从滑动窗口到拥塞控制</span>
+  【转】计算机操作系统</span>
 </a>
 </div>
 
 
 <div class="next">
-<a href="/2016/11/12/【Mysql】主从复制原理整理/"  title="【Mysql】主从复制原理整理">
+<a href="/2016/11/12/【Mysql】日志备忘/"  title="【Mysql】日志备忘">
  <strong>下一篇：</strong><br/> 
- <span>【Mysql】主从复制原理整理
+ <span>【Mysql】日志备忘
 </span>
 </a>
 </div>
